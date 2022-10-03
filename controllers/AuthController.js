@@ -339,5 +339,5 @@ export const AuthController = {
             return res.status(500).json(ResponseDetail(500, { message: "Lỗi",valid: false }))
         }
     }
-
+    
 }
