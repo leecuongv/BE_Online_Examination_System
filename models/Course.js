@@ -3,8 +3,8 @@ const autoinc = require("mongoose-plugin-autoinc");
 const { formatTimeUTC } = require("../utils/Timezone");
 const { COLLECTION } = require("../utils/enum");
 
-const contestSchema = mongoose.Schema({
-  contestId: {
+const courseSchema = mongoose.Schema({
+  courseId: {
     type: Number,
     require: true,
   },
@@ -36,7 +36,7 @@ const contestSchema = mongoose.Schema({
     type: String,
     default: null,
   },
-  tests: [
+  exams: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: COLLECTION.TEST,
@@ -63,18 +63,18 @@ const contestSchema = mongoose.Schema({
 
 });
 
-contestSchema.plugin(
+courseSchema.plugin(
   autoinc.autoIncrement,
   {
-    model: COLLECTION.CONTEST,
-    field: 'contestId'
+    model: COLLECTION.COURSE,
+    field: 'courseId'
   }
 );
 
-contestSchema.method("toJSON", function () {
+courseSchema.method("toJSON", function () {
   const { __v, ...object } = this.toObject();
   const { _id: id, ...result } = object;
   return { ...result, id };
 });
 
-module.exports = mongoose.model(COLLECTION.CONTEST, contestSchema);
+module.exports = mongoose.model(COLLECTION.COURSE, courseSchema);

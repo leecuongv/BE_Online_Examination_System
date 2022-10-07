@@ -23,7 +23,7 @@ lib-cov
 coverage
 *.lcov
 
-# nyc test coverage
+# nyc exam coverage
 .nyc_output
 
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
@@ -111,8 +111,8 @@ dist
 # TernJS port file
 .tern-port
 
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
+# Stores VSCode versions used for examing VSCode extensions
+.vscode-exam
 
 # yarn v2
 .yarn/cache

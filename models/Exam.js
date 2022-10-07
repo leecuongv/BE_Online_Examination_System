@@ -3,9 +3,9 @@ const autoinc = require("mongoose-plugin-autoinc");
 const { formatTimeUTC } = require("../utils/Timezone");
 const { COLLECTION } = require("../utils/enum");
 
-const testSchema = mongoose.Schema(
+const examSchema = mongoose.Schema(
   {
-    testId: {
+    examId: {
       type: Number,
       require: true,
     },
@@ -82,18 +82,18 @@ const testSchema = mongoose.Schema(
     },
   });
 
-testSchema.plugin(
+examSchema.plugin(
   autoinc.autoIncrement,
   {
     model: COLLECTION.TEST,
-    field: "testId"
+    field: "examId"
   }
 );
 
-testSchema.method("toJSON", function () {
+examSchema.method("toJSON", function () {
   const { __v, ...object } = this.toObject();
   const { _id: id, ...result } = object;
   return { ...result, id };
 });
 
-module.exports = mongoose.model(COLLECTION.TEST, testSchema);
+module.exports = mongoose.model(COLLECTION.TEST, examSchema);

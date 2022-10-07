@@ -1,11 +1,20 @@
+module.exports.ACCOUNT_TYPES = {
+    LITE: "haha",
+    PRO: "haha",
+  };
+  
+  module.exports.DEFAULT_VALUES = {
+    AVATAR: 'https://noithatxinh.net.vn/wp-content/uploads/avatar-co-nghia-la-gi.jpg',
+  };
+
 module.exports.COLLECTION = {
     ANSWER: "answers",
     BILL: "bills",
-    CONTEST: "contests",
+    COURSE: "courses",
     QUESTION: "questions",
-    TAKETEST: "take_tests",
-    TAKETESTLOG: "take_test_logs",
-    TEST: "tests",
+    TAKETEST: "take_exams",
+    TAKETESTLOG: "take_exam_logs",
+    TEST: "exams",
     USER: "users",
   };
 

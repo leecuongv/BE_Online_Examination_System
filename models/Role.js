@@ -1,11 +1,11 @@
-import  mongoose  from "mongoose";
+import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
-    name:{
+    name: {
         type: String,
         require: true,
     }
 },
- );
+);
 
- export const Role = mongoose.model('Role',schema);
+export const Role = mongoose.model('Role', schema);
