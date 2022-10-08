@@ -41,7 +41,7 @@ const schema = new mongoose.Schema({
             ref: "Role"
         }
     ],
-    tenhienthi: {
+    fullname: {
         type: String,
         require: true,
         default: "Anonymous",
@@ -52,7 +52,7 @@ const schema = new mongoose.Schema({
             message: "Tên hiển thị phải ngắn hơn 20 ký tự"
         }
     },
-    image: {
+    avatar: {
         type: String,
 
     },
@@ -64,6 +64,21 @@ const schema = new mongoose.Schema({
     birthdate: {
         type: Date,
         required: true,
+    },
+    phone:{
+        type: String
+    },
+    address:{
+        type: String
+    },
+    school:{
+        type: String
+    },
+    is_pro_acc:{
+        type: Boolean
+    },
+    balance:{
+        type: Number
     }
 },
     { timestamps: true }
