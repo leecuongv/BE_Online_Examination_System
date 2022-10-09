@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-import { Comment } from './Comment.js';
-import { Novel } from "./Novel.js";
-import { Reading } from "./Reading.js";
+import { STATUS ,TYPE_ACCOUNT} from "../utils/enum.js";
 const schema = new mongoose.Schema({
     username: {
         type: String,
@@ -30,18 +28,18 @@ const schema = new mongoose.Schema({
         default: "Anonymous",
         validate: {
             validator: item => {
-                return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.exam(item)
+                return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(item)
             },
             message: "Email không hợp lệ"
         }
     },
-    roles: [
+    role: 
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Role"
         }
-    ],
-    tenhienthi: {
+    ,
+    fullname: {
         type: String,
         require: true,
         default: "Anonymous",
@@ -52,18 +50,38 @@ const schema = new mongoose.Schema({
             message: "Tên hiển thị phải ngắn hơn 20 ký tự"
         }
     },
-    image: {
+    avatar: {
         type: String,
 
     },
-    active: {
-        type: Boolean,
+    status: {
+        type: String,
         require: true,
-        default: false
+        default: STATUS.INACTIVE
     },
-    birthdate: {
+    birthday: {
         type: Date,
         required: true,
+    },
+    balance:{
+        type:Number,
+        require: true,
+        default: 0
+    },
+    type:{
+        type:String,
+        require: true,
+        default: TYPE_ACCOUNT.NORMAL
+    },
+    socialId:{
+        type:String,
+        require: true,
+        default: ""
+    },
+    premium:{
+        type:Boolean,
+        require:true,
+        default: false
     }
 },
     { timestamps: true }
@@ -73,9 +91,9 @@ schema.pre('deleteOne', { query: true, document: false }, async function (next) 
     // 'this' is the client being removed. Provide callbacks here if you want
     // to be notified of the calls' result.
     let id = this.getQuery()['_id'];
-    await Comment.deleteMany({ userId: id })
-    await Reading.deleteMany({ userId: id })
-    await Novel.deleteMany({ nguoidangtruyen: id })
+    // await Comment.deleteMany({ userId: id })
+    // await Reading.deleteMany({ userId: id })
+    // await Novel.deleteMany({ nguoidangtruyen: id })
     next();
 });
 

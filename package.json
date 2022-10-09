@@ -14,9 +14,10 @@
         "body-parser": "^1.19.2",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
-        "dotenv": "^16.0.0",
+        "dotenv": "^16.0.3",
         "express": "^4.17.3",
         "express-rate-limit": "^6.4.0",
+        "express-session": "^1.17.3",
         "generate-password": "^1.7.0",
         "googleapis": "^101.0.0",
         "helmet": "^5.0.2",
@@ -27,6 +28,8 @@
         "node-fetch": "^3.2.2",
         "nodemailer": "^6.7.2",
         "nodemon": "^2.0.15",
+        "passport": "^0.6.0",
+        "passport-google-oauth20": "^2.0.0",
         "redux-persist": "^6.0.0"
     },
     "devDependencies": {
