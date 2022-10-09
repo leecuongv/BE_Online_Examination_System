@@ -24,15 +24,13 @@
         "helmet-csp": "^3.4.0",
         "jsonwebtoken": "^8.5.1",
         "jwt-decode": "^3.1.2",
-        "mongoose": "^6.2.4",
         "node-fetch": "^3.2.2",
         "nodemailer": "^6.7.2",
         "nodemon": "^2.0.15",
         "passport": "^0.6.0",
         "passport-google-oauth20": "^2.0.0",
-        "redux-persist": "^6.0.0"
+        "axios": "^1.1.0",
+        "mongoose": "^6.6.5"
     },
-    "devDependencies": {
-        "axios": "^1.1.0"
-    }
+    "devDependencies": {}
 }

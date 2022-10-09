@@ -82,7 +82,17 @@ const schema = new mongoose.Schema({
         type:Boolean,
         require:true,
         default: false
-    }
+    },
+    phone:{
+        type: String
+    },
+    address:{
+        type: String
+    },
+    school:{
+        type: String
+    },
+    
 },
     { timestamps: true }
 );

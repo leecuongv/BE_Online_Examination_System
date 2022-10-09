@@ -29,7 +29,7 @@ export const UserController ={
 
             const data = {
                 birthdate:req.body.birthdate,
-                image:req.body.image,
+                avatar:req.body.avatar,
                 tenhienthi:req.body.tenhienthi
             }
 
