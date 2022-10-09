@@ -26,52 +26,52 @@
 // }
 
 
-import nodemailer from 'nodemailer';
-import { google } from 'googleapis';
+const nodemailer = require('nodemailer');
+const { google } = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
 
-export const createTransporter = async () => {
-        const oauth2Client = new OAuth2(
-            process.env.clientId,
-            process.env.clientSecret,
-            "https://developers.google.com/oauthplayground"
-        );
+const createTransporter = async () => {
+    const oauth2Client = new OAuth2(
+        process.env.clientId,
+        process.env.clientSecret,
+        "https://developers.google.com/oauthplayground"
+    );
 
-        oauth2Client.setCredentials({
-            refresh_token: process.env.refreshToken
-        });
-        
-
-        const accessToken = await new Promise((resolve, reject) => {
-            oauth2Client.getAccessToken((err, token) => {
-                if (err) {
-                    reject();
-                }
-                
-                resolve(token);
-            });
-        });
+    oauth2Client.setCredentials({
+        refresh_token: process.env.refreshToken
+    });
 
 
-        var transporter = nodemailer.createTransport({ // config mail server
-            service: 'gmail',
-            host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-            auth: {
-                type: 'OAuth2',
-                user: 'server10.noreply@gmail.com',
-                clientId: process.env.clientId,
-                clientSecret: process.env.clientSecret,
-                refreshToken: process.env.refreshToken,
-                accessToken:accessToken
+    const accessToken = await new Promise((resolve, reject) => {
+        oauth2Client.getAccessToken((err, token) => {
+            if (err) {
+                reject();
             }
+
+            resolve(token);
         });
-        return transporter
+    });
+
+
+    var transporter = nodemailer.createTransport({ // config mail server
+        service: 'gmail',
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+            type: 'OAuth2',
+            user: 'server10.noreply@gmail.com',
+            clientId: process.env.clientId,
+            clientSecret: process.env.clientSecret,
+            refreshToken: process.env.refreshToken,
+            accessToken: accessToken
+        }
+    });
+    return transporter
 
 }
 
-export const sendMail = async (to, subject, active) => {
+const sendMail = async (to, subject, active) => {
     var emailOptions = { // thiết lập đối tượng, nội dung gửi mail
         from: 'Thích truyện chữ',
         to: to,
@@ -79,9 +79,8 @@ export const sendMail = async (to, subject, active) => {
         text: active,
         //html: '<p>You have got a new message</b><ul><li>Username:' + req.body.name + '</li><li>Email:' + req.body.email + '</li><li>Username:' + req.body.message + '</li></ul>'
     }
-    
+
     let emailTransporter = await createTransporter()
     return emailTransporter.sendMail(emailOptions)
-    
-
 }
+module.exports = {sendMail}

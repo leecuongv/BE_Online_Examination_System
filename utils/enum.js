@@ -4,7 +4,8 @@ const ACCOUNT_TYPES = {
   };
   
   const DEFAULT_VALUES = {
-    AVATAR: 'https://noithatxinh.net.vn/wp-content/uploads/avatar-co-nghia-la-gi.jpg',
+    AVATAR: 'https://1.bp.blogspot.com/-CV8fOXMMw60/YZ-UJ4X9sAI/AAAAAAAACMc/2Svet97exjgNdJ9CeTKUU3OuA-mnCQEzwCLcBGAsYHQ/s595/3a.jpg',
+    IMAGE_COURSE:""
   };
 
 const COLLECTION = {
@@ -42,4 +43,4 @@ const TYPE_ACCOUNT = {
     FACEBOOK: "FACEBOOK",
 };
 
-export {STATUS,TYPE_ACCOUNT,ROLES,COLLECTION,DEFAULT_VALUES,ACCOUNT_TYPES}
+module.exports= {STATUS,TYPE_ACCOUNT,ROLES,COLLECTION,DEFAULT_VALUES,ACCOUNT_TYPES}

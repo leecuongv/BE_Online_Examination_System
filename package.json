@@ -3,7 +3,6 @@
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
-    "type": "module",
     "scripts": {
         "start": "node index.js",
         "dev": "nodemon index.js"
@@ -11,27 +10,37 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "axios": "^1.1.3",
         "bcrypt": "^5.0.1",
         "body-parser": "^1.19.2",
+        "cloudinary": "^1.32.0",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
         "dotenv": "^16.0.3",
         "express": "^4.17.3",
+        "express-fileupload": "^1.4.0",
         "express-rate-limit": "^6.4.0",
         "express-session": "^1.17.3",
         "generate-password": "^1.7.0",
         "googleapis": "^101.0.0",
         "helmet": "^5.0.2",
-        "helmet-csp": "^3.4.0",
         "jsonwebtoken": "^8.5.1",
         "jwt-decode": "^3.1.2",
-        "node-fetch": "^3.2.2",
+        "mongoose": "^6.6.5",
+        "mongoose-plugin-autoinc": "^1.1.9",
+        "morgan": "^1.10.0",
+        "multer": "^1.4.5-lts.1",
+        "multer-storage-cloudinary": "^4.0.0",
         "nodemailer": "^6.7.2",
         "nodemon": "^2.0.15",
         "passport": "^0.6.0",
         "passport-google-oauth20": "^2.0.0",
-        "axios": "^1.1.0",
-        "mongoose": "^6.6.5"
-    },
-    "devDependencies": {}
+        "dateformat": "^2.2.0",
+        "debug": "^3.2.6",
+        "jade": "~1.11.0",
+        "jquery": "^3.4.0",
+        "md5": "^2.2.1",
+        "qs": "^6.7.0",
+        "sha256": "^0.2.0"
+    }
 }

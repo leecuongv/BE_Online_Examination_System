@@ -1,21 +1,21 @@
-import express from 'express';
-import {verifyToken,verifyTokenAdmin} from "../controllers/middlewareController.js"
-import {AuthController} from "../controllers/AuthController.js"
-import { UserController } from '../controllers/UserController.js';
-
+const express = require('express')
+const { verifyToken, verifyTokenAdmin } = require("../controllers/middlewareController")
+const { AuthController } = require('../controllers/AuthController')
+const { UserController } = require('../controllers/UserController')
 const router = express.Router();
 
 router.get('/info', verifyToken, UserController.getInfo);
+router.get('/info-short', verifyToken, UserController.getInfoShort);
+router.put('/update-profile',verifyToken, UserController.updateUser);
+router.put('/update-avatar',verifyToken, UserController.updateAvatar);
+router.put('/reset-avatar',verifyToken, UserController.resetAvatar);
 
-router.put('/info',verifyToken, UserController.updateUser);
+router.put('/change-password',verifyToken, UserController.updatePassword);
 
-router.put('/info/password',verifyToken, UserController.updatePassword);
-
-router.get('/getusers',verifyTokenAdmin,AuthController.LoadUsers);
 
 
 router.put('/updateroles',verifyTokenAdmin,UserController.updateRoles)
 
 router.delete('/',verifyTokenAdmin,UserController.deleteAccount)
 
-export default router;
+module.exports = router;
