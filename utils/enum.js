@@ -1,13 +1,13 @@
-module.exports.ACCOUNT_TYPES = {
-    LITE: "haha",
-    PRO: "haha",
+const ACCOUNT_TYPES = {
+    LITE: "LITE",
+    PRO: "PRO",
   };
   
-  module.exports.DEFAULT_VALUES = {
+  const DEFAULT_VALUES = {
     AVATAR: 'https://noithatxinh.net.vn/wp-content/uploads/avatar-co-nghia-la-gi.jpg',
   };
 
-module.exports.COLLECTION = {
+const COLLECTION = {
     ANSWER: "answers",
     BILL: "bills",
     COURSE: "courses",
@@ -18,7 +18,7 @@ module.exports.COLLECTION = {
     USER: "users",
   };
 
-module.exports.STATUS = {
+const STATUS = {
     DEACTIVE: 'deactive',
     DELETED: 'deleted',
     OK: 'ok',
@@ -26,11 +26,20 @@ module.exports.STATUS = {
     NOT_SUBMITTED: 'not submitted',
     PASSED: 'passed',
     FAILED: 'failed',
-    SUCCESS: 'success'
+    SUCCESS: 'success',
+    ACTIVE:'active',
+    INACTIVE:'inactive'
 };
 
-module.exports.ROLES = {
-    ADMIN: "admin",
-    CREATOR: "creator",
-    USER: "user",
+const ROLES = {
+    ADMIN: "ADMIN",
+    TEACHER: "TEACHER",
+    STUDENT: "STUDENT",
 };
+const TYPE_ACCOUNT = {
+    NORMAL: "NORMAL",
+    GOOGLE: "GOOGLE",
+    FACEBOOK: "FACEBOOK",
+};
+
+export {STATUS,TYPE_ACCOUNT,ROLES,COLLECTION,DEFAULT_VALUES,ACCOUNT_TYPES}

@@ -4,11 +4,14 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser'
-import {UserRoute,AuthRoute} from './routers/index.js'
+import {UserRoute,AuthRoute,SocialRoutes} from './routers/index.js'
 import * as helmet from "helmet";
+import passport from 'passport'
 import rateLimit from 'express-rate-limit'
-dotenv.config()
+import session from 'express-session'
 
+dotenv.config()
+import './services/passport.js'
 const app=express();
 const PORT = process.env.PORT ||5000;
 const URI=process.env.MONGODB_URL;
@@ -26,11 +29,19 @@ const loginLimiter = rateLimit({
   max: 3
 });
 
+
+app.use(session({
+   secret: 'somethingsecretgoeshere',
+   resave: false,
+   saveUninitialized: true,
+   cookie: { secure: true }
+}));
+
 app.use("/auth/login", loginLimiter);
  
 
-app.use(cors({ credentials: true, origin:"https://febaomatweb.vercel.app"}));//fix lỗi cross-domain
-//app.use(cors({ credentials: true, origin:true}));
+//app.use(cors({ credentials: true, origin:"https://febaomatweb.vercel.app"}));//fix lỗi cross-domain
+app.use(cors({ credentials: true, origin:true}));
 app.use(cookieParser());
 app.disable('x-powered-by');//fix lỗi leak info from x-powered-by
 
@@ -85,5 +96,20 @@ app.listen(PORT, () => {
 app.get('/',(req,res)=>{
         res.send('SUCCESS');
     });
+
+  
+app.use(passport.initialize());
+app.use(passport.session());
+app.get('/auth/google', passport.authenticate('google', {
+  scope: ['profile', 'email']
+}));
+
+app.get('/auth/google/callback',
+  passport.authenticate('google'),
+  (req, res) => {
+    res.redirect('/surveys');
+  }
+);
 app.use('/api',AuthRoute)
 app.use('/api/user',UserRoute)
+app.use('/api/social',SocialRoutes)

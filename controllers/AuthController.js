@@ -6,6 +6,7 @@ import { Role } from "../models/Role.js";
 import { sendMail } from "../services/EmailService.js";
 import mongoose from "mongoose";
 import generator from "generate-password"
+import { ROLES } from "../utils/enum.js";
 export const AuthController = {
     generateAccessToken: (data) => {
         const accessToken = jwt.sign(
@@ -27,7 +28,7 @@ export const AuthController = {
 
     RegisterUser: async (req, res) => {
         try {
-            const roles = await Role.find({ name: "USER" });
+            const roles = await Role.find({ name: ROLES.USER });
             const salt = await bcrypt.genSalt(10);
             const hash = await bcrypt.hash(req.body.password, salt);
             
@@ -36,7 +37,7 @@ export const AuthController = {
                 password: hash,
                 email: req.body.email,
                 roles: roles.map(item => item._id),
-                birthdate:new Date()
+                birthday:new Date()
             });
             let error = newUser.validateSync();
             if(error)
