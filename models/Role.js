@@ -8,4 +8,10 @@ const schema = new mongoose.Schema({
 },
 );
 
+schema.method("toJSON", function () {
+    const { __v, ...object } = this.toObject();
+    const { _id: id, ...result } = object;
+    return { ...result, id };
+  });
+  
 export const Role = mongoose.model('Role', schema);

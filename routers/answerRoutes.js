@@ -1,13 +1,13 @@
-const express = require("express");
-const router = express.Router();
-const verifyToken = require("../controllers/middlewareController");
-const dotenv = require("dotenv");
-const { ROLES, STATUS } = require("../utils/enum");
-dotenv.config({ path: "./.env" });
-const Answer = require("../models/Answer");
-const Question = require("../models/Question");
-const { formatTimeUTC } = require("../utils/Timezone")
+import express from "express";
+import {verifyToken} from "../controllers/middlewareController.js";
+import dotenv from "dotenv";
+import { ROLES, STATUS } from "../utils/enum.js";
+import {Answer} from "../models/Answer.js";
+import {Question} from "../models/Question.js";
+import { formatTimeUTC } from "../utils/Timezone.js"
 
+dotenv.config({ path: "./.env" });
+const router = express.Router();
 router.post("", verifyToken, async (req, res) => {
   try {
     //Check permission
@@ -218,5 +218,5 @@ router.put("/:answerId/delete", verifyToken, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
 

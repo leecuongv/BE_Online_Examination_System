@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-const autoinc = require("mongoose-plugin-autoinc");
-const { formatTimeUTC } = require("../utils/Timezone");
-const { COLLECTION } = require("../utils/enum");
+import mongoose from "mongoose";
+import autoinc from "mongoose-plugin-autoinc";
+import { formatTimeUTC } from "../utils/Timezone.js";
+import { COLLECTION } from "../utils/enum.js";
 
 const answerSchema = mongoose.Schema({
   answerId: {
@@ -47,4 +47,4 @@ answerSchema.method("toJSON", function () {
   return { ...result, id };
 });
 
-module.exports = mongoose.model(COLLECTION.ANSWER, answerSchema);
+export const Answer = mongoose.model(COLLECTION.ANSWER, answerSchema);
