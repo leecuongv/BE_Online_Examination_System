@@ -11,7 +11,6 @@ router.put('/info',verifyToken, UserController.updateUser);
 
 router.put('/info/password',verifyToken, UserController.updatePassword);
 
-router.get('/getusers',verifyTokenAdmin,AuthController.LoadUsers);
 
 
 router.put('/updateroles',verifyTokenAdmin,UserController.updateRoles)

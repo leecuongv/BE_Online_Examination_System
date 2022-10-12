@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { STATUS ,TYPE_ACCOUNT} from "../utils/enum.js";
+import { DEFAULT_VALUES, STATUS ,TYPE_ACCOUNT} from "../utils/enum.js";
 const schema = new mongoose.Schema({
     username: {
         type: String,
@@ -52,7 +52,8 @@ const schema = new mongoose.Schema({
     },
     avatar: {
         type: String,
-
+        require: true,
+        default: DEFAULT_VALUES.AVATAR
     },
     status: {
         type: String,

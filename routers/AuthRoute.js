@@ -4,35 +4,33 @@ import { verifyToken, verifyTokenAdmin } from "../controllers/middlewareControll
 import passport from 'passport'
 const router = express.Router();
 
-router.post('/auth/register', AuthController.RegisterUser);
+router.post('/register', AuthController.RegisterUser);
 
-router.post('/auth/login', AuthController.LoginUser);
+router.post('/login', AuthController.LoginUser);
 
-router.get('/getusers', verifyToken, AuthController.LoadUsers);
+router.post('/refreshtoken', AuthController.RefreshToken);
 
-router.post('/auth/refreshtoken', AuthController.RefreshToken);
+router.post('/reactive', AuthController.ReActive);
 
-router.post('/auth/reactive', AuthController.ReActive);
+router.get('/active', AuthController.Active);
 
-router.get('/auth/active', AuthController.Active);
+router.put('/activebyadmin', verifyTokenAdmin, AuthController.activeByAdmin);
 
-router.put('/auth/activebyadmin', verifyTokenAdmin, AuthController.activeByAdmin);
+router.put('/inactivebyadmin', verifyTokenAdmin, AuthController.inactiveByAdmin);
 
-router.put('/auth/inactivebyadmin', verifyTokenAdmin, AuthController.inactiveByAdmin);
+router.get('/verifytoken', AuthController.verifyToken);
 
-router.get('/auth/verifytoken', AuthController.verifyToken);
+router.post('/forgetpassword', AuthController.Forgotpassword);
 
-router.post('/auth/forgetpassword', AuthController.Forgotpassword);
+router.post('/checkusername', AuthController.checkUsername);
 
-router.post('/auth/checkusername', AuthController.checkUsername);
+router.post('/checkemail', AuthController.checkEmail);
 
-router.post('/auth/checkemail', AuthController.checkEmail);
-
-router.get('/auth/google', passport.authenticate('google', {
+router.get('/google', passport.authenticate('google', {
   scope: ['profile', 'email']
 }));
 
-router.get('/auth/google/callback',
+router.get('/google/callback',
   passport.authenticate('google'),
   (req, res) => {
     res.redirect('/');

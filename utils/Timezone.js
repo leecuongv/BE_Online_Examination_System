@@ -1,19 +1,19 @@
 //
-module.exports.formatTimeUTC = function () {
+const formatTimeUTC = function () {
     let currentTime = new Date(new Date().toUTCString())
     let timeZone = currentTime.getTimezoneOffset();
     return new Date(currentTime.getTime() - (timeZone * 60000))
 }
 
 
-module.exports.formatTimeUTC_ = function (date) {
+const formatTimeUTC_ = function (date) {
     let time = new Date(date)
     let currentTime = new Date(time.toUTCString())
     let timeZone = currentTime.getTimezoneOffset();
     return new Date(currentTime.getTime() - (timeZone * 60000))
 }
 
-module.exports.datetimeFormat = function (date, format) {
+const datetimeFormat = function (date, format) {
     let year = date.getFullYear()
     let month = date.getMonth() + 1
     let day = date.getDate()
@@ -35,3 +35,5 @@ module.exports.datetimeFormat = function (date, format) {
         return '' +  hour + minute + second
     }
 }
+
+export {formatTimeUTC,datetimeFormat,formatTimeUTC_}

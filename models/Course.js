@@ -1,7 +1,6 @@
-const mongoose = require("mongoose");
-const autoinc = require("mongoose-plugin-autoinc");
-const { formatTimeUTC } = require("../utils/Timezone");
-const { COLLECTION } = require("../utils/enum");
+import mongoose from "mongoose";
+import autoinc from "mongoose-plugin-autoinc";
+import { COLLECTION, DEFAULT_VALUES } from "../utils/enum.js";
 
 const courseSchema = mongoose.Schema({
   courseId: {
@@ -11,12 +10,12 @@ const courseSchema = mongoose.Schema({
   name: {
     type: String,
     require: true,
-    default: null,
+    default: "",
   },
   description: {
     type: String,
     require: true,
-    default: null,
+    default: "",
   },
   startTime: {
     type: Date,
@@ -29,39 +28,40 @@ const courseSchema = mongoose.Schema({
   },
   creatorId: {
     type: mongoose.Schema.Types.ObjectId,
-    default: null,
+    require: true,
     ref: COLLECTION.USER,
   },
-  url: {
+  slug: {
     type: String,
-    default: null,
+    unique:true,
+    default: "",
   },
   exams: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: COLLECTION.TEST,
-      default: null,
-    },
+      ref: COLLECTION.TEST
+    }
   ],
-  _status: {
+  users: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: COLLECTION.USER
+    }
+  ],
+  status: {
     type: String,
     default: "",
   },
-  createdAt: {
-    type: Date,
-    default: new Date()// formatTimeUTC,
-  },
-  updatedAt: {
-    type: Date,
-    default: new Date()//formatTimeUTC,
-  },
-  embededMedia:
+
+  image:
   {
     type: String,
-    default: null,
+    default: DEFAULT_VALUES.IMAGE_COURSE,
   },
 
-});
+},
+  { timestamps: true }
+);
 
 courseSchema.plugin(
   autoinc.autoIncrement,
@@ -77,4 +77,4 @@ courseSchema.method("toJSON", function () {
   return { ...result, id };
 });
 
-module.exports = mongoose.model(COLLECTION.COURSE, courseSchema);
+export const Course = mongoose.model(COLLECTION.COURSE, courseSchema);

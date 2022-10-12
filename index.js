@@ -4,11 +4,12 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser'
-import {UserRoute,AuthRoute,SocialRoutes} from './routers/index.js'
+import {UserRoute,AuthRoute,SocialRoutes,CourseRoutes,AnswerRoutes} from './routers/index.js'
 import * as helmet from "helmet";
 import passport from 'passport'
 import rateLimit from 'express-rate-limit'
 import session from 'express-session'
+import morgan from 'morgan'
 
 dotenv.config()
 import './services/passport.js'
@@ -100,16 +101,9 @@ app.get('/',(req,res)=>{
   
 app.use(passport.initialize());
 app.use(passport.session());
-app.get('/auth/google', passport.authenticate('google', {
-  scope: ['profile', 'email']
-}));
-
-app.get('/auth/google/callback',
-  passport.authenticate('google'),
-  (req, res) => {
-    res.redirect('/surveys');
-  }
-);
-app.use('/api',AuthRoute)
+app.use(morgan('combined'))
+app.use('/api/auth',AuthRoute)
 app.use('/api/user',UserRoute)
 app.use('/api/social',SocialRoutes)
+app.use('/api/course',CourseRoutes)
+app.use('/api/answer',AnswerRoutes)
