@@ -1,4 +1,3 @@
-
 const formatTimeUTC = function () {
     let currentTime = new Date(new Date().toUTCString())
     let timeZone = currentTime.getTimezoneOffset();
