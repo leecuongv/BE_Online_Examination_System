@@ -1,9 +1,9 @@
-import express from 'express';
-import { SocialController } from '../controllers/SocialController.js';
+const express = require('express')
+const { verifyToken, verifyTokenAdmin } = require("../controllers/middlewareController")
+const { SocialController } = require('../controllers/SocialController')
 const router = express.Router();
-
 router.post('/login-google', SocialController.LoginGoogle);
 
 router.post('/login-facebook', SocialController.LoginFacebook);
 
-export default router;
+module.exports= router;

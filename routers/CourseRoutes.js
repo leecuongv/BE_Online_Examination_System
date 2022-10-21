@@ -1,6 +1,6 @@
-import express from 'express';
-import { CourseController } from '../controllers/CourseController.js';
-import { verifyToken, verifyTokenAdmin } from "../controllers/middlewareController.js"
+const express = require('express')
+const { verifyToken, verifyTokenAdmin } = require("../controllers/middlewareController")
+const { CourseController } = require('../controllers/CourseController')
 const router = express.Router();
 
 router.post('/', CourseController.CreateCourse);
@@ -9,4 +9,4 @@ router.put('/', CourseController.UpdateCourse);
 
 router.get('', CourseController.getCourseBySlug);
 
-export default router;
+module.exports = router;

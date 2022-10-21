@@ -1,15 +1,12 @@
-import bcrypt from "bcrypt";
-import { User } from "../models/User.js";
-
-import { ResponseData, ResponseDetail } from "../services/ResponseJSON.js";
-import { Role } from "../models/Role.js";
-import { sendMail } from "../services/EmailService.js";
-import mongoose from "mongoose";
-import generator from "generate-password"
-import { ROLES ,STATUS,TYPE_ACCOUNT} from "../utils/enum.js";
-import axios from 'axios'
-import { generateAccessToken,generateRefreshToken } from "../services/jwtService.js";
-export const SocialController = {
+const bcrypt = require("bcrypt")
+const { User } = require("../models/User.js")
+const { sendMail } = require("../services/EmailService")
+const mongoose = require("mongoose")
+const generator = require("generate-password")
+const { ROLES ,STATUS,TYPE_ACCOUNT} = require("../utils/enum")
+const axios = require('axios')
+const { generateAccessToken,generateRefreshToken } = require("../services/jwtService")
+const SocialController = {
     
 
     LoginGoogle: async (req, res) => {
@@ -21,12 +18,12 @@ export const SocialController = {
             )
             const profile = response.data
 
-            const existingUser = await User.findOne({ socialId: profile.sub }).populate('role');
+            const existingUser = await User.findOne({ socialId: profile.sub })
 
             if (existingUser) {
                 const data = {
                     sub: existingUser.username,
-                    role: existingUser.role.name
+                    role: existingUser.role
                 };
                 const accessToken = generateAccessToken(data)
                 const refreshToken = generateRefreshToken(data)
@@ -34,7 +31,6 @@ export const SocialController = {
                 return res.status(200).json({
                     user:{
                         ...doc,
-                        role:existingUser.role.name,
                         accessToken,
                         refreshToken
                     }
@@ -42,7 +38,6 @@ export const SocialController = {
             }
             const salt = await bcrypt.genSalt(10);
             const hash = await bcrypt.hash("12345678", salt);
-            const role = await Role.findOne({ name: ROLES.STUDENT });
             const newUser = await new User({
                 id: profile.sub,
                 email: profile.email,
@@ -54,14 +49,14 @@ export const SocialController = {
                 type:TYPE_ACCOUNT.GOOGLE,
                 socialId:profile.sub,
                 avatar:profile.picture,
-                role:role._id
+                role:ROLES.STUDENT
             })
 
             let error = newUser.validateSync();
             if (error)
-                return res.status(400).json(ResponseDetail(400, {
+                return res.status(400).json( {
                     message: error.errors['email']?.message || error.errors['username']?.message
-                }))
+                })
 
             // let temp = (await User.findOne({ username: req.body.username }))
             // if (temp) {
@@ -75,7 +70,7 @@ export const SocialController = {
             const user = await newUser.save();
             const data = {
                 sub: user.username,
-                role: role.name
+                role: user.role
             };
             accessToken = generateAccessToken(data)
             const refreshToken = generateRefreshToken(data)
@@ -83,7 +78,6 @@ export const SocialController = {
             return res.status(200).json({
                 user:{
                     ...doc,
-                    role:role.name,
                     accessToken,
                     refreshToken
                 }
@@ -91,7 +85,7 @@ export const SocialController = {
 
         } catch (error) {
             console.log(error)
-            res.status(500).json(ResponseDetail(400, { username: "Lỗi tạo tài khoản" }))
+            res.status(500).json({ username: "Lỗi tạo tài khoản" })
         }
 
     },
@@ -104,20 +98,19 @@ export const SocialController = {
             )
             const profile = response.data
 
-            const existingUser = await User.findOne({ socialId: profile.id }).populate('role');
+            const existingUser = await User.findOne({ socialId: profile.id })
 
             if (existingUser) {
                 const data = {
                     sub: existingUser.username,
-                    role: existingUser.role.name
+                    role: existingUser.role
                 };
                 const accessToken = generateAccessToken(data)
                 const refreshToken = generateRefreshToken(data)
-                const {password,role,...doc} = existingUser._doc
+                const {password,...doc} = existingUser._doc
                 return res.status(200).json({
                     user:{
                         ...doc,
-                        role:existingUser.role.name,
                         accessToken,
                         refreshToken
                     }
@@ -125,7 +118,6 @@ export const SocialController = {
             }
             const salt = await bcrypt.genSalt(10);
             const hash = await bcrypt.hash("12345678", salt);
-            const role = await Role.findOne({ name: ROLES.STUDENT });
             const newUser = await new User({
                 id: profile.sub,
                 email: profile.email,
@@ -136,21 +128,20 @@ export const SocialController = {
                 status:STATUS.ACTIVE,
                 type:TYPE_ACCOUNT.FACEBOOK,
                 socialId:profile.id,
-                role:role._id,
+                role:ROLES.STUDENT,
                 avatar:profile.picture.data.url
             })
 
             let error = newUser.validateSync();
             if (error)
-                return res.status(400).json(ResponseDetail(400, {
+                return res.status(400).json({
                     message: error.errors['email']?.message || error.errors['username']?.message
-                }))
-
+                })
                
             const user = await newUser.save();
             const data = {
                 sub: user.username,
-                role: role.name
+                role: user.role
             };
             accessToken = generateAccessToken(data)
             const refreshToken = generateRefreshToken(data)
@@ -158,7 +149,6 @@ export const SocialController = {
             return res.status(200).json({
                 user:{
                     ...doc,
-                    role:role.name,
                     accessToken,
                     refreshToken
                 }
@@ -166,43 +156,12 @@ export const SocialController = {
 
         } catch (error) {
             console.log(error)
-            res.status(500).json(ResponseDetail(400, { username: "Lỗi tạo tài khoản" }))
+            res.status(500).json({ username: "Lỗi tạo tài khoản" })
         }
 
     },
 
-
-    RefreshToken: async (req, res) => {
-        try {
-            const refreshToken = req.body.refreshToken;
-            if (!refreshToken) {
-                return res.status(401).json("Bạn chưa có token")
-            }
-
-            jwt.verify(refreshToken, process.env.JWT_ACCESS_KEY, (err, user) => {
-                if (err) {
-                    console.log("Lỗi:" + err)
-                    return res.status(500).json(ResponseDetail(500, { message: "Token sai" }))
-                }
-                else {
-                    const { iat, exp, ...data } = user;
-                    const newAccessToken = AuthController.generateAccessToken(data);
-                    const newRefreshToken = AuthController.generateRefreshToken(data);
-                    console.log("refresh")
-                    res.cookie("token", newRefreshToken, {
-                        httpOnly: true,
-                        secure: true,
-                        sameSite: "strict"
-                    })
-                    return res.status(200).json(ResponseData(200, { refreshToken: newRefreshToken, accessToken: newAccessToken }));
-                }
-
-            })
-
-        } catch (error) {
-            console.log(error)
-            res.status(500).json(error)
-        }
-    },
 
 }
+
+module.exports = {SocialController}

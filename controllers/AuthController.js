@@ -1,14 +1,12 @@
-import bcrypt from "bcrypt";
-import { User } from "../models/User.js";
-import jwt from "jsonwebtoken";
-import { ResponseData, ResponseDetail } from "../services/ResponseJSON.js";
-import { Role } from "../models/Role.js";
-import { sendMail } from "../services/EmailService.js";
-import mongoose from "mongoose";
-import generator from "generate-password"
-import { ROLES, STATUS } from "../utils/enum.js";
-import { generateAccessToken, generateRefreshToken } from "../services/jwtService.js";
-export const AuthController = {
+const bcrypt =require("bcrypt");
+const {User}=require("../models/User");
+const jwt =require("jsonwebtoken");
+const { sendMail } =require("../services/EmailService");
+const mongoose =require("mongoose");
+const generator =require("generate-password");
+const { ROLES, STATUS, TYPE_ACCOUNT } =require("../utils/enum");
+const { generateAccessToken, generateRefreshToken } =require("../services/jwtService");
+const AuthController = {
     
 
     RegisterUser: async (req, res) => {
@@ -19,10 +17,9 @@ export const AuthController = {
                     message:"Không thể tạo tài khoản"
                 })
             }
-            const roleEntity = await Role.findOne({ name: role });
             const salt = await bcrypt.genSalt(10);
             const hash = await bcrypt.hash(password, salt);
-            if(!roleEntity){
+            if(role !== ROLES.STUDENT && role !== ROLES.TEACHER){
                 return res.status(400).json({
                     message:"Không thể tạo tài khoản"
                 })
@@ -32,7 +29,7 @@ export const AuthController = {
                 username: username,
                 password: hash,
                 email: email,
-                role: roleEntity.id,
+                role: role,
                 birthday:new Date()
             });
 
@@ -45,10 +42,10 @@ export const AuthController = {
                 return res.status(400).json({ 
                     message: error.errors['email']?.message||error.errors['username']?.message })
 
-            // temp = (await User.findOne({ email: req.body.email }))
-            // if (temp) {
-            //     return res.status(400).json(ResponseDetail(400, { username: "Email đã tồn tại" }))
-            // }
+            temp = await User.findOne({ email: req.body.email,type:TYPE_ACCOUNT.NORMAL })
+            if (temp) {
+                return res.status(400).json(ResponseDetail(400, { username: "Email đã tồn tại" }))
+            }
             const activeCode = jwt.sign(
                 { email },
                 process.env.JWT_ACCESS_KEY,
@@ -69,7 +66,7 @@ export const AuthController = {
     LoginUser: async (req, res) => {
         try {
             const {username, password} = req.body
-            const user = await User.findOne({ username: username }).populate("role");
+            const user = await User.findOne({ username: username })
 
             if (!user) {
                 return res.status(404).json({ username: "Sai tên đăng nhập hoặc mật khẩu" })
@@ -81,7 +78,7 @@ export const AuthController = {
                 }
                 const data = {
                     sub: user.username,
-                    role: user.role?.name
+                    role: user.role
                 };
                 const accessToken = generateAccessToken(data);
                 const refreshToken = generateRefreshToken(data);
@@ -97,7 +94,7 @@ export const AuthController = {
                     avatar,
                     accessToken,
                     refreshToken,
-                    role: role.name
+                    role: role
                 });
             }
             return res.status(404).json({ username: "Sai tên đăng nhập hoặc mật khẩu" })
@@ -320,3 +317,5 @@ export const AuthController = {
     }
     
 }
+
+module.exports = {AuthController}

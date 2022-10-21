@@ -1,10 +1,10 @@
-import bcrypt from "bcrypt";
-import { Course } from "../models/Course.js";
-import { User } from "../models/User.js";
-import mongoose from "mongoose";
-import generator from "generate-password"
-import { ROLES, STATUS } from "../utils/enum.js";
-export const CourseController = {
+const bcrypt =require("bcrypt")
+const { Course } =require("../models/Course")
+const { User } =require("../models/User")
+const mongoose =require("mongoose")
+const generator =require("generate-password")
+const { ROLES, STATUS } =require("../utils/enum")
+const CourseController = {
     CreateCourse: async (req, res) => {
         try {
             const {slug, name, description, image,userId} =req.body
@@ -87,3 +87,5 @@ export const CourseController = {
         }
     },
 }
+
+module.exports={CourseController}

@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
-import autoinc from "mongoose-plugin-autoinc";
-import { COLLECTION, DEFAULT_VALUES } from "../utils/enum.js";
+const mongoose =require("mongoose")
+const autoinc =require("mongoose-plugin-autoinc")
+const { COLLECTION, DEFAULT_VALUES } =require("../utils/enum")
 
 const courseSchema = mongoose.Schema({
   courseId: {
@@ -77,4 +77,5 @@ courseSchema.method("toJSON", function () {
   return { ...result, id };
 });
 
-export const Course = mongoose.model(COLLECTION.COURSE, courseSchema);
+const Course = mongoose.model(COLLECTION.COURSE, courseSchema);
+module.exports = {Course}

@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { DEFAULT_VALUES, STATUS ,TYPE_ACCOUNT} from "../utils/enum.js";
+const mongoose =require("mongoose");
+const { DEFAULT_VALUES, STATUS, TYPE_ACCOUNT } =require("../utils/enum");
 const schema = new mongoose.Schema({
     username: {
         type: String,
@@ -33,12 +33,12 @@ const schema = new mongoose.Schema({
             message: "Email không hợp lệ"
         }
     },
-    role: 
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Role"
-        }
-    ,
+    role: {
+
+        type: String,
+        require: true,
+        default: "STUDENT",
+    },
     fullname: {
         type: String,
         require: true,
@@ -64,36 +64,39 @@ const schema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    balance:{
-        type:Number,
+    balance: {
+        type: Number,
         require: true,
         default: 0
     },
-    type:{
-        type:String,
+    type: {
+        type: String,
         require: true,
         default: TYPE_ACCOUNT.NORMAL
     },
-    socialId:{
-        type:String,
+    socialId: {
+        type: String,
         require: true,
         default: ""
     },
-    premium:{
-        type:Boolean,
-        require:true,
+    premium: {
+        type: Boolean,
+        require: true,
         default: false
     },
-    phone:{
+    gender: {
+        type:String,
+    },
+    phone: {
         type: String
     },
-    address:{
+    address: {
         type: String
     },
-    school:{
+    school: {
         type: String
     },
-    
+
 },
     { timestamps: true }
 );
@@ -108,4 +111,5 @@ schema.pre('deleteOne', { query: true, document: false }, async function (next) 
     next();
 });
 
-export const User = mongoose.model('User', schema);
+const User = mongoose.model('User', schema);
+module.exports = {User}

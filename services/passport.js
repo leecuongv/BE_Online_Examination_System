@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import { Role } from '../models/Role.js';
 import { User } from '../models/User.js';
 import { STATUS, TYPE_ACCOUNT } from '../utils/enum.js';
 import  mongoose from 'mongoose';

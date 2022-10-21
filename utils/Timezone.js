@@ -1,4 +1,3 @@
-//
 const formatTimeUTC = function () {
     let currentTime = new Date(new Date().toUTCString())
     let timeZone = currentTime.getTimezoneOffset();
@@ -36,4 +35,4 @@ const datetimeFormat = function (date, format) {
     }
 }
 
-export {formatTimeUTC,datetimeFormat,formatTimeUTC_}
+module.exports = {formatTimeUTC,datetimeFormat,formatTimeUTC_}
