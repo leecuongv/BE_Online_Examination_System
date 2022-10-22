@@ -12,7 +12,7 @@ router.post('/refreshtoken', AuthController.RefreshToken);
 
 router.post('/reactive', AuthController.ReActive);
 
-router.get('/active', AuthController.Active);
+router.post('/active', AuthController.Active);
 
 router.put('/activebyadmin', verifyTokenAdmin, AuthController.activeByAdmin);
 

@@ -51,7 +51,7 @@ const AuthController = {
                 process.env.JWT_ACCESS_KEY,
                 { expiresIn: "15m" }
             )
-            sendMail(email , "Kích hoạt tài khoản", process.env.CLIENT_URL + "active/" + activeCode)
+            sendMail(email , "Kích hoạt tài khoản", process.env.CLIENT_URL + "active/" + activeCode,username)
             await newUser.save();
             return res.status(200).json({
                 message:"Tạo tài khoản thành công"
@@ -82,22 +82,15 @@ const AuthController = {
                 };
                 const accessToken = generateAccessToken(data);
                 const refreshToken = generateRefreshToken(data);
-                const { username, fullname, avatar, role } = user._doc;
-                res.cookie("token", refreshToken, {
-                    httpOnly: true,
-                    secure: false,
-                    sameSite: "strict"
-                })
+                const { password,id,status,type,...rest } = user._doc;
+                
                 return res.status(200).json({
-                    username,
-                    fullname,
-                    avatar,
+                    ...rest,
                     accessToken,
-                    refreshToken,
-                    role: role
+                    refreshToken
                 });
             }
-            return res.status(404).json({ username: "Sai tên đăng nhập hoặc mật khẩu" })
+            return res.status(400).json({ message: "Sai tên đăng nhập hoặc mật khẩu" })
 
         } catch (error) {
             console.log(error)
@@ -156,7 +149,7 @@ const AuthController = {
                         { expiresIn: "15m" }
                     )
                     console.log("active:" + activeCode);
-                    sendMail(email, "Kích hoạt tài khoản", process.env.CLIENT_URL + "active/" + activeCode)
+                    sendMail(email , "Kích hoạt tài khoản", process.env.CLIENT_URL + "active/" + activeCode,user.username)
                         .then(response => {
                             console.log(response)
                             return res.status(200).json({ message: "Đã gửi mail kích hoạt. Vui lòng kiểm tra trong hộp thư của email" })
@@ -217,7 +210,7 @@ const AuthController = {
 
     Active: async (req, res) => {
         try {
-            const key = req.query.key;
+            const key = req.body.token;
             if (key) {
                 jwt.verify(key, process.env.JWT_ACCESS_KEY, async (err, user) => {
                     if (err) {
@@ -226,9 +219,15 @@ const AuthController = {
                     }
                     const email = user.email
                     const newUser = await User.findOneAndUpdate({ email: email }, { status: STATUS.ACTIVE }, { new: true })
-                    console.log(newUser)
+                  
                     if (newUser) {
-                        return res.status(200).json({ message: "Kích hoạt thành công" })
+                        const data = {
+                            sub: newUser.username,
+                            role: newUser.role
+                        };
+                        const accessToken = generateAccessToken(data);
+                        const refreshToken = generateRefreshToken(data);
+                        return res.status(200).json({ message: "Kích hoạt thành công",accessToken,refreshToken })
                     }
                     return res.status(400).json({ message: "Kích hoạt không thành công" })
 
@@ -305,7 +304,7 @@ const AuthController = {
     checkEmail: async (req, res) => {
         try {
             const email = req.body.email;
-            const user = await User.findOne({ email:email })
+            const user = await User.findOne({ email:email,type:TYPE_ACCOUNT.NORMAL })
             if (user)
                 return res.status(200).json({message:"Email đã tồn tại trong hệ thống",valid: false})
             return res.status(200).json({message:"Email hợp lý",valid: true})

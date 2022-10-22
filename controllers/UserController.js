@@ -16,7 +16,7 @@ const UserController = {
         try {
             const username = req.user.sub
             const user = await User.findOne({ username })
-            const { password, ...rest } = user._doc;
+            const { password,type,id,status, ...rest } = user._doc;
 
             return res.status(200).json({ ...rest })
 

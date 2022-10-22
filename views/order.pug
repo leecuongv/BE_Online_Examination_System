@@ -1,5 +1,3 @@
-//Created by vinhnt on 6/16/2017.
-
 extends layout
 
 block content
@@ -52,30 +50,3 @@ block content
                     option(value='vn') Tiếng Việt
                     option(value='en') English
             button.btn.btn-default#btnPopup(type='submit') Thanh toán
-    p&nbsp;
-    //Neu dung Redirect thi khong can cac thu vien ben duoi
-//    link(rel='stylesheet', href='https://pay.vnpay.vn/lib/vnpay/vnpay.css')
-//    script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
-//    script(src='https://pay.vnpay.vn/lib/vnpay/vnpay.js')
-//    script(type='text/javascript').
-//        $("#btnPopup").click(function () {
-//            var postData = $("#createOrder").serialize();
-//            var submitUrl = $("#createOrder").attr("action");
-//            $.ajax({
-//                type: "POST",
-//                url: submitUrl,
-//                data: postData,
-//                dataType: 'JSON',
-//                success: function (x) {
-//                    if (x.code === '00') {
-//                        if(window.vnpay)
-//                        location.href=x.data;
-//                        return false;
-//                        
-//                    } else {
-//                        alert(x.Message);
-//                    }
-//                }
-//            });
-//            return false;
-//        });

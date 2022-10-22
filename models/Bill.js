@@ -8,27 +8,34 @@ const billSchema = mongoose.Schema({
         type: Number,
         require: true,
     },
-    user: {
+    creatorId: {
         type: mongoose.Schema.Types.ObjectId,
         default: null,
         ref: COLLECTION.USER,
     },
     amount: {
         type: Number,
-        default: null,
+        default: 0,
     },
-    _status: {
+    status: {
         type: String,
         default: STATUS.FAILED
     },
-    createdAt: {
-        type: Date,
-        default: new Date(),
+    description:{
+        type:String,
+        require:true,
+        default:""
     },
-    updatedAt: {
-        type: Date,
-        default: new Date()
+    method:{
+        type: String,
+        require:true,
     },
+    transactionId:{
+        type: String,
+        require:true,
+        default:""
+    }
+
 });
 
 billSchema.plugin(
@@ -44,5 +51,5 @@ billSchema.method("toJSON", function () {
     const { _id: id, ...result } = object;
     return { ...result, id };
 });
-
-module.exports = mongoose.model(COLLECTION.BILL, billSchema);
+const Bill = mongoose.model(COLLECTION.BILL, billSchema);
+module.exports = {Bill}

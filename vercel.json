@@ -1,10 +1,10 @@
 {
-    "vesion": 2,
+    "version": 2,
     "builds": [{
         "src": "./index.js",
         "use": "@vercel/node"
     }],
-    "routers": [{
+    "routes": [{
         "src": "/(.*)",
         "dest": "/"
     }]
