@@ -1,33 +1,7 @@
-
-// import nodemailer from 'nodemailer';
-
-// export const sendMail = (to,subject,active) => {
-//     const mailHost = 'smtp.gmail.com'
-// // 587 là một cổng tiêu chuẩn và phổ biến trong giao thức SMTP
-// const mailPort = 587
-//     var transporter = nodemailer.createTransport({ // config mail server
-//         service: 'Gmail',
-//         host: mailHost,
-//     port: mailPort,
-//     secure: false,
-//         auth: {
-//             user: 'server10.noreply@gmail.com',
-//             pass: '123456789a.'
-//         }
-//     });
-//     var mainOptions = { // thiết lập đối tượng, nội dung gửi mail
-//         from: 'Thích truyện chữ',
-//         to: to,
-//         subject: subject,
-//         text: active,
-//         //html: '<p>You have got a new message</b><ul><li>Username:' + req.body.name + '</li><li>Email:' + req.body.email + '</li><li>Username:' + req.body.message + '</li></ul>'
-//     }
-//     return transporter.sendMail(mainOptions);
-// }
-
-
+const hbs = require('nodemailer-express-handlebars')
 const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
+const path = require('path')
 const OAuth2 = google.auth.OAuth2;
 
 const createTransporter = async () => {
@@ -67,20 +41,38 @@ const createTransporter = async () => {
             accessToken: accessToken
         }
     });
+
+    // point to the template folder
+    const handlebarOptions = {
+        viewEngine: {
+            partialsDir: path.resolve('./views/'),
+            defaultLayout: false,
+        },
+        viewPath: path.resolve('./views/'),
+    };
+
+    // use a template file with nodemailer
+    transporter.use('compile', hbs(handlebarOptions))
     return transporter
 
 }
 
-const sendMail = async (to, subject, active) => {
+
+
+const sendMail = async (to, subject, activeLink, username) => {
     var emailOptions = { // thiết lập đối tượng, nội dung gửi mail
-        from: 'Thích truyện chữ',
+        from: 'Hệ thống thi trắc nghiệm Bello Quiz',
         to: to,
         subject: subject,
-        text: active,
+        template: 'emailActive', // the name of the template file i.e email.handlebars
+        context: {
+            activeLink, // replace {{name}} with Adebola
+            username// replace {{company}} with My Company
+        }
         //html: '<p>You have got a new message</b><ul><li>Username:' + req.body.name + '</li><li>Email:' + req.body.email + '</li><li>Username:' + req.body.message + '</li></ul>'
     }
 
     let emailTransporter = await createTransporter()
     return emailTransporter.sendMail(emailOptions)
 }
-module.exports = {sendMail}
+module.exports = { sendMail }
