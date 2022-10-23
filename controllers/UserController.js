@@ -94,8 +94,6 @@ const UserController = {
         try {
             const username = req.user.sub
             let {fullname, address, phone, school,birthday,gender } = req.body
-            console.log(birthday);
-            console.log(new Date(birthday).toLocaleString())
             if(birthday===null || new Date(birthday).toLocaleString() === "Invalid Date"){
                 return res.status(400).json({ message: "Ngày sinh không hợp lệ" })
             }

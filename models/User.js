@@ -101,6 +101,14 @@ const schema = new mongoose.Schema({
     { timestamps: true }
 );
 
+schema.method("toJSON", function () {
+    const { __v, ...object } = this.toObject();
+    const { _id: id, ...result } = object;
+    return { ...result, id };
+});
+
+schema.index({fullname: 'text', email: 'text'});
+
 schema.pre('deleteOne', { query: true, document: false }, async function (next) {
     // 'this' is the client being removed. Provide callbacks here if you want
     // to be notified of the calls' result.

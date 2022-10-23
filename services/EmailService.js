@@ -75,4 +75,21 @@ const sendMail = async (to, subject, activeLink, username) => {
     let emailTransporter = await createTransporter()
     return emailTransporter.sendMail(emailOptions)
 }
-module.exports = { sendMail }
+
+const sendMailResetPassword = async (to, subject, activeLink, username) => {
+    var emailOptions = { // thiết lập đối tượng, nội dung gửi mail
+        from: '"Hệ thống thi trắc nghiệm Bello Quiz" <server10.noreply@gmail.com>',
+        to: to,
+        subject: subject,
+        template: 'resetPassword', // the name of the template file i.e email.handlebars
+        context: {
+            activeLink, // replace {{name}} with Adebola
+            username// replace {{company}} with My Company
+        }
+        //html: '<p>You have got a new message</b><ul><li>Username:' + req.body.name + '</li><li>Email:' + req.body.email + '</li><li>Username:' + req.body.message + '</li></ul>'
+    }
+
+    let emailTransporter = await createTransporter()
+    return emailTransporter.sendMail(emailOptions)
+}
+module.exports = { sendMail,sendMailResetPassword }

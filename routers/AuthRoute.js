@@ -20,7 +20,9 @@ router.put('/inactivebyadmin', verifyTokenAdmin, AuthController.inactiveByAdmin)
 
 router.get('/verifytoken', AuthController.verifyToken);
 
-router.post('/forgetpassword', AuthController.Forgotpassword);
+router.get('/reset-password', AuthController.Forgotpassword);
+
+router.post('/reset-password', AuthController.ResetPassword);
 
 router.post('/checkusername', AuthController.checkUsername);
 
