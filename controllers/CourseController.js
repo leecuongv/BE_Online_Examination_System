@@ -1,6 +1,5 @@
-const bcrypt = require("bcrypt")
-const { Course } = require("../models/Course")
-const { User } = require("../models/User")
+const  Course = require("../models/Course")
+const User = require("../models/User")
 const mongoose = require("mongoose")
 const generator = require("generate-password")
 const { ROLES, STATUS } = require("../utils/enum")

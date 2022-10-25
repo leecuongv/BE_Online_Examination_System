@@ -13,11 +13,27 @@ const COLLECTION = {
     BILL: "Bill",
     COURSE: "Course",
     QUESTION: "Question",
-    TAKETEST: "Take_exam",
-    TAKETESTLOG: "Take_exam_log",
-    TEST: "Exam",
+    TAKEEXAM: "Take_exam",
+    EXAMRESULT: "Exam_result",
+    EXAM: "Exam",
     USER: "User",
   };
+
+const TYPEOFPOINT = {
+  MAX:'max',
+  AVG:'avg',
+  LAST:'last'
+}
+const VIEWPOINT = {
+  NO:'no',
+  DONE:'done',
+  ALLDONE:'alldone'
+}
+const VIEWANSWER = {
+  NO:'no',
+  DONE:'done',
+  ALLDONE:'alldone'
+}
 
 const STATUS = {
     DEACTIVE: 'deactive',
@@ -29,7 +45,9 @@ const STATUS = {
     FAILED: 'failed',
     SUCCESS: 'success',
     ACTIVE:'active',
-    INACTIVE:'inactive'
+    INACTIVE:'inactive',
+    PUBLIC:'public',
+    PRIVATE:'private'
 };
 
 const ROLES = {
@@ -43,4 +61,4 @@ const TYPE_ACCOUNT = {
     FACEBOOK: "FACEBOOK",
 };
 
-module.exports= {STATUS,TYPE_ACCOUNT,ROLES,COLLECTION,DEFAULT_VALUES,ACCOUNT_TYPES}
+module.exports= {STATUS,TYPE_ACCOUNT,ROLES,COLLECTION,DEFAULT_VALUES,ACCOUNT_TYPES,TYPEOFPOINT,VIEWPOINT,VIEWANSWER}

@@ -1,18 +1,17 @@
 const mongoose = require("mongoose");
 const autoinc = require("mongoose-plugin-autoinc");
-const { formatTimeUTC } = require("../utils/Timezone");
-const { COLLECTION } = require("../utils/enum");
+const { COLLECTION, VIEWPOINT, TYPEOFPOINT, VIEWANSWER, STATUS } = require("../utils/enum");
 
 const examSchema = mongoose.Schema(
   {
-    examId: {
+    slug: {
       type: Number,
       require: true,
     },
     name: {
       type: String,
       require: true,
-      default: 0,
+      default: "Đề thi",
     },
     creatorId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -21,17 +20,24 @@ const examSchema = mongoose.Schema(
     description: {
       type: String,
       require: true,
-      default: null,
+      default: '',
     },
     pin: {
       type: String,
       require: true,
-      default: null,
+      default: '',
     },
     questions: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: COLLECTION.QUESTION,
-      default: null,
+      index: {
+        type: Number,
+        require: true,
+        default: 0
+      },
+      question: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: COLLECTION.QUESTION,
+        default: null,
+      }
     }],
     startTime: {
       type: Date,
@@ -41,52 +47,59 @@ const examSchema = mongoose.Schema(
       type: Date,
       default: new Date()//formatTimeUTC,
     },
-    attempts_allowed: {
+    numberofQuestions: {
       type: Number,
-      default: null,
+      require:true,
+      default: 0,
     },
-    url: {
+    viewPoint: {
       type: String,
-      default: null,
+      require:true,
+      default: VIEWPOINT.NO,
+    },
+    viewAnswer: {
+      type: String,
+      require:true,
+      default: VIEWANSWER.NO,
+    },
+    attemptsAllowed: {
+      type: Number,
+      default: 0,
     },
     maxPoints: {
       type: Number,
-      default: null,
+      default: 0,
+    },
+    typeofPoint: {
+      type: Number,
+      default: TYPEOFPOINT.MAX,
     },
     maxTimes: {
       type: Number,
-      default: null,
+      require:true,
+      default: 1
     },
-    tracking: [
-      {
-        type: String,
-        default: [],
-      },
-    ],
-    questionsOrder: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: COLLECTION.QUESTION,
-      default: null,
-    }],
-    _status: {
+    tracking: {
+      type:Boolean,
+      default:true
+    },
+    shuffle: {
+      type:Boolean,
+      default:true
+    },
+    status: {
       type: String,
-      default: "",
-    },
-    createdAt: {
-      type: Date,
-      default: new Date()//formatTimeUTC,
-    },
-    updatedAt: {
-      type: Date,
-      default: new Date()//formatTimeUTC,
-    },
-  });
+      default: STATUS.PUBLIC,
+    }, 
+  },
+  { timestamps: true }
+  );
 
 examSchema.plugin(
   autoinc.autoIncrement,
   {
-    model: COLLECTION.TEST,
-    field: "examId"
+    model: COLLECTION.EXAM,
+    field: "slug"
   }
 );
 
@@ -96,4 +109,4 @@ examSchema.method("toJSON", function () {
   return { ...result, id };
 });
 
-module.exports = mongoose.model(COLLECTION.TEST, examSchema);
+module.exports = mongoose.model(COLLECTION.EXAM, examSchema);

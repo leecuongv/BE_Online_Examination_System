@@ -4,24 +4,15 @@ const { formatTimeUTC } =require("../utils/Timezone");
 const { COLLECTION } =require("../utils/enum");
 
 const questionSchema = mongoose.Schema({
-  // order: {
-  //   type: Number,
-  //   require: true,
-  //   default: 0,
-  // },
-  questionId: {
-    type: Number,
-    require: true,
-  },
-  type: {
+   type: {
     type: String,
     require: true,
-    default: null,
+    default: 'single',
   },
   content: {
     type: String,
     require: true,
-    default: null,
+    default: '',
   },
   answers: [
     {
@@ -56,13 +47,7 @@ const questionSchema = mongoose.Schema({
   },
 });
 
-questionSchema.plugin(
-  autoinc.autoIncrement,
-  {
-    model: COLLECTION.QUESTION,
-    field: "questionId"
-  }
-);
+
 
 questionSchema.method("toJSON", function () {
   const { __v, ...object } = this.toObject();
@@ -72,4 +57,4 @@ questionSchema.method("toJSON", function () {
 
 const Question = mongoose.model(COLLECTION.QUESTION, questionSchema);
 
-module.exports = {Question}
+module.exports = Question

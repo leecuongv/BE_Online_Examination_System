@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const autoinc = require("mongoose-plugin-autoinc");
 const { formatTimeUTC } = require("../utils/Timezone");
-const { COLLECTION } = require("../utils/enum");
+const { COLLECTION, STATUS } = require("../utils/enum");
 
 const takeExamSchema = mongoose.Schema({
   takeExamId: {
@@ -12,7 +12,7 @@ const takeExamSchema = mongoose.Schema({
     type: mongoose.SchemaTypes.ObjectId,
     require: true,
     default: null,
-    ref: COLLECTION.TEST,
+    ref: COLLECTION.EXAM,
   },
   user: {
     type: mongoose.SchemaTypes.ObjectId,
@@ -20,43 +20,29 @@ const takeExamSchema = mongoose.Schema({
     default: null,
     ref: COLLECTION.USER,
   },
+  startTime: {
+    type: Date,
+    default: new Date()// formatTimeUTC,
+  },
   submitTime: {
     type: Date,
     default: new Date()// formatTimeUTC,
   },
-  questionsOrder: [String],
-  chooseAnswers: [
-    {
-      question: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: COLLECTION.QUESTION,
-        default: null,
-      },
-      answers: [String]
-    },
-  ],
-  isCorrect: [Boolean],
   points: {
     type: Number,
     default: 0,
   },
-  _status: {
+  status: {
     type: String,
+    default:STATUS.NOT_SUBMITTED
   },
-  createdAt: {
-    type: Date,
-    default: new Date()//formatTimeUTC,
-  },
-  updatedAt: {
-    type: Date,
-    default: new Date()//formatTimeUTC,
-  },
-});
+},
+{ timestamps: true });
 
 takeExamSchema.plugin(
   autoinc.autoIncrement,
   {
-    model: COLLECTION.TAKETEST,
+    model: COLLECTION.TAKEEXAM,
     field: "takeExamId"
   }
 );
@@ -67,4 +53,4 @@ takeExamSchema.method("toJSON", function () {
   return { ...result, id };
 });
 
-module.exports = mongoose.model(COLLECTION.TAKETEST, takeExamSchema);
+module.exports = mongoose.model(COLLECTION.TAKEEXAM, takeExamSchema);

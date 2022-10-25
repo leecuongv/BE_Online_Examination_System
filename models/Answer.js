@@ -48,4 +48,4 @@ answerSchema.method("toJSON", function () {
 });
 
 const Answer = mongoose.model(COLLECTION.ANSWER, answerSchema);
-module.exports = {Answer}
+module.exports = Answer

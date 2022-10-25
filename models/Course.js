@@ -39,7 +39,7 @@ const courseSchema = mongoose.Schema({
   exams: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: COLLECTION.TEST
+      ref: COLLECTION.EXAM
     },
   ],
   students: [
@@ -78,4 +78,4 @@ courseSchema.method("toJSON", function () {
 });
 
 const Course = mongoose.model(COLLECTION.COURSE, courseSchema);
-module.exports = {Course}
+module.exports = Course
