@@ -43,6 +43,7 @@ const schema = new mongoose.Schema({
         type: String,
         require: true,
         default: "Anonymous",
+        trim:true,
         validate: {
             validator: item => {
                 return item.length <= 20

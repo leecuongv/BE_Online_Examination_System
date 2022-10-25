@@ -27,6 +27,7 @@
         "helmet": "^5.0.2",
         "jsonwebtoken": "^8.5.1",
         "jwt-decode": "^3.1.2",
+        "moment": "^2.29.4",
         "mongoose": "^6.6.5",
         "mongoose-plugin-autoinc": "^1.1.9",
         "morgan": "^1.10.0",
