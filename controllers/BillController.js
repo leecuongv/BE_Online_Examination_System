@@ -1,10 +1,10 @@
 const crypto =require('crypto')
 const https =require('https')
 const dateFormat =require('dateformat')
-const { User } =require('../models/User')
+const  User  =require('../models/User')
 const dotenv = require('dotenv')
-const { Bill } = require('../models/Bill')
-const { default: mongoose } = require('mongoose')
+const  Bill  = require('../models/Bill')
+const mongoose  = require('mongoose')
 const { STATUS } = require('../utils/enum')
 dotenv.config()
 const frontendUrl = 'http://localhost:3006/'

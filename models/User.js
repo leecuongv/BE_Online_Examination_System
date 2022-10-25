@@ -120,4 +120,4 @@ schema.pre('deleteOne', { query: true, document: false }, async function (next) 
 });
 
 const User = mongoose.model('User', schema);
-module.exports = { User }
+module.exports =  User 

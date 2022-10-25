@@ -1,7 +1,7 @@
 const { Exam } = require("../models/Exam")
 const mongoose = require("mongoose");
 const ExamController = {
-    CreateExam: async (req, res) => {
+    CreateExam: async (req, res) => {///Sửa
         try {
             const { name, description, userId, slug } = req.body
 
@@ -28,7 +28,7 @@ const ExamController = {
             res.status(500).json({ message: "Lỗi tạo bài thi" })
         }
     },
-    getExamBySlug: async (req, res) => {
+    getExamBySlug: async (req, res) => {//Sửa
         try {
             const { slug } = req.query
             console.log(slug)
@@ -48,6 +48,7 @@ const ExamController = {
             res.status(500).json({ message: "Lỗi tạo bài thi" })
         }
     },
+    //// 
     UpdateExam: async (req, res) => {//nhớ sửa
         try {
             const { slug, name, description, image, userId } = req.body

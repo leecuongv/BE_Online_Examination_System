@@ -52,4 +52,4 @@ billSchema.method("toJSON", function () {
     return { ...result, id };
 });
 const Bill = mongoose.model(COLLECTION.BILL, billSchema);
-module.exports = {Bill}
+module.exports = Bill

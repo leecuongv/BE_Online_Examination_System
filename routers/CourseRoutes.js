@@ -3,7 +3,7 @@ const { verifyToken, verifyTokenAdmin } = require("../controllers/middlewareCont
 const { CourseController } = require('../controllers/CourseController')
 const router = express.Router();
 
-router.post('', CourseController.CreateCourse);
+router.post('',verifyToken, CourseController.CreateCourse);
 
 router.put('/', CourseController.UpdateCourse);
 
