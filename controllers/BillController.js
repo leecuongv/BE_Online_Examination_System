@@ -1,6 +1,7 @@
 const crypto =require('crypto')
 const https =require('https')
 const dateFormat =require('dateformat')
+const moment = require('moment')
 const  User  =require('../models/User')
 const dotenv = require('dotenv')
 const  Bill  = require('../models/Bill')
@@ -148,7 +149,7 @@ const BillController = {
             let returnUrl = backendUrl+"api/payment/vnpay-return"
             let date = new Date();
     
-            let createDate = dateFormat(date, 'yyyymmddHHmmss');
+            let createDate =moment().format('YYYYMMDDHHmmss'); 
             //let orderId = dateFormat(date, 'HHmmss');
             let orderId = date.getTime()
             let username = req.user.sub
@@ -201,7 +202,7 @@ const BillController = {
             let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
             vnp_Params['vnp_SecureHash'] = signed;
             vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
-            
+            console.log(vnpUrl)
             res.status(200).json({payUrl:vnpUrl})
         }
         catch(err){
