@@ -1,11 +1,11 @@
 const bcrypt =require("bcrypt");
 const {User}=require("../models/User");
 const jwt =require("jsonwebtoken");
-const { sendMail } =require("../services/EmailService");
+const { sendMail, sendMailResetPassword } =require("../services/EmailService");
 const mongoose =require("mongoose");
 const generator =require("generate-password");
 const { ROLES, STATUS, TYPE_ACCOUNT } =require("../utils/enum");
-const { generateAccessToken, generateRefreshToken } =require("../services/jwtService");
+const { generateAccessToken, generateRefreshToken, generateToken } =require("../services/jwtService");
 const AuthController = {
     
 
@@ -173,22 +173,16 @@ const AuthController = {
 
     Forgotpassword: async (req, res) => {
         try {
-            const email = req.body.email;
-            var password = generator.generate({
-                length: 12,
-                numbers: true,
-            });
-            const salt = await bcrypt.genSalt(10);
-            const hash = await bcrypt.hash(password, salt);
+            const email = req.query.email;
             if (email) {
                 const user = await User.findOne({ email: email })
                 if (user) {
-                    const newUser = await User.findOneAndUpdate({email: email },{password:hash},{new:true})
-                    
-                    sendMail(email, "Mật khẩu mới", "Mật khẩu mới của tài khoản:"+password)
+                    const resetCode = generateToken({
+                        id:user.id.toString()
+                    })
+                    sendMailResetPassword(email,'Đặt lại mật khẩu',process.env.CLIENT_URL + "reset-password/" + resetCode,user.username )
                         .then(response => {
-                            console.log(response)
-                            return res.status(200).json({ message: "Đã gửi mật khẩu mới" })
+                            return res.status(200).json({ message: "Đã gửi đường đẫn mật khẩu tới email" })
                         })
                         .catch(err => {
                             console.log(err)
@@ -208,6 +202,35 @@ const AuthController = {
         }
     },
 
+    ResetPassword: async (req, res) => {
+        try {
+            const {token,newPassword,cfPassword} = req.body;
+            if (token) {
+                jwt.verify(token, process.env.JWT_ACCESS_KEY, async (err, user) => {
+                    if (err) {
+                        console.log(err)
+                        return res.status(400).json( { message: "Mã đặt lại mật khẩu đã hết hạn" })
+                    }
+                    const id = user.id
+                    const salt = await bcrypt.genSalt(10);
+                    const hash = await bcrypt.hash(newPassword, salt);
+                    const newUser = await User.findByIdAndUpdate(id, {password:hash}, { new: true })
+                  
+                    if (newUser) {
+                        return res.status(200).json({ message: "Đặt lại mật khẩu thành công"})
+                    }
+                    return res.status(400).json({ message: "Đặt lại mật khẩu thành công. Vui lòng thử lại" })
+
+                })
+            }
+            else {
+                return res.status(400).json( { message: "Không có mã kích hoạt" })
+            }
+
+        } catch (error) {
+            return res.status(500).json({ message: "Lỗi đặt lại mật khẩu" })
+        }
+    },
     Active: async (req, res) => {
         try {
             const key = req.body.token;

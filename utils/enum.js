@@ -9,14 +9,14 @@ const ACCOUNT_TYPES = {
   };
 
 const COLLECTION = {
-    ANSWER: "answers",
-    BILL: "bills",
-    COURSE: "courses",
-    QUESTION: "questions",
-    TAKETEST: "take_exams",
-    TAKETESTLOG: "take_exam_logs",
-    TEST: "exams",
-    USER: "users",
+    ANSWER: "Answer",
+    BILL: "Bill",
+    COURSE: "Course",
+    QUESTION: "Question",
+    TAKETEST: "Take_exam",
+    TAKETESTLOG: "Take_exam_log",
+    TEST: "Exam",
+    USER: "User",
   };
 
 const STATUS = {

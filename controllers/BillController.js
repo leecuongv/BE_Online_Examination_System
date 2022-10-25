@@ -7,10 +7,10 @@ const { Bill } = require('../models/Bill')
 const { default: mongoose } = require('mongoose')
 const { STATUS } = require('../utils/enum')
 dotenv.config()
-// const frontendUrl = 'http://localhost:3006/'
-// const backendUrl = 'http://localhost:5000/'
-const frontendUrl = 'https://oes.vercel.app/'
-const backendUrl = 'https://becnpmm.cyclic.app/'
+const frontendUrl = 'http://localhost:3006/'
+const backendUrl = 'http://localhost:5000/'
+// const frontendUrl = 'https://oes.vercel.app/'
+// const backendUrl = 'https://be-oes.vercel.app/'
 const BillController = {
     createPaymentMomo: async (req, res) => {
         try {
@@ -133,133 +133,150 @@ const BillController = {
         res.render('order', { title: 'Tạo mới đơn hàng', amount: 10000, description: desc })
     },
     CreatePaymentVNPay: async (req, res, next) => {
-        let ipAddr = req.headers['x-forwarded-for'] ||
-            req.connection.remoteAddress ||
-            req.socket.remoteAddress ||
-            req.connection.socket.remoteAddress;
-        if(ipAddr ==='::1')
-            ipAddr ='127.0.0.1'
-        let dateFormat = require('dateformat');
-        let tmnCode = process.env.vnp_TmnCode;
-        let secretKey = process.env.vnp_HashSecret;
-        let vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
-        let returnUrl = "http://localhost:5000/api/payment/vnpay-return"
-        let date = new Date();
+        try{
 
-        let createDate = dateFormat(date, 'yyyymmddHHmmss');
-        //let orderId = dateFormat(date, 'HHmmss');
-        let orderId = date.getTime()
-        let username = req.user.sub
-        let amount = req.body.amount;
-        let bankCode = req.body.bankCode;
-
-        let orderInfo = req.body.orderDescription || "Nang cap tai khoan "+username;
-        let orderType = req.body.orderType || 'billpayment';
-        let locale = req.body.language;
-        if (locale === null || locale === '') {
-            locale = 'vn';
+            let ipAddr = req.headers['x-forwarded-for'] ||
+                req.connection.remoteAddress ||
+                req.socket.remoteAddress ||
+                req.connection.socket.remoteAddress;
+            if(ipAddr ==='::1')
+                ipAddr ='127.0.0.1'
+            let dateFormat = require('dateformat');
+            let tmnCode = process.env.vnp_TmnCode;
+            let secretKey = process.env.vnp_HashSecret;
+            let vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+            let returnUrl = backendUrl+"api/payment/vnpay-return"
+            let date = new Date();
+    
+            let createDate = dateFormat(date, 'yyyymmddHHmmss');
+            //let orderId = dateFormat(date, 'HHmmss');
+            let orderId = date.getTime()
+            let username = req.user.sub
+            let amount = req.body.amount;
+            let bankCode = req.body.bankCode;
+    
+            let orderInfo = req.body.orderDescription || "Nang cap tai khoan "+username;
+            let orderType = req.body.orderType || 'billpayment';
+            let locale = req.body.language;
+            if (locale === null || locale === '') {
+                locale = 'vn';
+            }
+            let currCode = 'VND';
+            let vnp_Params = {};
+            vnp_Params['vnp_Version'] = '2.1.0';
+            vnp_Params['vnp_Command'] = 'pay';
+            vnp_Params['vnp_TmnCode'] = tmnCode;
+            // vnp_Params['vnp_Merchant'] = ''
+            vnp_Params['vnp_Locale'] = locale;
+            vnp_Params['vnp_CurrCode'] = currCode;
+            vnp_Params['vnp_OrderInfo'] = orderInfo;
+            vnp_Params['vnp_OrderType'] = orderType;
+            vnp_Params['vnp_Amount'] = amount * 100;
+            vnp_Params['vnp_ReturnUrl'] = returnUrl;
+            vnp_Params['vnp_IpAddr'] = ipAddr;
+            vnp_Params['vnp_CreateDate'] = createDate;
+            if (bankCode !== null && bankCode !== '') {
+                vnp_Params['vnp_BankCode'] = bankCode;
+            }
+    
+            //Tạo bill
+            const user = await User.findOne({username})
+            if(!user){
+                return res.status(400).json({message:"Không tồn tại tài khoản"})
+            }
+            const newBill = await new Bill({
+                creatorId:user.id,
+                description:"Nâng cấp tài khoản bằng VNPay",
+                amount,
+                method:"VNPay"
+            })
+            await newBill.save()//lưu bill vào db
+            vnp_Params['vnp_TxnRef'] = newBill.id.toString()
+            vnp_Params = sortObject(vnp_Params);
+    
+            let querystring = require('qs');
+            let signData = querystring.stringify(vnp_Params, { encode: false });
+            let crypto = require("crypto");
+            let hmac = crypto.createHmac("sha512", secretKey);
+            let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
+            vnp_Params['vnp_SecureHash'] = signed;
+            vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+            
+            res.status(200).json({payUrl:vnpUrl})
         }
-        let currCode = 'VND';
-        let vnp_Params = {};
-        vnp_Params['vnp_Version'] = '2.1.0';
-        vnp_Params['vnp_Command'] = 'pay';
-        vnp_Params['vnp_TmnCode'] = tmnCode;
-        // vnp_Params['vnp_Merchant'] = ''
-        vnp_Params['vnp_Locale'] = locale;
-        vnp_Params['vnp_CurrCode'] = currCode;
-        vnp_Params['vnp_OrderInfo'] = orderInfo;
-        vnp_Params['vnp_OrderType'] = orderType;
-        vnp_Params['vnp_Amount'] = amount * 100;
-        vnp_Params['vnp_ReturnUrl'] = returnUrl;
-        vnp_Params['vnp_IpAddr'] = ipAddr;
-        vnp_Params['vnp_CreateDate'] = createDate;
-        if (bankCode !== null && bankCode !== '') {
-            vnp_Params['vnp_BankCode'] = bankCode;
+        catch(err){
+            res.status(400).json({message:"Tạo hoá đơn không thành công. Vui lòng thử lại"})
         }
-
-        //Tạo bill
-        const user = await User.findOne({username})
-        if(!user){
-            return res.status(400).json({message:"Không tồn tại tài khoản"})
-        }
-        const newBill = await new Bill({
-            creatorId:user.id,
-            description:"Nâng cấp tài khoản bằng VNPay",
-            amount,
-            method:"VNPay"
-        })
-        await newBill.save()//lưu bill vào db
-console.log(newBill._id)
-        vnp_Params['vnp_TxnRef'] = newBill.id.toString()
-        vnp_Params = sortObject(vnp_Params);
-
-        let querystring = require('qs');
-        let signData = querystring.stringify(vnp_Params, { encode: false });
-        let crypto = require("crypto");
-        let hmac = crypto.createHmac("sha512", secretKey);
-        let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
-        vnp_Params['vnp_SecureHash'] = signed;
-        vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
-        console.log(vnpUrl)
-        res.status(200).json({payUrl:vnpUrl})
     },
     VNPayReturn:async(req, res, next)=>{
-        let vnp_Params = req.query;
-    
-        let secureHash = vnp_Params['vnp_SecureHash'];
-    
-        delete vnp_Params['vnp_SecureHash'];
-        delete vnp_Params['vnp_SecureHashType'];
-    
-        vnp_Params = sortObject(vnp_Params);
-    
-        let tmnCode = process.env.vnp_TmnCode;
-        let secretKey = process.env.vnp_HashSecret;
-    
-        let querystring = require('qs');
-        let signData = querystring.stringify(vnp_Params, { encode: false });
-        let crypto = require("crypto");     
-        let hmac = crypto.createHmac("sha512", secretKey);
-        let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");     
-    
-        if(secureHash === signed){
-            //Kiem tra xem du lieu trong db co hop le hay khong va thong bao ket qua
-            res.render('success', {code: vnp_Params['vnp_ResponseCode']})
-        } else{
-            res.render('success', {code: '97'})
+        try{
+
+            let vnp_Params = req.query;
+        
+            let secureHash = vnp_Params['vnp_SecureHash'];
+        
+            delete vnp_Params['vnp_SecureHash'];
+            delete vnp_Params['vnp_SecureHashType'];
+        
+            vnp_Params = sortObject(vnp_Params);
+        
+            let tmnCode = process.env.vnp_TmnCode;
+            let secretKey = process.env.vnp_HashSecret;
+        
+            let querystring = require('qs');
+            let signData = querystring.stringify(vnp_Params, { encode: false });
+            let crypto = require("crypto");     
+            let hmac = crypto.createHmac("sha512", secretKey);
+            let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");     
+        
+            if(secureHash === signed){
+                //Kiem tra xem du lieu trong db co hop le hay khong va thong bao ket qua
+                res.render('success', {code: vnp_Params['vnp_ResponseCode']})
+            } else{
+                res.render('success', {code: '97'})
+            }
+        }
+        catch(err){
+
         }
     },
     VNPayIPN:async(req, res, next)=>{
-        let vnp_Params = req.query;
-        let secureHash = vnp_Params['vnp_SecureHash'];
-    
-        delete vnp_Params['vnp_SecureHash'];
-        delete vnp_Params['vnp_SecureHashType'];
-    
-        vnp_Params = sortObject(vnp_Params);
-        let secretKey = process.env.vnp_HashSecret;
-        let querystring = require('qs');
-        let signData = querystring.stringify(vnp_Params, { encode: false });
-        let crypto = require("crypto");     
-        let hmac = crypto.createHmac("sha512", secretKey);
-        let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");     
-         
-        if(secureHash === signed){
-            let orderId = vnp_Params['vnp_TxnRef'];
-            let rspCode = vnp_Params['vnp_ResponseCode'];
-            if(rspCode==='00')//giao dich thanh cong
-            {
-                const bill = await Bill.findOneAndUpdate({id:mongoose.Types.ObjectId(orderId)}
-                ,{status:STATUS.SUCCESS,transactionId:vnp_Params['vnp_TransactionNo']}
-                ,{new:true})
-                const user = await User.findByIdAndUpdate(bill.creatorId,{premium:true})
+        try{
+            let vnp_Params = req.query;
+            let secureHash = vnp_Params['vnp_SecureHash'];
+        
+            delete vnp_Params['vnp_SecureHash'];
+            delete vnp_Params['vnp_SecureHashType'];
+        
+            vnp_Params = sortObject(vnp_Params);
+            let secretKey = process.env.vnp_HashSecret;
+            let querystring = require('qs');
+            let signData = querystring.stringify(vnp_Params, { encode: false });
+            let crypto = require("crypto");     
+            let hmac = crypto.createHmac("sha512", secretKey);
+            let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");     
+             
+            if(secureHash === signed){
+                let orderId = vnp_Params['vnp_TxnRef'];
+                let rspCode = vnp_Params['vnp_ResponseCode'];
+                console.log(rspCode);
+                if(rspCode==='00')//giao dich thanh cong
+                {
+                    const bill = await Bill.findOneAndUpdate({id:mongoose.Types.ObjectId(orderId)}
+                    ,{status:STATUS.SUCCESS,transactionId:vnp_Params['vnp_TransactionNo']}
+                    ,{new:true})
+                    const user = await User.findByIdAndUpdate(bill.creatorId,{premium:true})
+                    return res.redirect(`${frontendUrl}result-payment?message=Giao dịch thành công`)
+                }
+                //Kiem tra du lieu co hop le khong, cap nhat trang thai don hang va gui ket qua cho VNPAY theo dinh dang duoi
                 return res.redirect(`${frontendUrl}result-payment?message=Giao dịch không thành công`)
             }
-            //Kiem tra du lieu co hop le khong, cap nhat trang thai don hang va gui ket qua cho VNPAY theo dinh dang duoi
-            return res.redirect(`${frontendUrl}result-payment?message=Giao dịch thành công`)
+            else {
+                return res.redirect(`${frontendUrl}result-payment?message=Giao dịch không thành công`)
+            }
         }
-        else {
-            return res.redirect(`${frontendUrl}result-payment?message=Giao dịch không thành công`)
+        catch(err){
+            return res.redirect(`${frontendUrl}result-payment?message=Xác nhận giao dịch không thành công`)
         }
     }
 
