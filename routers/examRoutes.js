@@ -3,7 +3,7 @@ const { verifyToken, verifyTokenAdmin } = require("../controllers/middlewareCont
 const { ExamController } = require('../controllers/ExamController')
 const router = express.Router();
 
-router.post('/', ExamController.CreateExam);
+router.post('/create-exam', verifyToken, ExamController.CreateExam);
 
 router.put('/', ExamController.UpdateExam);
 
