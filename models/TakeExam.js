@@ -12,13 +12,13 @@ const takeExamSchema = mongoose.Schema({
     type: mongoose.SchemaTypes.ObjectId,
     require: true,
     default: null,
-    ref: "exams",
+    ref: COLLECTION.TEST,
   },
   user: {
     type: mongoose.SchemaTypes.ObjectId,
     require: true,
     default: null,
-    ref: "users",
+    ref: COLLECTION.USER,
   },
   submitTime: {
     type: Date,

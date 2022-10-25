@@ -6,6 +6,7 @@ const generator = require("generate-password")
 const { ROLES, STATUS } = require("../utils/enum")
 const cloudinary = require('cloudinary').v2
 const dotenv = require('dotenv')
+const TakeExam = require("../models/TakeExam")
 dotenv.config()
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -37,8 +38,8 @@ const CourseController = {
                 endTime
             });
             if (image) {
-                if(image.data.size > 2000000){
-                    return res.status(400).json({message:"Ảnh có kích thước quá 2Mb"})
+                if (image.data.size > 2000000) {
+                    return res.status(400).json({ message: "Ảnh có kích thước quá 2Mb" })
                 }
                 let data = image.data.toString('base64')
                 data = `data:${image.mimetype};base64,${data}`//chuyển sang data uri
@@ -101,8 +102,8 @@ const CourseController = {
 
             const course = await Course.findOne({ courseId })
             if (course) {
-                const { name, description, exams, image, status } = course._doc
-                return res.status(200).json({ name, description, exams, image, status })
+                const { _id, name, description, exams, image, status } = course._doc
+                return res.status(200).json({ id: _id, name, description, exams, image, status })
             }
 
             return res.status(400).json({
@@ -117,11 +118,11 @@ const CourseController = {
     getListCourseTeacher: async (req, res) => {
         try {
             const username = req.user?.sub
-            const user = await User.findOne({username})
-            if(!user){
-                return res.status(400).json({message:"Tài khoản không tồn tại"})
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const courses = await Course.find({ creatorId:user.id })
+            const courses = await Course.find({ creatorId: user.id })
             if (courses) {
                 return res.status(200).json(courses)
             }
@@ -134,19 +135,82 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tạo khoá học" })
         }
     },
+
     searchListStudentToAdd: async (req, res) => {
         try {
+            //Lấy cái parameter
             const username = req.user?.sub
             const search = req.query.search
-            
-            console.log(req.params)
-            const user = await User.findOne({username})
-            if(!user){
-                return res.status(400).json({message:"Tài khoản không tồn tại"})
+            const courseId = req.query.courseId
+
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const users = await User.find({$text: {$search: search} })
+            const course = await Course.findById(courseId)
+            let students = course.students
+            students.push(user.id)
+            console.log(students)
+            const users = await User.find({ $text: { $search: search }, _id: { $nin: students } })
+                .select({ id: 1, fullname: 1, gender: 1, avatar: 1, birthday: 1 })
+                .limit(20)
             if (users) {
                 return res.status(200).json(users)
+            }
+
+            return res.status(400).json({
+                message: "Không tìm thấy khoá học",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tạo khoá học" })
+        }
+    },
+    getListStudentOfCourse: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const courseId = req.query.courseId
+            const start = new Date().getTime()
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            const course = await Course.findById(courseId)
+                .populate({ path: 'students', select: { id: 1, fullname: 1, avatar: 1, email: 1 } })
+
+            let listStudent = course.students
+            let listExam = course.exams
+            const countExam = await TakeExam.aggregate([
+                {
+                    $match:
+                    {
+                        user: { $in: listStudent },
+                        exam: { $in: listExam }
+                    }
+                },
+                {
+                    $group: { _id: { 'exam': '$exam', 'user': '$user' } }
+                },
+                {
+                    $group: { _id: '$_id.user', count: { $sum: 1 } }
+                }
+            ])
+
+            let result = listStudent.map(std => {
+                let tmp = countExam?.find(item => item._id.toString() === std.id.toString())
+                let count = 0
+                if (tmp) {
+                    count = tmp.count
+                }
+
+                return { ...std._doc, count }
+            })
+            console.log(new Date().getTime() - start)
+
+            if (course) {
+                return res.status(200).json(result)
             }
             return res.status(400).json({
                 message: "Không tìm thấy khoá học",
@@ -157,7 +221,141 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tạo khoá học" })
         }
     },
+    getListExamOfCourse: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const courseId = req.query.courseId
+            const start = new Date().getTime()
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            
+            const listExam = await Course.aggregate([
+                {
+                    $match: { _id: new mongoose.Types.ObjectId(courseId) }
+                },
+                {
+                    $lookup:
+                    {
+                        from: "exams",
+                        localField: "exams",
+                        foreignField: "_id",
+                        as: "exams"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$exams",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "take_exams",
+                        localField: "exams._id",
+                        foreignField: "exam",
+                        as: "takeExams"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$takeExams",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                { $group: { _id: { id: '$takeExams.exam', name: '$exams.name' }, count: { $sum: 1 } } }
+            ]
+            )
+            console.log(listExam)
 
+            if (listExam) {
+                const result = listExam.map(item=>{
+                    let {id,name} = item._id
+                    return {id,name,count:item.count}
+                })
+                return res.status(200).json(result)
+            }
+            return res.status(400).json({
+                message: "Không tìm thấy khoá học",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tạo khoá học" })
+        }
+    },
+    addStudentIntoCourse: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const { studentId, courseId } = req.body
+            console.log(new mongoose.Types.ObjectId(courseId));
+
+            const teacher = await User.findOne({ username })
+            const student = await User.findById(studentId)
+            if (!teacher || !student) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+
+            let course = await Course.findOne({ _id: new mongoose.Types.ObjectId(courseId), creatorId: teacher.id })
+            if (!course)
+                return res.status(400).json({
+                    message: "Không tìm thấy khoá học",
+                })
+
+            if (!course.students.find(item => item.toString() === student.id.toString())) {//nếu chưa có sinh viên trên
+                course.students.push(student.id)
+            }
+            else {
+                return res.status(400).json({ message: "Học viên đã thuộc lớp học." })
+            }
+            await course.save()
+            return res.status(200).json({
+                message: "Thêm học viên thành công",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi thêm học viên" })
+        }
+    },
+
+    deleteStudentInCourse: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const { studentId, courseId } = req.query
+
+            const teacher = await User.findOne({ username })
+            const student = await User.findById(studentId)
+            if (!teacher || !student) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+
+            let course = await Course.findOne({ _id: new mongoose.Types.ObjectId(courseId), creatorId: teacher.id })
+            if (!course)
+                return res.status(400).json({
+                    message: "Không tìm thấy khoá học",
+                })
+
+            if (course.students.find(item => item.toString() === student.id.toString())) {//nếu chưa có sinh viên trên
+                course.students = course.students.filter(item => item.toString() !== student.id.toString())
+            }
+            else {
+                return res.status(400).json({ message: "Học viên không thuộc lớp học." })
+            }
+            await course.save()
+            return res.status(200).json({
+                message: "Xoá học viên thành công",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi thêm học viên" })
+        }
+    },
 
 
     UpdateCourse: async (req, res) => {//nhớ sửa

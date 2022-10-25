@@ -12,6 +12,7 @@ const session = require('express-session');
 const morgan = require('morgan');
 const fileupload = require("express-fileupload");
 const path = require('path');
+const TakeExam = require('./models/TakeExam');
 
 dotenv.config()
 
@@ -85,7 +86,7 @@ app.use(function (req, res, next) {
 });
 
 mongoose.connect(URI)
-  .then(() => {
+  .then(async() => {
     console.log('Connected')
   }).catch(err => {
     console.log('err', err)

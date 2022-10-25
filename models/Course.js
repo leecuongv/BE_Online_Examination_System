@@ -42,7 +42,7 @@ const courseSchema = mongoose.Schema({
       ref: COLLECTION.TEST
     },
   ],
-  users: [
+  students: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: COLLECTION.USER

@@ -1,5 +1,5 @@
-const mongoose =require("mongoose");
-const { DEFAULT_VALUES, STATUS, TYPE_ACCOUNT } =require("../utils/enum");
+const mongoose = require("mongoose");
+const { DEFAULT_VALUES, STATUS, TYPE_ACCOUNT } = require("../utils/enum");
 const schema = new mongoose.Schema({
     username: {
         type: String,
@@ -85,7 +85,7 @@ const schema = new mongoose.Schema({
         default: false
     },
     gender: {
-        type:String,
+        type: String,
     },
     phone: {
         type: String
@@ -102,12 +102,12 @@ const schema = new mongoose.Schema({
 );
 
 schema.method("toJSON", function () {
-    const { __v, ...object } = this.toObject();
-    const { _id: id, ...result } = object;
-    return { ...result, id };
+    const { __v, _id, ...object } = this.toObject();
+    object.id = _id;
+    return object;
 });
 
-schema.index({fullname: 'text', email: 'text'});
+schema.index({ fullname: 'text', email: 'text' });
 
 schema.pre('deleteOne', { query: true, document: false }, async function (next) {
     // 'this' is the client being removed. Provide callbacks here if you want
@@ -120,4 +120,4 @@ schema.pre('deleteOne', { query: true, document: false }, async function (next) 
 });
 
 const User = mongoose.model('User', schema);
-module.exports = {User}
+module.exports = { User }
