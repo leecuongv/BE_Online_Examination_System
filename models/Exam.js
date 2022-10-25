@@ -71,7 +71,7 @@ const examSchema = mongoose.Schema(
       default: 0,
     },
     typeofPoint: {
-      type: Number,
+      type: String,
       default: TYPEOFPOINT.MAX,
     },
     maxTimes: {
