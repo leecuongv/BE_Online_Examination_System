@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.post('/create-exam', verifyToken, ExamController.CreateExam);
 
-router.put('/', ExamController.UpdateExam);
+//router.put('/', ExamController.UpdateExam);
 
-router.get('', ExamController.getExamBySlug);
+router.get('/get-exambyslug', verifyToken, ExamController.getExamBySlug);
 
 module.exports = router;

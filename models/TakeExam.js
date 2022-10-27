@@ -34,10 +34,10 @@ const takeExamSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    default:STATUS.NOT_SUBMITTED
+    default: STATUS.NOT_SUBMITTED
   },
 },
-{ timestamps: true });
+  { timestamps: true });
 
 takeExamSchema.plugin(
   autoinc.autoIncrement,

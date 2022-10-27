@@ -5,53 +5,54 @@ const User = require("../models/User")
 
 const ExamController = {
     CreateExam: async (req, res) => {
-        try 
-        {
-                const username = req.user.sub
-                const { name, description, courseId, numberOfQuestion, viewPoint, viewAnswer, 
-                    attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime} = req.body
-                if (!username) return res.status(400).json({ message: "Không có người dùng" })
-                const user = await User.findOne({ username })
-                if (!user) return res.status(400).json({ message: "Không có người dùng" })
+        try {
+            const username = req.user.sub
+            const { name, description, courseId, numberOfQuestion, viewPoint, viewAnswer,
+                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
-                const course = await Course.findOne({_id:mongoose.Types.ObjectId(courseId), creatorId:user.id})
-                if(!course) return res.status(400).json({message:"Thông tin không hợp lệ(không tìm thấy thông tin khóa học hoặc người tạo khóa học"})
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+            const user = await User.findOne({ username })
+
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+
+            const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
+            if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ(không tìm thấy thông tin khóa học hoặc người tạo khóa học" })
 
 
-                if (startTime === null || endTime === null
-                    || new Date(startTime).toLocaleString() === "Invalid Date"
-                    || new Date(endTime).toLocaleString() === "Invalid Date") {
-                    return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
-                
-        }
-            
+            if (startTime === null || endTime === null
+                || new Date(startTime).toLocaleString() === "Invalid Date"
+                || new Date(endTime).toLocaleString() === "Invalid Date") {
+                return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
+
+            }
+
             const newExam = await new Exam({
-                
-                name, 
-                description, 
-                creatorId: user.id,  
-                numberOfQuestion, 
-                viewPoint, 
-                viewAnswer, 
-                attemptsAllowed, 
-                maxPoints, 
-                typeofPoint, 
-                maxTimes, 
-                tracking, 
-                shuffle, 
+
+                name,
+                description,
+                creatorId: user.id,
+                numberOfQuestion,
+                viewPoint,
+                viewAnswer,
+                attemptsAllowed,
+                maxPoints,
+                typeofPoint,
+                maxTimes,
+                tracking,
+                shuffle,
                 status,
-                startTime:new Date(startTime),
+                startTime: new Date(startTime),
                 endTime: new Date(endTime)
             })
             let error = newExam.validateSync()
-            if (error){
+            if (error) {
                 console.log(error)
                 return res.status(400).json({
                     message: "Tạo bài thi thất bại!"
                 })
             }
             const exam = await newExam.save();
-            
+
             course.exams.push(exam.id);
             await course.save()
 
@@ -65,15 +66,20 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi tạo bài thi" })
         }
     },
+
     getExamBySlug: async (req, res) => {
         try {
+            const username = req.user.sub
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
             const { slug } = req.query
             console.log(slug)
-            const exam = await Exam.findOne({ slug: slug })
+            const exam = await Exam.findOne({ slug, creatorId: user.id }).populate('questions')
             console.log(exam)
             if (exam) {
-                const { name, description, questions, image, status } = exam._doc
-                return res.status(200).json({ name, description, questions, image, status })
+
+                return res.status(200).json(exam._doc)
             }
 
             return res.status(400).json({
