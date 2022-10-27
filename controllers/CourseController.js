@@ -1,4 +1,4 @@
-const  Course = require("../models/Course")
+const Course = require("../models/Course")
 const User = require("../models/User")
 const mongoose = require("mongoose")
 const generator = require("generate-password")
@@ -230,7 +230,7 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            
+
             const listExam = await Course.aggregate([
                 {
                     $match: { _id: new mongoose.Types.ObjectId(courseId) }
@@ -270,9 +270,9 @@ const CourseController = {
             console.log(listExam)
 
             if (listExam) {
-                const result = listExam.map(item=>{
-                    let {id,name} = item._id
-                    return {id,name,count:item.count}
+                const result = listExam.map(item => {
+                    let { id, name } = item._id
+                    return { id, name, count: item.count }
                 })
                 return res.status(200).json(result)
             }
