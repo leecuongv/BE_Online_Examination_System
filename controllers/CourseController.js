@@ -101,8 +101,8 @@ const CourseController = {
 
             const course = await Course.findOne({ courseId })
             if (course) {
-                const { _id, name, description, exams, image, status } = course._doc
-                return res.status(200).json({ id: _id, name, description, exams, image, status })
+                const { _id, courseId, name, description, exams, image, status } = course._doc
+                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status })
             }
 
             return res.status(400).json({
@@ -176,7 +176,7 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const course = await Course.findById(courseId)
+            const course = await Course.findOne({ courseId })
                 .populate({ path: 'students', select: { id: 1, fullname: 1, avatar: 1, email: 1 } })
 
             let listStudent = course.students
@@ -230,10 +230,11 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
+            console.log(courseId)
 
             const listExam = await Course.aggregate([
                 {
-                    $match: { _id: new mongoose.Types.ObjectId(courseId) }
+                    $match: { courseId: Number(courseId) }
                 },
                 {
                     $lookup:
@@ -264,17 +265,39 @@ const CourseController = {
                         preserveNullAndEmptyArrays: true
                     }
                 },
-                { $group: { _id: { id: '$takeExams.exam', name: '$exams.name' }, count: { $sum: 1 } } }
+                {
+                    $group: {
+                        _id: '$exams._id', "doc": { "$first": "$$ROOT.exams" }
+                        , count: {
+                            $sum: {
+                                $cond: [{ $ifNull: ['$takeExams', false] }, 1, 0]
+                            }
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        id: "$doc._id",
+                        name: "$doc.name",
+                        count: "$count",
+                        slug: "$doc.slug",
+                        status:'$doc.status',
+                        numberofQuestions:"$doc.numberofQuestions",
+                    startTime:'$doc.startTime',
+                    endTime:'$doc.endTime',
+                    maxTimes:'$doc.maxTimes'
+                    }
+                }
             ]
             )
             console.log(listExam)
 
             if (listExam) {
-                const result = listExam.map(item => {
-                    let { id, name } = item._id
-                    return { id, name, count: item.count }
-                })
-                return res.status(200).json(result)
+                // const result = listExam.map(item => {
+                //     let { id, name } = item
+                //     return { id, name, count: item.count }
+                // })
+                return res.status(200).json(listExam)
             }
             return res.status(400).json({
                 message: "Không tìm thấy khoá học",

@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const { UserRoute, AuthRoute, SocialRoutes, CourseRoutes, 
-  BillRoute, examRoute, questionRoute, takeExamRoutes } = require('./routers');
+  BillRoute, examRoutes, questionRoutes, TakeExamRoutes } = require('./routers');
 const helmet= require("helmet");
 const passport = require('passport');
 const rateLimit = require('express-rate-limit');
@@ -115,6 +115,6 @@ app.use('/api/user', UserRoute)
 app.use('/api/social', SocialRoutes)
 app.use('/api/course', CourseRoutes)
 app.use('/api/payment', BillRoute)
-app.use('/api/exam', examRoute)
-app.use("/api/question", questionRoute)
-app.use("/api/takeExam", takeExamRoutes)
+app.use('/api/exam', examRoutes)
+app.use("/api/question", questionRoutes)
+app.use("/api/takeexam", TakeExamRoutes)

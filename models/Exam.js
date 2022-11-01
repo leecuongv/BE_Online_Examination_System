@@ -49,17 +49,17 @@ const examSchema = mongoose.Schema(
     },
     numberofQuestions: {
       type: Number,
-      require:true,
+      require: true,
       default: 0,
     },
     viewPoint: {
       type: String,
-      require:true,
+      require: true,
       default: VIEWPOINT.NO,
     },
     viewAnswer: {
       type: String,
-      require:true,
+      require: true,
       default: VIEWANSWER.NO,
     },
     attemptsAllowed: {
@@ -76,25 +76,36 @@ const examSchema = mongoose.Schema(
     },
     maxTimes: {
       type: Number,
-      require:true,
+      require: true,
       default: 1
     },
     tracking: {
-      type:Boolean,
-      default:true
+      type: Boolean,
+      default: true
     },
     shuffle: {
-      type:Boolean,
-      default:true
+      type: Boolean,
+      default: true
     },
     status: {
       type: String,
       default: STATUS.PUBLIC,
-    }, 
+    },
   },
-  { timestamps: true }
-  );
+  { timestamps: true ,
+    toObject: {
+      transform: function (doc, ret) {
+        ret.id=ret._id
+        delete ret._id;
+      }
+    }},
+  
+);
 
+examSchema.method("toJSON", function () {
+  const { __v, ...object } = this.toObject();
+  return object;
+});
 examSchema.plugin(
   autoinc.autoIncrement,
   {
@@ -102,11 +113,5 @@ examSchema.plugin(
     field: "slug"
   }
 );
-
-examSchema.method("toJSON", function () {
-  const { __v, ...object } = this.toObject();
-  const { _id: id, ...result } = object;
-  return { ...result, id };
-});
 
 module.exports = mongoose.model(COLLECTION.EXAM, examSchema);

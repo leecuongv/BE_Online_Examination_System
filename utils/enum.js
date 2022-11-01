@@ -41,6 +41,7 @@ const STATUS = {
     OK: 'ok',
     ARCHIVED: 'archived',
     NOT_SUBMITTED: 'not submitted',
+    SUBMITTED: 'submitted',
     PASSED: 'passed',
     FAILED: 'failed',
     SUCCESS: 'success',

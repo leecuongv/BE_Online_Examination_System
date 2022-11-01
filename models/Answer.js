@@ -4,47 +4,27 @@ const { formatTimeUTC } =require("../utils/Timezone")
 const { COLLECTION } =require("../utils/enum")
 
 const answerSchema = mongoose.Schema({
-  answerId: {
-    type: Number,
-    require: true,
-  },
-  name: {
-    type: String,
-    require: true,
-    default: 0,
-  },
   content: {
     type: String,
     require: true,
-    default: null,
+    default: '',
   },
-  _status: {
-    type: String,
-    default: "",
+  isCorrect: {
+    type: Boolean,
+    default: false,
   },
-  createdAt: {
-    type: Date,
-    default: new Date()//formatTimeUTC,
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()// formatTimeUTC,
-  },
-});
-
-answerSchema.plugin(
-  autoinc.autoIncrement,
-  {
-    model: COLLECTION.ANSWER,
-    field: 'answerId'
-  }
-);
+},
+{ timestamps: true ,
+  toObject: {
+    transform: function (doc, ret) {
+      ret.id=ret._id
+      delete ret._id;
+    }
+  },});
 
 answerSchema.method("toJSON", function () {
   const { __v, ...object } = this.toObject();
-  const { _id: id, ...result } = object;
-  return { ...result, id };
+  return object;
 });
 
 const Answer = mongoose.model(COLLECTION.ANSWER, answerSchema);

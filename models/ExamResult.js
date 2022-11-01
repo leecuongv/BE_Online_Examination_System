@@ -40,7 +40,13 @@ const examResultSchema = mongoose.Schema({
         }
     ],
 },
-{ timestamps: true }
+{ timestamps: true,
+    toObject: {
+        transform: function (doc, ret) {
+          ret.id=ret._id
+          
+        }
+      } }
 );
 
 

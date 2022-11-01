@@ -1,10 +1,11 @@
-const mongoose =require("mongoose");
-const autoinc =require("mongoose-plugin-autoinc");
-const { formatTimeUTC } =require("../utils/Timezone");
-const { COLLECTION } =require("../utils/enum");
+const mongoose = require("mongoose");
+const autoinc = require("mongoose-plugin-autoinc");
+const { formatTimeUTC } = require("../utils/Timezone");
+const { COLLECTION } = require("../utils/enum");
+const Answer = require("./Answer");
 
 const questionSchema = mongoose.Schema({
-   type: {
+  type: {
     type: String,
     require: true,
     default: 'single',
@@ -21,40 +22,49 @@ const questionSchema = mongoose.Schema({
       default: null,
     },
   ],
-  correctAnswers: [
-    {
-      type: String,
-      default: null,
-    },
-  ],
-  embededMedia: {
+  image: {
     type: String,
-    default: null,
-  },
-  _status: {
-    type: String,
+    default: "",
   },
   maxPoints: {
     type: Number,
-  },
-  createdAt: {
-    type: Date,
-    default: new Date()//formatTimeUTC,
-  },
-  updatedAt: {
-    type: Date,
-    default: new Date()//formatTimeUTC
-  },
-});
-
+  }
+},
+  {
+    timestamps: true, toObject: {
+      transform: function (doc, ret) {
+        ret.id = ret._id
+       // delete ret._id;
+      }
+    }
+  });
 
 
 questionSchema.method("toJSON", function () {
   const { __v, ...object } = this.toObject();
-  const { _id: id, ...result } = object;
-  return { ...result, id };
+  return object;
 });
+questionSchema.pre('deleteOne', { query: true, document: true}, async function (next) {
+  // 'this' is the client being removed. Provide callbacks here if you want
+  // to be notified of the calls' result.
+  try {
+    //let answers = this.getQuery()['anwsers'];
+    const answers = this.answers
+    answers.forEach(async(item)=>{
+      await Answer.findByIdAndDelete(item)
+    })
+    // await Reading.deleteMany({ userId: id })
+    // await Novel.deleteMany({ nguoidangtruyen: id })
+  }
+  catch(err) {
+console.log(err)
+  }
+  finally {
+    next();
+  }
 
+
+});
 const Question = mongoose.model(COLLECTION.QUESTION, questionSchema);
 
 module.exports = Question

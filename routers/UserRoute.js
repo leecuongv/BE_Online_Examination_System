@@ -11,8 +11,8 @@ router.put('/update-avatar',verifyToken, UserController.updateAvatar);
 router.put('/reset-avatar',verifyToken, UserController.resetAvatar);
 
 router.put('/change-password',verifyToken, UserController.updatePassword);
-
-
+router.put('/update-device-token',verifyToken, UserController.updateDeviceToken);
+router.get('/test', UserController.testNotify);
 
 router.put('/updateroles',verifyTokenAdmin,UserController.updateRoles)
 

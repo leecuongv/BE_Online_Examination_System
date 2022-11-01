@@ -8,10 +8,10 @@ const  Bill  = require('../models/Bill')
 const mongoose  = require('mongoose')
 const { STATUS } = require('../utils/enum')
 dotenv.config()
-const frontendUrl = 'http://localhost:3006/'
-const backendUrl = 'http://localhost:5000/'
-// const frontendUrl = 'https://oes.vercel.app/'
-// const backendUrl = 'https://be-oes.vercel.app/'
+// const frontendUrl = 'http://localhost:3006/'
+// const backendUrl = 'http://localhost:5000/'
+const frontendUrl = 'https://oes.vercel.app/'
+const backendUrl = 'https://be-oes.vercel.app/'
 const BillController = {
     createPaymentMomo: async (req, res) => {
         try {
@@ -263,7 +263,7 @@ const BillController = {
                 console.log(rspCode);
                 if(rspCode==='00')//giao dich thanh cong
                 {
-                    const bill = await Bill.findOneAndUpdate({id:mongoose.Types.ObjectId(orderId)}
+                    const bill = await Bill.findOneAndUpdate({_id:mongoose.Types.ObjectId(orderId)}
                     ,{status:STATUS.SUCCESS,transactionId:vnp_Params['vnp_TransactionNo']}
                     ,{new:true})
                     const user = await User.findByIdAndUpdate(bill.creatorId,{premium:true})
