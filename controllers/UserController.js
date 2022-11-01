@@ -11,6 +11,7 @@ cloudinary.config({
 
 const bcrypt =require('bcrypt')
 const { DEFAULT_VALUES } =require('../utils/enum')
+const { sendNotificationToClient } = require('../services/firebase.js')
 const UserController = {
     getInfo: async (req, res) => {
         try {
@@ -114,6 +115,23 @@ const UserController = {
             return res.status(400).json({ message: "Lỗi cập nhật tài khoản" })
         }
     },
+    updateDeviceToken: async (req, res) => {
+        try {
+            const username = req.user.sub
+            const deviceToken = req.body.deviceToken
+            try{
+                await User.updateOne({username},{deviceToken},{strict:false})
+                return res.status(200).json({ message: "Cập nhật device token thành công"})
+            }
+            catch(error){
+                return res.status(400).json({ message: "Cập nhật device token không thành công" })
+            }
+
+        } catch (error) {
+            console.log(error)
+            return res.status(400).json({ message: "Lỗi cập nhật tài khoản" })
+        }
+    },
     updatePassword: async (req, res) => {
         try {
             const username = req.user.sub
@@ -182,6 +200,19 @@ const UserController = {
             if (deleteUser)
                 return res.status(200).json(ResponseData(200, { message: "Xoá thành công" }))
             return res.status(400).json(ResponseDetail(400, "Xoá thất bại"))
+        }
+        catch (error) {
+            console.log(error)
+            return res.status(500).json(ResponseDetail(500, { message: "Lỗi cập nhật quyền tài khoản" }))
+        }
+    },
+    testNotify: async (req, res) => {
+        try {
+            const user = await User.findOne({username:'tranduy1'})
+            sendNotificationToClient([user.deviceToken],{
+                title:"Thông báo mới",
+                body:"Test"
+            })
         }
         catch (error) {
             console.log(error)

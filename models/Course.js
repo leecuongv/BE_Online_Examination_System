@@ -60,7 +60,13 @@ const courseSchema = mongoose.Schema({
   },
 
 },
-  { timestamps: true }
+  { timestamps: true ,
+    toObject: {
+      transform: function (doc, ret) {
+        ret.id=ret._id
+        //delete ret._id;
+      }
+    }}
 );
 
 courseSchema.plugin(
@@ -72,9 +78,9 @@ courseSchema.plugin(
 );
 
 courseSchema.method("toJSON", function () {
-  const { __v, ...object } = this.toObject();
-  const { _id: id, ...result } = object;
-  return { ...result, id };
+  const { __v, _id, ...object } = this.toObject();
+  object.id = _id;
+  return object;
 });
 
 const Course = mongoose.model(COLLECTION.COURSE, courseSchema);
