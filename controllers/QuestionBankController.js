@@ -1,4 +1,4 @@
-const QuestionBank= require("../models/QuestionBank")
+const QuestionBank = require("../models/QuestionBank")
 const User = require("../models/User")
 const mongoose = require("mongoose")
 const generator = require("generate-password")
@@ -6,7 +6,8 @@ const { ROLES, STATUS } = require("../utils/enum")
 const cloudinary = require('cloudinary').v2
 const dotenv = require('dotenv')
 const TakeExam = require("../models/TakeExam")
-const QuestionBank = require("../models/QuestionBank")
+const Question = require("../models/Question")
+const Answer = require("../models/Answer")
 dotenv.config()
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -16,158 +17,156 @@ cloudinary.config({
 const QuestionBankController = {
     CreateQuestionBank: async (req, res) => {
         try {
-            const { name,  description} = req.body
+            const { name, description } = req.body
             const username = req.user.sub
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
-            const newQuestionBank = await new QuestionBank({
+            const newQuestionBank = new QuestionBank({
                 name,
                 description,
                 creatorId: user.id,
-                questions:[]
+                questions: []
             });
             let error = newQuestionBank.validateSync();
             if (error)
                 return res.status(400).json({
-                    message: "Tạo khoá học không thành công"
+                    message: "Tạo ngân hàng câu hỏi không thành công"
                 })
 
             const questionBank = await newQuestionBank.save();
             return res.status(200).json({
-                message: "Tạo khoá học thành công",
+                message: "Tạo ngân hàng câu hỏi thành công",
                 questionBankId: questionBank._doc.questionBankId
             })
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Lỗi tạo khoá học" })
+            res.status(500).json({ message: "Lỗi tạo ngân hàng câu hỏi" })
         }
     },
     getQuestionBankBySlug: async (req, res) => {
         try {
             const { slug } = req.query
             console.log(slug)
-            const questionBank = await CQuestionBankfindOne({ slug: slug })
+            const questionBank = await QuestionBank.findOne({ slug: slug })
             console.log(questionBank)
             if (questionBank) {
                 const { name, description, questions, image, status } = questionBank._doc
-                return res.status(200).json({ name, description, exams, image, status })
+                return res.status(200).json({ name, description, image, status })
             }
 
             return res.status(400).json({
-                message: "Không tìm thấy khoá học",
+                message: "Không tìm thấy ngân hàng câu hỏi",
             })
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Lỗi tạo khoá học" })
+            res.status(500).json({ message: "Lỗi tạo ngân hàng câu hỏi" })
+        }
+    },
+    getListQuestionBankByTeacher: async (req, res) => {
+        try {
+            const username = req.user.sub
+
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có tài khoản" })
+
+            const questionBanks = await QuestionBank.find({ creatorId: user.id })
+
+            if (questionBanks) {
+                return res.status(200).json(questionBanks)
+            }
+
+            return res.status(400).json({
+                message: "Không tìm thấy ngân hàng câu hỏi",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tạo ngân hàng câu hỏi" })
         }
     },
     getListQuestionOfQuestionBank: async (req, res) => {
         try {
             //Lấy cái parameter
             const username = req.user?.sub
-            const questionBankId = req.query.questionBankId
+            const slug = req.query.slug
             const start = new Date().getTime()
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            console.log(questionBankId)
 
-            const listQuestion = await QuestionBank.aggregate([
-                {
-                    $match: { questionBankId: Number(questionBankId) }
-                },
-                {
-                    $lookup:
-                    {
-                        from: "questions",
-                        localField: "questions",
-                        foreignField: "_id",
-                        as: "questions"
+            const listQuestion = await QuestionBank.findOne({ slug })
+                .populate({
+                    path: 'questions',
+                    populate: {
+                        path: 'answers'
                     }
-                },
-                {
-                    $unwind: {
-                        path: "$questions",
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "take_questions",
-                        localField: "questions._id",
-                        foreignField: "exam",
-                        as: "takeExams"
-                    }
-                },
-                {
-                    $unwind: {
-                        path: "$takeExams",
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $group: {
-                        _id: '$questions._id', "doc": { "$first": "$$ROOT.questions" }
-                        , count: {
-                            $sum: {
-                                $cond: [{ $ifNull: ['$takeExams', false] }, 1, 0]
-                            }
-                        }
-                    }
-                },
-                {
-                    $project: {
-                        id: "$doc._id",
-                        name: "$doc.name",
-                        count: "$count",
-                        slug: "$doc.slug",
-                        status:'$doc.status',
-                        numberofQuestions:"$doc.numberofQuestions",
-                    startTime:'$doc.startTime',
-                    endTime:'$doc.endTime',
-                    maxTimes:'$doc.maxTimes'
-                    }
-                }
-            ]
-            )
-            console.log(listExam)
+                })
 
-            if (listExam) {
+            if (listQuestion) {
                 // const result = listExam.map(item => {
                 //     let { id, name } = item
                 //     return { id, name, count: item.count }
                 // })
-                return res.status(200).json(listExam)
+                return res.status(200).json(listQuestion)
             }
             return res.status(400).json({
-                message: "Không tìm thấy khoá học",
+                message: "Không tìm thấy ngân hàng câu hỏi",
             })
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Lỗi tạo khoá học" })
+            res.status(500).json({ message: "Lỗi tạo ngân hàng câu hỏi" })
+        }
+    },
+    getListQuestionByListQB: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const arrSlug = eval(req.body.arrSlug)
+            const start = new Date().getTime()
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+
+            let listQuestion = await QuestionBank.find({ slug: { $in: arrSlug } })
+                .populate({
+                    path: 'questions',
+                    populate: {
+                        path: 'answers'
+                    }
+                })
+
+            listQuestion = listQuestion.reduce((pre, element) => [...pre, ...element.questions], [])
+
+            if (listQuestion) {
+                // const result = listExam.map(item => {
+                //     let { id, name } = item
+                //     return { id, name, count: item.count }
+                // })
+                return res.status(200).json(listQuestion)
+            }
+            return res.status(400).json({
+                message: "Không tìm thấy ngân hàng câu hỏi",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tạo ngân hàng câu hỏi" })
         }
     },
     addQuestionIntoQuestionBank: async (req, res) => {
         try {
             //Lấy cái parameter
             const username = req.user?.sub
-            const { questionId, questionBankId } = req.body
-            console.log(new mongoose.Types.ObjectId(questionBankId));
+            const { questionBankId, type, content, maxPoints, answers, image } = req.body
 
             const user = await User.findOne({ username })
-            
-            if (!user) {
-                return res.status(400).json({ message: "Tài khoản không tồn tại" })
-            }
-            const question = await Question.findById(questionId)
-            if(!question){
-                return res.status(400).json({ message: "Câu hỏi không tồn tại" })
-            }
+            if (!user) return res.status(400).json({ message: "Không có người dùng!" })
 
             let questionBank = await QuestionBank.findOne({ _id: new mongoose.Types.ObjectId(questionBankId), creatorId: user.id })
             if (!questionBank)
@@ -175,12 +174,33 @@ const QuestionBankController = {
                     message: "Không tìm thấy ngân hàng câu hỏi",
                 })
 
-            if (!questionBank.questions.find(item => item.toString() === question.id.toString())) {//nếu chưa có sinh viên trên
-                questionBank.questions.push(question.id)
+            const newQuestion = new Question({
+                type,
+                content,
+                maxPoints,
+                answers: [],
+                image
+            })
+            let error = newQuestion.validateSync()
+            if (error) {
+                console.log(error)
+                return res.status(400).json({
+                    message: "Tạo câu hỏi thất bại!"
+                })
             }
-            else {
-                return res.status(400).json({ message: "Câu hỏi đã có sẵn trong ngân hàng câu hỏi." })
-            }
+
+            await Promise.all(answers.map(async (element) => {
+                const answer = new Answer({
+                    content: element.content || "",
+                    isCorrect: element.isCorrect || false
+                })
+                await answer.save()
+                newQuestion.answers.push(answer.id)
+            }))
+
+            console.log(await (await newQuestion.save()).populate('answers'))
+            questionBank.questions.push(newQuestion.id)
+
             await questionBank.save()
             return res.status(200).json({
                 message: "Thêm câu hỏi thành công",
@@ -197,13 +217,13 @@ const QuestionBankController = {
             //Lấy cái parameter
             const username = req.user?.sub
             const { questionId, questionBankId } = req.query
-            
+
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
             const question = await Question.findById(questionId)
-            
-            if(!question){
+
+            if (!question) {
                 return res.status(400).json({ message: "Câu hỏi không tồn tại" })
             }
             const user = await User.findOne({ username })
@@ -245,18 +265,45 @@ const QuestionBankController = {
             let error = newQuestionBank.validateSync();
             if (error)
                 return res.status(400).json({
-                    message: "Tạo khoá học không thành công. Vui lòng thử lại!"
+                    message: "Tạo ngân hàng câu hỏi không thành công. Vui lòng thử lại!"
                 })
             const questionBank = await newQuestionBank.save();
 
             return res.status(200).json({
-                message: "Tạo khoá học thành công",
+                message: "Tạo ngân hàng câu hỏi thành công",
                 slug: questionBank._doc.questionBankId
             })
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Lỗi tạo khoá học" })
+            res.status(500).json({ message: "Lỗi tạo ngân hàng câu hỏi" })
+        }
+    },
+
+    DeleteQuestionBank: async (req, res) => {
+        try {
+            const { questionBankId } = req.query
+            const username = req.user.sub
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+
+            const questionBank = await QuestionBank.findOne({ _id: mongoose.Types.ObjectId(questionBankId) })
+            if (!questionBank) return res.status(400).json({ message: 'Không tồn tại ngân hàng câu hỏi' })
+
+            const deleteQuestionBank = await questionBank.deleteOne({ _id: questionBankId })
+            if (deleteQuestionBank) {
+                return res.status(200).json({
+                    message: "Xoá ngân hàng câu hỏi thành công!"
+                })
+            }
+            return res.status(400).json({
+                message: "Xoá ngân hàng câu hỏi không thành công!"
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi xóa ngân hàng câu hỏi!" })
         }
     },
 }

@@ -5,6 +5,17 @@ const CourseRoutes = require('./CourseRoutes');
 const BillRoute = require('./BillRoute');
 const examRoutes = require("./examRoutes");
 const questionRoutes = require("./questionRoutes")
-const TakeExamRoutes = require("./TakeExamRoutes") 
+const TakeExamRoutes = require("./TakeExamRoutes")
+const QuestionBankRoutes = require("./QuestionBankRoutes")  
 
-module.exports = { AuthRoute, UserRoute, SocialRoutes, CourseRoutes, BillRoute, examRoutes,questionRoutes,TakeExamRoutes }
+module.exports = { 
+    AuthRoute, 
+    UserRoute, 
+    SocialRoutes, 
+    CourseRoutes, 
+    BillRoute, 
+    examRoutes,
+    questionRoutes,
+    TakeExamRoutes,
+    QuestionBankRoutes
+ }

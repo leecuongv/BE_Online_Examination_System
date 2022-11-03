@@ -19,7 +19,11 @@ const questionBankSchema = mongoose.Schema({
     questions:[{
         type: mongoose.Schema.Types.ObjectId,
       ref: COLLECTION.QUESTION, 
-    }]
+    }],
+    slug:{
+      type: Number,
+
+    }
 },
 { timestamps: true ,
   toObject: {
@@ -33,6 +37,13 @@ questionBankSchema.method("toJSON", function () {
   const { __v, ...object } = this.toObject();
   return object;
 });
+questionBankSchema.plugin(
+  autoinc.autoIncrement,
+  {
+    model: COLLECTION.QUESTIONBANK,
+    field: "slug"
+  }
+)
 
 const QuestionBank = mongoose.model(COLLECTION.QUESTIONBANK, questionBankSchema);
 module.exports = QuestionBank

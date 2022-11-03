@@ -17,6 +17,7 @@ const COLLECTION = {
     EXAMRESULT: "Exam_result",
     EXAM: "Exam",
     USER: "User",
+    QUESTIONBANK: "Question_bank"
   };
 
 const TYPEOFPOINT = {
