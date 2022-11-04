@@ -14,7 +14,7 @@ const QuestionController = {
         try {
             let start = new Date()
             const username = req.user.sub
-            const { examId, type, content, maxPoint, answers, image } = req.body
+            const { examId, type, content, maxPoints, answers, image } = req.body
             if (!username) return res.status(400).json({ message: "Không có người dùng!" })
             const user = await User.findOne({ username })
             const exam = await Exam.findOne({ _id: mongoose.Types.ObjectId(examId), creatorId: user._id })
@@ -25,7 +25,7 @@ const QuestionController = {
 
                 type,
                 content,
-                maxPoint,
+                maxPoints,
                 answers:[],
                 image
             })

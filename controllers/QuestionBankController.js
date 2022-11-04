@@ -24,7 +24,8 @@ const QuestionBankController = {
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             
             const existQuestionBank = await QuestionBank.findOne({name: name, creatorId: user._id})
-            if(!existQuestionBank) return res.status(400).json({ message: "Trùng tên với ngân hàng câu hỏi trước đó" })
+            console.log(existQuestionBank);
+            if(existQuestionBank) return res.status(400).json({ message: "Trùng tên với ngân hàng câu hỏi trước đó" })
             const newQuestionBank = new QuestionBank({
                 name,
                 description,
@@ -76,6 +77,7 @@ const QuestionBankController = {
             if (!user) return res.status(400).json({ message: "Không có tài khoản" })
 
             const questionBanks = await QuestionBank.find({ creatorId: user.id })
+            console.log(user.id)
 
             if (questionBanks) {
                 return res.status(200).json(questionBanks)

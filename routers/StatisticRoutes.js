@@ -1,6 +1,6 @@
 const express = require('express')
 const { verifyToken, verifyTokenAdmin } = require("../controllers/middlewareController")
-const { StatisticController } = require('../controllers/StatisticController')
+const { StatisticController } = require('../controllers/StatisticsController')
 const router = express.Router();
 
 router.get('/exam-by-student',verifyToken, StatisticController.getTakeExamByStudent);

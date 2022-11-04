@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const autoinc = require("mongoose-plugin-autoinc");
-const { formatTimeUTC } = require("../utils/Timezone");
 const { COLLECTION } = require("../utils/enum");
 
 const examResultSchema = mongoose.Schema({
@@ -12,7 +11,7 @@ const examResultSchema = mongoose.Schema({
         type: mongoose.SchemaTypes.ObjectId,
         require: true,
         default: null,
-        ref: COLLECTION.TAKETEST,
+        ref: COLLECTION.TAKEEXAM,
     },
     result: [
         {
@@ -56,4 +55,4 @@ examResultSchema.method("toJSON", function () {
     return { ...result, id };
 });
 
-module.exports = mongoose.model(COLLECTION.EXAMRESULT, takeExamLogsSchema);
+module.exports = mongoose.model(COLLECTION.EXAMRESULT, examResultSchema);
