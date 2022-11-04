@@ -248,7 +248,11 @@ const TakeExamController = {
             console.log(error)
             res.status(400).json({ message: "Lỗi làm bài thi" })
         }
+    },
+    getPreviewExam: async(req, res)=>{
+        // TO DO: mai làm
     }
+
 }
 
 module.exports = { TakeExamController }
