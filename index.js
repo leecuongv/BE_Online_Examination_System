@@ -10,8 +10,8 @@ const {
   SocialRoutes, 
   CourseRoutes, 
   BillRoute, 
-  examRoutes, 
-  questionRoutes, 
+  ExamRoutes, 
+  QuestionRoutes, 
   TakeExamRoutes,
   QuestionBankRoutes
  } = require('./routers');
@@ -124,7 +124,7 @@ app.use('/api/user', UserRoute)
 app.use('/api/social', SocialRoutes)
 app.use('/api/course', CourseRoutes)
 app.use('/api/payment', BillRoute)
-app.use('/api/exam', examRoutes)
-app.use("/api/question", questionRoutes)
+app.use('/api/exam', ExamRoutes)
+app.use("/api/question", QuestionRoutes)
 app.use("/api/takeexam", TakeExamRoutes)
 app.use("/api/questionbank", QuestionBankRoutes)
