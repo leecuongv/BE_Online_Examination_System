@@ -9,45 +9,63 @@ const moment = require("moment/moment");
 const ExamResult = require("../models/ExamResult");
 
 const StatisticController = {
-    getTakeExamByStudent: async (takeExam) => {
-        const username = req.user.sub
-        const {examSlug} = req.body
+    getTakeExamByStudent: async (req, res) => {
+        try {
 
-        const user = await User.findOne({username})
-        if(!user) return res.status(200).json({message:"Không có tài khoản"})
-        
-        const exam = await Exam.findOne({slug:examSlug})
-        if(!exam) return res.status(200).json({message:"Không tìm thấy khoá học"}) 
-        let takeExams = await TakeExam.find({user:user.id,exam:exam.id})
+            const username = req.user.sub
+            const { examSlug } = req.query
 
-        let results = takeExams.map(item=>({
-            ...item._doc,
-            maxPoints:exam.maxPoints
-        }))
-        return res.status(200).json(results)
-    },
-    getTakeExamByTeacher: async (req,res) => {
-        const username = req.user.sub
-        const {examSlug} = req.query
+            const user = await User.findOne({ username })
+            if (!user) return res.status(200).json({ message: "Không có tài khoản" })
 
-        const user = await User.findOne({username})
-        if(!user) return res.status(200).json({message:"Không có tài khoản"})
-        
-        const exam = await Exam.findOne({slug:examSlug})
-        if(!exam) return res.status(200).json({message:"Không tìm thấy khoá học"}) 
+            const exam = await Exam.findOne({ slug: examSlug })
+            if (!exam) return res.status(200).json({ message: "Không tìm thấy khoá học" })
+            let takeExams = await TakeExam.find({ user: user.id, exam: exam.id })
 
-        if(exam.creatorId.toString() !== user.id.toString()){//nếu không phải người tạo khoá học thì không trả về kết quả
-            return res.status(403).json({message:"Không có quyền truy cập"})
+            let results = takeExams.map(item => ({
+                ...item._doc,
+                maxPoints: exam.maxPoints
+            }))
+            return res.status(200).json(results)
         }
-        let takeExams = await TakeExam.find({exam:exam.id})
-
-        let results = takeExams.map(item=>({
-            ...item._doc,
-            maxPoints:exam.maxPoints
-        }))
-        return res.status(200).json(results)
+        catch (err) {
+            return res.status(500).json({ message: 'Lỗi thống kê' })
+        }
     },
-    
+    getTakeExamByTeacher: async (req, res) => {
+        try {
+
+            const username = req.user.sub
+            const { examSlug } = req.query
+
+            const user = await User.findOne({ username })
+            if (!user) return res.status(200).json({ message: "Không có tài khoản" })
+
+            const exam = await Exam.findOne({ slug: examSlug })
+            if (!exam) return res.status(200).json({ message: "Không tìm thấy khoá học" })
+
+            if (exam.creatorId.toString() !== user.id.toString()) {//nếu không phải người tạo khoá học thì không trả về kết quả
+                return res.status(403).json({ message: "Không có quyền truy cập" })
+            }
+            let takeExams = await TakeExam.find({ exam: exam.id })
+                .populate({
+                    path:'user',
+                    select:'fullname'
+                })
+
+            let results = takeExams.map(item => ({
+                ...item._doc,
+                name:item.user.fullname,
+                maxPoints: exam.maxPoints
+            }))
+            return res.status(200).json(results)
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: 'Lỗi thống kê' })
+        }
+    },
+
 }
 
 module.exports = { StatisticController }

@@ -13,7 +13,8 @@ const {
   examRoutes, 
   questionRoutes, 
   TakeExamRoutes,
-  QuestionBankRoutes
+  QuestionBankRoutes,
+  StatisticRoutes
  } = require('./routers');
 const helmet= require("helmet");
 const passport = require('passport');
@@ -128,3 +129,4 @@ app.use('/api/exam', examRoutes)
 app.use("/api/question", questionRoutes)
 app.use("/api/takeexam", TakeExamRoutes)
 app.use("/api/questionbank", QuestionBankRoutes)
+app.use("/api/statistic", StatisticRoutes)
