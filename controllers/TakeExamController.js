@@ -78,7 +78,7 @@ const TakeExamController = {
 
       if (!exam) res.status(200).json({ message: "invalid" });
 
-      const takeExam = await TakeExam.find({ user: user.id, examId: exam.id });
+      const takeExam = await TakeExam.find({ userId: user.id, examId: exam.id });
       ///kiểm tra hợp lệ
       if (takeExam.length === 0)
         return res.status(200).json({ message: "checkpin" });
@@ -307,7 +307,7 @@ const TakeExamController = {
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
       const takeExam = await TakeExam.findById(takeExamId).populate('examId')
-      const takeExams = await TakeExam.find({ exam: takeExam.examId.id, user: user.id })
+      const takeExams = await TakeExam.find({ examId: takeExam.examId.id, userId: user.id })
       const index = takeExams.findIndex(item => item.id.toString() === takeExamId)
       if (!takeExam) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
       if (takeExam.examId.viewPoint === 'no')
