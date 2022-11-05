@@ -76,9 +76,9 @@ const ExamController = {
             console.log(slug)
             const exam = await Exam.findOne({ slug, creatorId: user.id })
                 .populate({
-                    path:'questions.question',
-                    populate:{
-                        path:'answers'
+                    path: 'questions.question',
+                    populate: {
+                        path: 'answers'
                     }
                 })
             if (exam) {
@@ -129,7 +129,7 @@ const ExamController = {
     UpdateExam: async (req, res) => {
         try {
             const username = req.user.sub
-            const {id, name, description, courseId, numberOfQuestion, viewPoint, viewAnswer,
+            const { id, name, description, courseId, numberOfQuestion, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -176,8 +176,10 @@ const ExamController = {
             //course.exams.push(exam.id);
             //await course.save()
 
-            exitExam = await Exam.findByIdAndUpdate(id, {name, description, courseId, numberOfQuestion, viewPoint, viewAnswer,
-                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime}, {new: true})
+            exitExam = await Exam.findByIdAndUpdate(id, {
+                name, description, courseId, numberOfQuestion, viewPoint, viewAnswer,
+                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime
+            }, { new: true })
             return res.status(200).json({
                 message: "Tạo bài thi mới thành công",
                 slug: exam._doc.slug
