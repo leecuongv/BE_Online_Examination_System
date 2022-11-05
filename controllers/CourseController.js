@@ -409,6 +409,12 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tạo khoá học" })
         }
     },
+    getCourseFromStudent: async(req, res)=>{
+
+    },
+    getListExamInCourseOfStudent: async(req, res)=>{
+        
+    }
 }
 
 module.exports = { CourseController }

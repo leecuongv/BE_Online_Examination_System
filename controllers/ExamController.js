@@ -190,6 +190,9 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi tạo bài thi" })
         }
     },
+    createQuestionWithQuestionBank: async(req, res)=>{
+        
+    }
 
 
 }

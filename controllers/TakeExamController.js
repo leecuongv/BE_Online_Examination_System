@@ -393,6 +393,9 @@ const TakeExamController = {
     }
 
   },
+  createLogs: async(req, res)=>{
+    
+  }
 };
 
 module.exports = { TakeExamController };
