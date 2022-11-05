@@ -49,7 +49,7 @@ const StatisticController = {
             }
             let takeExams = await TakeExam.find({ examId: exam.id })
                 .populate({
-                    path:'user',
+                    path:'userId',
                     select:'fullname'
                 })
 
