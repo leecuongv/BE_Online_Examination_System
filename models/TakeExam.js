@@ -8,13 +8,13 @@ const takeExamSchema = mongoose.Schema({
     type: Number,
     require: true,
   },
-  exam: {
+  examId: {
     type: mongoose.SchemaTypes.ObjectId,
     require: true,
     default: null,
     ref: COLLECTION.EXAM,
   },
-  user: {
+  userId: {
     type: mongoose.SchemaTypes.ObjectId,
     require: true,
     default: null,

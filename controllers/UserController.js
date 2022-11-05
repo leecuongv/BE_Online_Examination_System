@@ -219,6 +219,7 @@ const UserController = {
             return res.status(500).json(ResponseDetail(500, { message: "Lỗi cập nhật quyền tài khoản" }))
         }
     },
+    
 
 }
 module.exports = {UserController}
