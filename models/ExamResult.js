@@ -7,7 +7,7 @@ const examResultSchema = mongoose.Schema({
         type: Number,
         require: true,
     },
-    takeExam: {
+    takeExamId: {
         type: mongoose.SchemaTypes.ObjectId,
         require: true,
         default: null,
