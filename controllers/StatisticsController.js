@@ -49,20 +49,26 @@ const StatisticController = {
             }
             let takeExams = await TakeExam.find({ examId: exam.id })
                 .populate({
-                    path:'userId',
-                    select:'fullname'
+                    path: 'userId',
+                    //select: 'fullname'
                 })
 
-            let results = takeExams.map(item => ({
-                ...item._doc,
-                name:item.user.fullname,
-                maxPoints: exam.maxPoints
-            }))
+            let results = takeExams.map(item => {
+                let { userId, ...data } = item._doc
+                return {
+                    ...data,
+                    name: userId.fullname,
+                    maxPoints: exam.maxPoints
+                }
+            })
+
+            //results.pop(results.userId)
+            //console.log(results)
             return res.status(200).json(results)
         }
         catch (err) {
             console.log(err)
-            return res.status(500).json({ message: 'Lỗi thống kê' })
+            return res.status(400).json({ message: 'Lỗi thống kê' })
         }
     },
 
