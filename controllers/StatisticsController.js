@@ -62,8 +62,6 @@ const StatisticController = {
                 }
             })
 
-            //results.pop(results.userId)
-            //console.log(results)
             return res.status(200).json(results)
         }
         catch (err) {
