@@ -124,11 +124,11 @@ const TakeExamController = {
     try {
       const username = req.user.sub;
       const { slug, pin } = req.body;
+      const toDay = new Date()
 
       if (!username)
         return res.status(400).json({ message: "Không có người dùng" });
       const user = await User.findOne({ username });
-
       if (!user)
         return res.status(400).json({ message: "Không có người dùng" });
       const exam = await Exam.findOne({ slug })
@@ -168,6 +168,17 @@ const TakeExamController = {
           .status(400)
           .json({ message: "Thí sinh không thuộc bài thi này!" });
 
+      if ((new Date(toDay)) < (new Date(course.startTime)) || (new Date(toDay)) > (new Date(course.endTime))){
+      console.log(toDay)
+      return res.status(400).json({
+          message: "Thời gian thực hiện bài thi không hợp lệ"
+        })}
+      // const takeExams = TakeExam.find({})  
+      // const countTakeExam = takeExam.length - 1;
+      // if (countTakeExam > exam.attemptsAllowed)
+      //   return res.status(400).json({
+      //     message: "Đã quá số lần làm bài"
+      //   })
       const newTakeExam = new TakeExam({
         slug,
         exam: exam.id,
@@ -393,8 +404,8 @@ const TakeExamController = {
     }
 
   },
-  createLogs: async(req, res)=>{
-    
+  createLogs: async (req, res) => {
+
   }
 };
 
