@@ -19,12 +19,17 @@ const ExamController = {
             const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ(không tìm thấy thông tin khóa học hoặc người tạo khóa học" })
 
+
+
             if (startTime === null || endTime === null
                 || new Date(startTime).toLocaleString() === "Invalid Date"
                 || new Date(endTime).toLocaleString() === "Invalid Date") {
                 return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
 
             }
+
+            if ((new Date(startTime)) < (new Date(course.startTime)) || (new Date(endTime)) > (new Date(course.endTime)))
+                return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
 
             const newExam = await new Exam({
 
@@ -300,10 +305,10 @@ const ExamController = {
                         exam.questions.push({ question: newQuestion });
                         n++;
                     }
-                    
+
                     index++;
-                    
-                    if (index===numberOfQuestion)
+
+                    if (index === numberOfQuestion)
                         return res.status(400).json({ message: "Các câu hỏi đã tồn tại trong hệ thống" })
                 }
 
