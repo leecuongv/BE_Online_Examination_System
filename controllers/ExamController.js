@@ -296,35 +296,30 @@ const ExamController = {
             const user = await User.findOne({ username })
 
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
-
-            //const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
-            //if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ(không tìm thấy thông tin khóa học hoặc người tạo khóa học" })
-
-            const exam = await Exam.findById(id)
+            let exitsExam = await Exam.findById(id)
             
-            let exitsExam = exam
+            
             console.log(exitsExam)
-
-            //console.log(exam)
 
             let error = exitsExam.validateSync()
             if (error) {
                 console.log(error)
                 return res.status(400).json({
-                    message: "Tạo bài thi thất bại!"
+                    message: "Xuất bản bài thi thất bại!"
                 })
             }
             const status ="public"
             exitsExam = await Exam.findByIdAndUpdate(id, {status
             }, { new: true })
             return res.status(200).json({
-                message: "Tạo bài thi mới thành công",
+                message: "Xuất bản bài thi thành công",
+
                 slug: exitsExam._doc.slug
             })
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi tạo bài thi" })
+            res.status(400).json({ message: "Lỗi xuất bản bài thi" })
         }
     }
 };
