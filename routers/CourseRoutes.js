@@ -1,6 +1,7 @@
 const express = require('express')
 const { verifyToken, verifyTokenAdmin } = require("../controllers/middlewareController")
-const { CourseController } = require('../controllers/CourseController')
+const { CourseController } = require('../controllers/CourseController');
+// const { UploadController } = require('../controllers/UploadController');
 const router = express.Router();
 
 router.post('',verifyToken, CourseController.CreateCourse);
@@ -19,5 +20,8 @@ router.get('/get-exams',verifyToken, CourseController.getListExamOfCourse);
 
 router.post('/add-student',verifyToken, CourseController.addStudentIntoCourse);
 router.delete('/delete-student',verifyToken, CourseController.deleteStudentInCourse);
+router.post('/update-course',verifyToken, CourseController.UpdateCourse);
+// router.post('/update-file',verifyToken, UploadController.Upload);
+// router.get('/download-file', UploadController.Download);
 
 module.exports = router;

@@ -135,7 +135,7 @@ const ExamController = {
     UpdateExam: async (req, res) => {
         try {
             const username = req.user.sub
-            const { id, name, description, courseId, numberOfQuestion, viewPoint, viewAnswer,
+            const { id, name, description, courseId, numberofQuestions, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -157,7 +157,7 @@ const ExamController = {
                 name,
                 description,
                 creatorId: user.id,
-                numberOfQuestion,
+                numberofQuestions,
                 viewPoint,
                 viewAnswer,
                 attemptsAllowed,
@@ -183,12 +183,12 @@ const ExamController = {
             //await course.save()
 
             exitExam = await Exam.findByIdAndUpdate(id, {
-                name, description, courseId, numberOfQuestion, viewPoint, viewAnswer,
-                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime
+                name, description, numberofQuestions, viewPoint, viewAnswer,
+                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, startTime, endTime
             }, { new: true })
             return res.status(200).json({
                 message: "Tạo bài thi mới thành công",
-                slug: exam._doc.slug
+                slug: exitExam._doc.slug
             })
 
         } catch (error) {
