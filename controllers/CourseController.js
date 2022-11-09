@@ -101,8 +101,8 @@ const CourseController = {
 
             const course = await Course.findOne({ courseId })
             if (course) {
-                const { _id, courseId, name, description, exams, image, status } = course._doc
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status })
+                const { _id, courseId, name, description, exams, image, status,startTime,endTime } = course._doc
+                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status,startTime,endTime })
             }
 
             return res.status(400).json({
@@ -185,15 +185,15 @@ const CourseController = {
                 {
                     $match:
                     {
-                        user: { $in: listStudent },
-                        exam: { $in: listExam }
+                        userId: { $in: listStudent },
+                        examId: { $in: listExam }
                     }
                 },
                 {
-                    $group: { _id: { 'exam': '$exam', 'user': '$user' } }
+                    $group: { _id: { 'examId': '$examId', 'userId': '$userId' } }
                 },
                 {
-                    $group: { _id: '$_id.user', count: { $sum: 1 } }
+                    $group: { _id: '$_id.userId', count: { $sum: 1 } }
                 }
             ])
 
@@ -255,7 +255,7 @@ const CourseController = {
                     $lookup: {
                         from: "take_exams",
                         localField: "exams._id",
-                        foreignField: "exam",
+                        foreignField: "examId",
                         as: "takeExams"
                     }
                 },
@@ -281,11 +281,11 @@ const CourseController = {
                         name: "$doc.name",
                         count: "$count",
                         slug: "$doc.slug",
-                        status:'$doc.status',
-                        numberofQuestions:"$doc.numberofQuestions",
-                    startTime:'$doc.startTime',
-                    endTime:'$doc.endTime',
-                    maxTimes:'$doc.maxTimes'
+                        status: '$doc.status',
+                        numberofQuestions: "$doc.numberofQuestions",
+                        startTime: '$doc.startTime',
+                        endTime: '$doc.endTime',
+                        maxTimes: '$doc.maxTimes'
                     }
                 }
             ]
@@ -382,26 +382,50 @@ const CourseController = {
 
     UpdateCourse: async (req, res) => {//nhớ sửa
         try {
-            const { slug, name, description, image, userId } = req.body
-            const newCourse = await new Course({
-                name,
-                slug,
-                description,
-                email,
-                creatorId: userId
-            });
+            const username = req.user?.sub
+            const { slug, name, description, startTime, endTime, courseId } = req.body
+            const image = req.files?.file
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
 
+            if (startTime === null || endTime === null
+                || new Date(startTime).toLocaleString() === "Invalid Date"
+                || new Date(endTime).toLocaleString() === "Invalid Date") {
+                return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
+            }
+            const course = await Course.findOne({ courseId })
+            
+            let data = {//dữ liệu cần update
+                slug, name, description, startTime, endTime
+            }
 
-            let error = newCourse.validateSync();
-            if (error)
-                return res.status(400).json({
-                    message: "Tạo khoá học không thành công. Vui lòng thử lại!"
-                })
-            const course = await newCourse.save();
+            if (image) {
+                if (image.data.size > 2000000) {
+                    return res.status(400).json({ message: "Ảnh có kích thước quá 2Mb" })
+                }
+                let dataImage = image.data.toString('base64')
+                dataImage = `data:${image.mimetype};base64,${dataImage}`//chuyển sang data uri
+                try {
+                    const upload = await cloudinary.uploader
+                        .upload(dataImage,
+                            {
+                                folder: "course/",
+                                public_id: course.id.toString(),
+                                overwrite:true
+                            })
+                        data.image = upload.secure_url
+                }
+                catch (err) {
+                    console.log(err);
+                }
+                
+            }
 
+            await Course.updateOne({courseId},data);
             return res.status(200).json({
-                message: "Tạo khoá học thành công",
-                slug: course._doc.courseId
+                message: "Cập nhật khoá học thành công",
+                courseId: course._doc.courseId
             })
 
         } catch (error) {
@@ -409,11 +433,11 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tạo khoá học" })
         }
     },
-    getCourseFromStudent: async(req, res)=>{
+    getCourseFromStudent: async (req, res) => {
         
     },
-    getListExamInCourseOfStudent: async(req, res)=>{
-        
+    getListExamInCourseOfStudent: async (req, res) => {
+
     }
 }
 

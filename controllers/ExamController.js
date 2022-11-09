@@ -296,16 +296,10 @@ const ExamController = {
             const user = await User.findOne({ username })
 
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
-
-            //const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
-            //if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ(không tìm thấy thông tin khóa học hoặc người tạo khóa học" })
-
             let exitsExam = await Exam.findById(id)
             
-            //let  = exam
+            
             console.log(exitsExam)
-
-            //console.log(exam)
 
             let error = exitsExam.validateSync()
             if (error) {
@@ -319,6 +313,7 @@ const ExamController = {
             }, { new: true })
             return res.status(200).json({
                 message: "Xuất bản bài thi thành công",
+
                 slug: exitsExam._doc.slug
             })
 

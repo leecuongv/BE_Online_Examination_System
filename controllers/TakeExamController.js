@@ -236,7 +236,7 @@ const TakeExamController = {
         let noAnswerCorrect = question.answers.filter(e => e.isCorrect).length //số đáp án đúng
         let questionClient = answerSheet.find(e => e.question === question.id.toString())
         if (!questionClient) {
-          if (questionClient.answers.length === 0)
+          if (noAnswerCorrect === 0)
             points += question.maxPoints
           else
             points += 0
@@ -323,12 +323,14 @@ const TakeExamController = {
       if (takeExam.examId.viewPoint === 'no')
         return res.status(200).json({
           name: takeExam.examId.name,
-          lanThi: index
+          lanThi: index,
+         
         })
       return res.status(200).json({
         name: takeExam.examId.name,
         lanThi: index,
-        points: takeExam.points
+        points: takeExam.points,
+        maxPoints:takeExam.examId.maxPoints
       })
     }
     catch (error) {
@@ -363,7 +365,7 @@ const TakeExamController = {
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
       const examResult = await ExamResult.findOne({ takeExamId: mongoose.Types.ObjectId(takeExamId) })
         .populate('takeExamId')
-      const exam = await Exam.findById(examResult.takeExamId.exam)
+      const exam = await Exam.findById(examResult.takeExamId.examId)
         .populate({
           path: "questions.question",
           populate: {
