@@ -135,7 +135,7 @@ const ExamController = {
     UpdateExam: async (req, res) => {
         try {
             const username = req.user.sub
-            const { id, name, description, courseId, numberOfQuestion, viewPoint, viewAnswer,
+            const { id, name, description, courseId, numberofQuestions, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -157,7 +157,7 @@ const ExamController = {
                 name,
                 description,
                 creatorId: user.id,
-                numberOfQuestion,
+                numberofQuestions,
                 viewPoint,
                 viewAnswer,
                 attemptsAllowed,
@@ -183,12 +183,12 @@ const ExamController = {
             //await course.save()
 
             exitExam = await Exam.findByIdAndUpdate(id, {
-                name, description, courseId, numberOfQuestion, viewPoint, viewAnswer,
-                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime
+                name, description, numberofQuestions, viewPoint, viewAnswer,
+                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, startTime, endTime
             }, { new: true })
             return res.status(200).json({
                 message: "Tạo bài thi mới thành công",
-                slug: exam._doc.slug
+                slug: exitExam._doc.slug
             })
 
         } catch (error) {
@@ -217,53 +217,14 @@ const ExamController = {
                 return res.status(400).json({ message: "Không tồn tại ngân hàng câu hỏi!" })
 
             const questionsResult = await QuestionBank.findOne({})
-
-
-
-            /*
-            const examResult = await ExamResult.findOne({ takeExamId: mongoose.Types.ObjectId(takeExamId) })
-                .populate('takeExamId')
-            const exam = await Exam.findById(examResult.takeExamId.exam)
-              .populate({
-                path: "questions.question",
-                populate: {
-                  path: "answers",
-                  select: "id content isCorrect",
-                },
-              })
-            let { questions, startTime, maxTimes, ...data } = exam._doc;
-            questions = questions.map((item) => item.question);
-      
-            const result = examResult.result
-      
-            questions = questions.map(item => {
-      
-              let resultAnswer = result.find(e => e.question?.toString() === item.id.toString())
-              let choose = []
-              if (resultAnswer) {
-                choose = resultAnswer.answers
-              }
-      
-              return { ...item._doc, choose }
-            })
-      
-            console.log(questions)
-            return res.status(200).json(
-              {
-                name: examResult.takeExamId.name,
-                startTime: examResult.takeExamId.startTime,
-                submitTime: examResult.takeExamId.submitTime,
-                questions: questions
-              })
-              */
             return res.status(200).json({
-                message: "Lấy ds câu hỏi thành con nhà bà công!",
+                message: "Lấy danh câu hỏi thành công!",
                 questions: questions
             })
         }
         catch (error) {
             console.log(error);
-            res.status(400).json({ message: "Lỗi hiện điểm" });
+            res.status(400).json({ message: "Lỗi lấy danh sách câu hỏi" });
         }
 
     },
@@ -326,6 +287,46 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi tạo!" })
         }
     },
+    publicExam: async(req, res)=>{
+        try {
+            const username = req.user.sub
+            const { id } = req.query
+
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+            const user = await User.findOne({ username })
+
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+
+            //const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
+            //if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ(không tìm thấy thông tin khóa học hoặc người tạo khóa học" })
+
+            let exitsExam = await Exam.findById(id)
+            
+            //let  = exam
+            console.log(exitsExam)
+
+            //console.log(exam)
+
+            let error = exitsExam.validateSync()
+            if (error) {
+                console.log(error)
+                return res.status(400).json({
+                    message: "Xuất bản bài thi thất bại!"
+                })
+            }
+            const status ="public"
+            exitsExam = await Exam.findByIdAndUpdate(id, {status
+            }, { new: true })
+            return res.status(200).json({
+                message: "Xuất bản bài thi thành công",
+                slug: exitsExam._doc.slug
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi xuất bản bài thi" })
+        }
+    }
 };
 
 
