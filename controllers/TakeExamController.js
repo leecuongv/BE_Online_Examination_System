@@ -180,9 +180,8 @@ const TakeExamController = {
       //     message: "Đã quá số lần làm bài"
       //   })
       const newTakeExam = new TakeExam({
-        slug,
-        exam: exam.id,
-        user: user.id,
+        examId: exam.id,
+        userId: user.id,
       });
       let error = newTakeExam.validateSync();
       if (error) {
@@ -192,7 +191,7 @@ const TakeExamController = {
         });
       }
       const takeExam = await newTakeExam.save();
-      const newExamResult = new ExamResult({ takeExam: takeExam.id });
+      const newExamResult = new ExamResult({ takeExamId: takeExam.id });
       await newExamResult.save();
       return res.status(200).json({
         message: "Làm bài thi thành công!",
