@@ -434,7 +434,7 @@ const CourseController = {
         }
     },
     getCourseFromStudent: async (req, res) => {
-
+        
     },
     getListExamInCourseOfStudent: async (req, res) => {
 
