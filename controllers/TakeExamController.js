@@ -180,9 +180,8 @@ const TakeExamController = {
       //     message: "Đã quá số lần làm bài"
       //   })
       const newTakeExam = new TakeExam({
-        slug,
-        exam: exam.id,
-        user: user.id,
+        examId: exam.id,
+        userId: user.id,
       });
       let error = newTakeExam.validateSync();
       if (error) {
