@@ -4,10 +4,6 @@ const { formatTimeUTC } = require("../utils/Timezone");
 const { COLLECTION, STATUS } = require("../utils/enum");
 
 const takeExamSchema = mongoose.Schema({
-  takeExamId: {
-    type: Number,
-    require: true,
-  },
   examId: {
     type: mongoose.SchemaTypes.ObjectId,
     require: true,
@@ -36,16 +32,28 @@ const takeExamSchema = mongoose.Schema({
     type: String,
     default: STATUS.NOT_SUBMITTED
   },
+  result: [
+    {
+        question: {
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: COLLECTION.QUESTION
+        },
+        answers: [
+            {
+                type: mongoose.SchemaTypes.ObjectId,
+                ref: COLLECTION.ANSWER
+            }
+        ],
+        point: {
+          type: Number,
+          default: 0
+        }
+    }
+],
+
 },
   { timestamps: true });
 
-takeExamSchema.plugin(
-  autoinc.autoIncrement,
-  {
-    model: COLLECTION.TAKEEXAM,
-    field: "takeExamId"
-  }
-);
 
 takeExamSchema.method("toJSON", function () {
   const { __v, ...object } = this.toObject();

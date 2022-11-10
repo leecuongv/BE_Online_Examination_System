@@ -10,4 +10,6 @@ router.put('/update-exam', verifyToken, ExamController.UpdateExam);
 router.get('/get-exambyslug', verifyToken, ExamController.getExamBySlug);
 router.get("/add-question-with-questionbank", verifyToken, ExamController.addQuestionWithQuestionBank)
 router.put('/public-exam', verifyToken, ExamController.publicExam)
+router.put('/close-exam', verifyToken, ExamController.CloseExam)
+
 module.exports = router;

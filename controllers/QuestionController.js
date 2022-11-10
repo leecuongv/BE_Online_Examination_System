@@ -26,7 +26,7 @@ const QuestionController = {
                 type,
                 content,
                 maxPoints,
-                answers:[],
+                answers: [],
                 image
             })
             let error = newQuestion.validateSync()
@@ -38,7 +38,7 @@ const QuestionController = {
             }
 
             await Promise.all(answers.map(async (element) => {
-                const answer =  new Answer({
+                const answer = new Answer({
                     content: element.content || "",
                     isCorrect: element.isCorrect || false
                 })
@@ -47,7 +47,7 @@ const QuestionController = {
             }))
 
             console.log(await (await newQuestion.save()).populate('answers'))
-            exam.questions.push({question: newQuestion.id})
+            exam.questions.push({ question: newQuestion.id })
 
             await exam.save()
             console.log(new Date().getTime() - start.getTime())
@@ -73,10 +73,10 @@ const QuestionController = {
             const exam = await Exam.findOne({ _id: mongoose.Types.ObjectId(examId), creatorId: user._id })
             if (!exam) return res.status(400).json({ message: "Không tồn tại!" })
 
-            const question = await Question.findOne({_id:mongoose.Types.ObjectId(questionId)})
-            if(!question) return res.status(400).json({message:'Không tồn tại câu hỏi'})
+            const question = await Question.findOne({ _id: mongoose.Types.ObjectId(questionId) })
+            if (!question) return res.status(400).json({ message: 'Không tồn tại câu hỏi' })
 
-            exam.questions = exam.questions.filter(item=>item.question.toString()!== question.id.toString())
+            exam.questions = exam.questions.filter(item => item.question.toString() !== question.id.toString())
             await exam.save()
 
             await question.deleteOne()
@@ -89,7 +89,64 @@ const QuestionController = {
             console.log(error)
             res.status(400).json({ message: "Lỗi tạo câu hỏi!" })
         }
-    }
+    },
+    CreateQuestionByFile: async (req, res) => {
+        try {
+            let start = new Date()
+            const username = req.user.sub
+            let { examId, questions } = req.body
+            if (!username) return res.status(400).json({ message: "Không có người dùng!" })
+            const user = await User.findOne({ username })
+            const exam = await Exam.findOne({ _id: mongoose.Types.ObjectId(examId), creatorId: user._id })
+            if (!exam) return res.status(400).json({ message: "Không tồn tại!" })
+            if (!user) return res.status(400).json({ message: "Không có người dùng!" })
+
+            questions = questions.map(async(question) => {
+                const newQuestion = new Question({
+
+                    type: question.type,
+                    content: question.content,
+                    maxPoints: question.maxPoints,
+                    answers: [],
+                    image: question.image
+                })
+                let error = newQuestion.validateSync()
+                if (error) {
+                    console.log(error)
+                    return res.status(400).json({
+                        message: "Tạo câu hỏi thất bại!"
+                    })
+                }
+
+                await Promise.all(question.answers.map(async (element) => {
+                    const answer = new Answer({
+                        content: element.content || "",
+                        isCorrect: element.isCorrect || false
+                    })
+                    await answer.save()
+                    newQuestion.answers.push(answer.id)
+                }))
+
+                
+                exam.questions.push({ question: newQuestion.id })
+                return newQuestion.save()
+                
+            });
+            await Promise.all(questions)
+            await exam.save()
+            console.log(new Date().getTime() - start.getTime())
+            return res.status(200).json({
+                message: "Tạo câu hỏi mới thành công!",
+                //question: newQuestion,
+                
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi tạo câu hỏi!" })
+        }
+    },
+
 }
 
-module.exports ={ QuestionController}
+module.exports = { QuestionController }

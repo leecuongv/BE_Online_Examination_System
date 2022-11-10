@@ -11,7 +11,7 @@ const ExamResult = require("../models/ExamResult");
 const TakeExamController = {
   getExam: async (takeExam) => {
 
-    let = await Exam.findById(takeExam.examId)
+    let exam = await Exam.findById(takeExam.examId)
       .populate({
         path: "questions.question",
         populate: {
@@ -25,29 +25,29 @@ const TakeExamController = {
     questions = questions.map((item) => item.question);
     return { ...data, endTime, questions };
   },
-  CheckTakeExamId: async (req, res) => {
-    try {
-      const username = req.user.sub;
-      const { takeExamId } = req.body;
+  // CheckTakeExamId: async (req, res) => {
+  //   try {
+  //     const username = req.user.sub;
+  //     const { takeExamId } = req.body;
 
-      const user = await User.findOne({ username });
-      if (!user)
-        return res.status(400).json({ message: "Không có người dùng" });
+  //     const user = await User.findOne({ username });
+  //     if (!user)
+  //       return res.status(400).json({ message: "Không có người dùng" });
 
-      const takeExam = await TakeExam.findById(takeExamId);
-      if (!takeExam || takeExam.status === STATUS.SUBMITTED)
-        return res.status(200).json({ message: "invalid" });
+  //     const takeExam = await TakeExam.findById(takeExamId);
+  //     if (!takeExam || takeExam.status === STATUS.SUBMITTED)
+  //       return res.status(200).json({ message: "invalid" });
 
-      const exam = await TakeExamController.getExam(takeExam);
-      return res.status(200).json({
-        message: "valid",
-        exam: exam,
-      });
-    } catch (error) {
-      console.log(error);
-      return res.status(400).json({ message: "Lỗi làm bài thi" });
-    }
-  },
+  //     const exam = await TakeExamController.getExam(takeExam);
+  //     return res.status(200).json({
+  //       message: "valid",
+  //       exam: exam,
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //     return res.status(400).json({ message: "Lỗi làm bài thi" });
+  //   }
+  // },
   CheckExam: async (req, res) => {
     try {
       const username = req.user.sub;
@@ -93,11 +93,11 @@ const TakeExamController = {
       } else {
         if (takeExam.length === exam.attemptsAllowed) {
           if (lastTakeExam.status === STATUS.SUBMITTED)
-            return res.status(200).json({ message: "invalid" }); //take exam cuối cùng đã hết thời gian
+            return res.status(400).json({ message: "Hết số lần làm bài thi" }); //take exam cuối cùng đã hết thời gian
           if (remainTime < 0)
-            return res.status(200).json({ message: "invalid" }); //take exam cuối cùng đã hết thời gian
+            return res.status(400).json({ message: "Hết số lần làm bài thi" }); //take exam cuối cùng đã hết thời gian
         } else if (takeExam.length > exam.attemptsAllowed)
-          return res.status(200).json({ message: "invalid" }); //take exam cuối cùng đã hết thời gian
+          return res.status(400).json({ message: "Hết số lần làm bài thi" }); //take exam cuối cùng đã hết thời gian
       }
       if (lastTakeExam.status === STATUS.SUBMITTED)
         return res.status(200).json({ message: "checkpin" }); //take exam cuối cùng đã hết thời gian
@@ -125,7 +125,6 @@ const TakeExamController = {
       const username = req.user.sub;
       const { slug, pin } = req.body;
       const toDay = new Date()
-
       if (!username)
         return res.status(400).json({ message: "Không có người dùng" });
       const user = await User.findOne({ username });
@@ -168,11 +167,13 @@ const TakeExamController = {
           .status(400)
           .json({ message: "Thí sinh không thuộc bài thi này!" });
 
-      if ((new Date(toDay)) < (new Date(course.startTime)) || (new Date(toDay)) > (new Date(course.endTime))){
-      console.log(toDay)
-      return res.status(400).json({
+      if ((new Date(toDay)) < (new Date(course.startTime)) ||
+        (new Date(toDay)) > (new Date(course.endTime))) {
+        console.log(toDay)
+        return res.status(400).json({
           message: "Thời gian thực hiện bài thi không hợp lệ"
-        })}
+        })
+      }
       // const takeExams = TakeExam.find({})  
       // const countTakeExam = takeExam.length - 1;
       // if (countTakeExam > exam.attemptsAllowed)
@@ -235,6 +236,7 @@ const TakeExamController = {
         let pointOfQuestion = 0
         let noAnswerCorrect = question.answers.filter(e => e.isCorrect).length //số đáp án đúng
         let questionClient = answerSheet.find(e => e.question === question.id.toString())
+        //thay bằng Question result, answer
         if (!questionClient) {
           if (noAnswerCorrect === 0)
             points += question.maxPoints
@@ -262,7 +264,10 @@ const TakeExamController = {
               }
 
             })
+
             pointOfQuestion = pointOfQuestion > 0 ? pointOfQuestion : 0
+            questionClient.point = pointOfQuestion
+
             points += pointOfQuestion
           }
         }
@@ -283,6 +288,7 @@ const TakeExamController = {
           })
           answers = answers.filter(e => e !== null)
           return {
+            point: item.point,
             question: mongoose.Types.ObjectId(item.question),
             answers
           }
@@ -292,7 +298,7 @@ const TakeExamController = {
         }
       })
       result = result.filter(e => e !== null)
-      await ExamResult.updateOne({ takeExamId: takeExam.id }, { result })
+      takeExam.result = result
       await takeExam.save()
 
       return res.status(200).json({
@@ -324,13 +330,13 @@ const TakeExamController = {
         return res.status(200).json({
           name: takeExam.examId.name,
           lanThi: index,
-         
+
         })
       return res.status(200).json({
         name: takeExam.examId.name,
         lanThi: index,
         points: takeExam.points,
-        maxPoints:takeExam.examId.maxPoints
+        maxPoints: takeExam.examId.maxPoints
       })
     }
     catch (error) {
@@ -341,31 +347,15 @@ const TakeExamController = {
 
 
   getPreviewExam: async (req, res) => {
-    // api getPreviewExam:{
-    //     query:{takeExamId},
-    //     yêu cầu:
-    //     + Nếu bài thi cho phép xem đáp án
-    //     trả về lỗi khi:
-    //     + Không cho phép xem điểm, tất cả chưa làm xong
-    //     trả về thông tin takeExam và danh sách câu trả lời ở result trên bảng takeResult, ghép 2 bảng này lại theo dạng
-    //     questions:{
-    //         id,
-    //         content,
-    //         type,
-    //         answers,
-    //         choose (lấy từ result ghép vào từng question theo question id, cái nào ko có  để [])
-    //     }
-    // },
     try {
       const { takeExamId } = req.query;
       const username = req.user.sub;
-      if (!username)
-        return res.status(400).json({ message: "Không có người dùng" });
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
-      const examResult = await ExamResult.findOne({ takeExamId: mongoose.Types.ObjectId(takeExamId) })
-        .populate('takeExamId')
-      const exam = await Exam.findById(examResult.takeExamId.examId)
+      
+      const takeExam = await TakeExam.findById(takeExamId)
+
+      const exam = await Exam.findById(takeExam.examId)
         .populate({
           path: "questions.question",
           populate: {
@@ -376,7 +366,7 @@ const TakeExamController = {
       let { questions, startTime, maxTimes, ...data } = exam._doc;
       questions = questions.map((item) => item.question);
 
-      const result = examResult.result
+      const result = takeExam.result
 
       questions = questions.map(item => {
 
@@ -392,9 +382,9 @@ const TakeExamController = {
       console.log(questions)
       return res.status(200).json(
         {
-          name: examResult.takeExamId.name,
-          startTime: examResult.takeExamId.startTime,
-          submitTime: examResult.takeExamId.submitTime,
+          name: exam.name,
+          startTime: exam.startTime,
+          submitTime: exam.submitTime,
           questions: questions
         })
 

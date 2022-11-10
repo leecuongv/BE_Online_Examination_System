@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.post('/create-question', verifyToken, QuestionController.CreateQuestion);
 router.delete('', verifyToken, QuestionController.DeleteQuestion);
-
+router.post("/create-question-by-file", verifyToken, QuestionController.CreateQuestionByFile)
 
 module.exports = router;

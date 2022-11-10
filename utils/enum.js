@@ -49,7 +49,8 @@ const STATUS = {
     ACTIVE:'active',
     INACTIVE:'inactive',
     PUBLIC:'public',
-    PRIVATE:'private'
+    PRIVATE:'private',
+    CLOSE:'close'
 };
 
 const ROLES = {
