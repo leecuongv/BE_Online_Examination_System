@@ -21,12 +21,31 @@ const StatisticController = {
             const exam = await Exam.findOne({ slug: examSlug })
             if (!exam) return res.status(200).json({ message: "Không tìm thấy khoá học" })
             let takeExams = await TakeExam.find({ userId: user.id, examId: exam.id })
-
-            let results = takeExams.map(item => ({
+            takeExams = takeExams.map(item => {
+                let { result, points, userId, ...data } = item._doc
+                points = result.reduce((total, current)=>{
+                    
+                    total+= current.point
+                    return total
+                },
+                0
+                )
+                return {
+                    ...data,
+                    name: userId.fullname,
+                    maxPoints: exam.maxPoints,
+                    points
+                }
+            })
+            console.log("------------------------------------------------------------------------------")
+            console.log(takeExams)
+            
+            /*let results = takeExams.map(item => ({
                 ...item._doc,
                 maxPoints: exam.maxPoints
-            }))
-            return res.status(200).json(results)
+
+            }))*/
+            return res.status(200).json(takeExams)
         }
         catch (err) {
             return res.status(500).json({ message: 'Lỗi thống kê' })
@@ -52,17 +71,27 @@ const StatisticController = {
                     path: 'userId',
                     //select: 'fullname'
                 })
-
-            let results = takeExams.map(item => {
-                let { userId, ...data } = item._doc
+            takeExams = takeExams.map(item => {
+                let { result, points, userId, ...data } = item._doc
+                points = result.reduce((total, current)=>{
+                    
+                    total+= current.point
+                    return total
+                },
+                0
+                )
                 return {
                     ...data,
                     name: userId.fullname,
-                    maxPoints: exam.maxPoints
+                    maxPoints: exam.maxPoints,
+                    points
                 }
             })
+            console.log("------------------------------------------------------------------------------")
+            console.log(takeExams)
+            
 
-            return res.status(200).json(results)
+            return res.status(200).json(takeExams)
         }
         catch (err) {
             console.log(err)

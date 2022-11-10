@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
 const QuestionBank = require("../models/QuestionBank");
+const { STATUS } = require("../utils/enum");
 
 const ExamController = {
     CreateExam: async (req, res) => {
@@ -320,6 +321,41 @@ const ExamController = {
         } catch (error) {
             console.log(error)
             res.status(400).json({ message: "Lỗi xuất bản bài thi" })
+        }
+    },
+    CloseExam: async(req, res)=>{
+        try {
+            const username = req.user.sub
+            const { id } = req.query
+
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+            const user = await User.findOne({ username })
+
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+            let exitsExam = await Exam.findById(id)
+            
+            
+            console.log(exitsExam)
+
+            let error = exitsExam.validateSync()
+            if (error) {
+                console.log(error)
+                return res.status(400).json({
+                    message: "Đóng bài thi thất bại!"
+                })
+            }
+            
+            exitsExam = await Exam.findByIdAndUpdate(id, {status: STATUS.CLOSE
+            }, { new: true })
+            return res.status(200).json({
+                message: "Đóng bài thi thành công",
+
+                slug: exitsExam._doc.slug
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi đóng bài thi" })
         }
     }
 };

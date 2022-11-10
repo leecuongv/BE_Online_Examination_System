@@ -101,8 +101,8 @@ const CourseController = {
 
             const course = await Course.findOne({ courseId })
             if (course) {
-                const { _id, courseId, name, description, exams, image, status,startTime,endTime } = course._doc
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status,startTime,endTime })
+                const { _id, courseId, name, description, exams, image, status, startTime, endTime } = course._doc
+                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime })
             }
 
             return res.status(400).json({
@@ -395,7 +395,7 @@ const CourseController = {
                 return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
             }
             const course = await Course.findOne({ courseId })
-            
+
             let data = {//dữ liệu cần update
                 slug, name, description, startTime, endTime
             }
@@ -412,17 +412,17 @@ const CourseController = {
                             {
                                 folder: "course/",
                                 public_id: course.id.toString(),
-                                overwrite:true
+                                overwrite: true
                             })
-                        data.image = upload.secure_url
+                    data.image = upload.secure_url
                 }
                 catch (err) {
                     console.log(err);
                 }
-                
+
             }
 
-            await Course.updateOne({courseId},data);
+            await Course.updateOne({ courseId }, data);
             return res.status(200).json({
                 message: "Cập nhật khoá học thành công",
                 courseId: course._doc.courseId
@@ -433,11 +433,121 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tạo khoá học" })
         }
     },
-    getCourseFromStudent: async (req, res) => {
-        
+    getStudentCourse: async (req, res) => {
+        try {
+
+            const username = req.user?.sub
+            //const { studentId } = req.query
+
+            //const teacher = await User.findOne({ username })
+            const student = await User.findOne({ username })
+            if (!student) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            let studentCourse = await Course.find({
+                students: { $in: [mongoose.Types.ObjectId(student.id)] }
+            });
+            console.log(student.id)
+            if (!studentCourse)
+                return res.status(400).json({ message: "Học viên chưa thuộc khóa học nào." })
+
+            console.log(studentCourse)
+
+            return res.status(200).json(studentCourse)
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi thêm học viên" })
+        }
     },
     getListExamInCourseOfStudent: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const courseId = req.query.courseId
+            const start = new Date().getTime()
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            console.log(courseId)
 
+            const listExam = await Course.aggregate([
+                {
+                    $match: { courseId: Number(courseId) }
+                },
+                {
+                    $lookup:
+                    {
+                        from: "exams",
+                        localField: "exams",
+                        foreignField: "_id",
+                        as: "exams"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$exams",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "take_exams",
+                        localField: "exams._id",
+                        foreignField: "examId",
+                        as: "takeExams"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$takeExams",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$exams._id', "doc": { "$first": "$$ROOT.exams" }
+                        , count: {
+                            $sum: {
+                                $cond: [{ $ifNull: ['$takeExams', false] }, 1, 0]
+                            }
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        id: "$doc._id",
+                        name: "$doc.name",
+                        count: "$count",
+                        slug: "$doc.slug",
+                        status: '$doc.status',
+                        numberofQuestions: "$doc.numberofQuestions",
+                        startTime: '$doc.startTime',
+                        endTime: '$doc.endTime',
+                        maxTimes: '$doc.maxTimes'
+                    }
+                }
+            ]
+            )
+            console.log(listExam)
+
+            if (listExam) {
+                // const result = listExam.map(item => {
+                //     let { id, name } = item
+                //     return { id, name, count: item.count }
+                // })
+                listExam = listExam.filter(item=>item.status!==STATUS.PRIVATE)
+                return res.status(200).json(listExam)
+            }
+            return res.status(400).json({
+                message: "Không tìm thấy khoá học",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi tạo khoá học" })
+        }
     }
 }
 

@@ -13,20 +13,7 @@ const examResultSchema = mongoose.Schema({
         default: null,
         ref: COLLECTION.TAKEEXAM,
     },
-    result: [
-        {
-            question: {
-                type: mongoose.SchemaTypes.ObjectId,
-                ref: COLLECTION.QUESTION
-            },
-            answers: [
-                {
-                    type: mongoose.SchemaTypes.ObjectId,
-                    ref: COLLECTION.ANSWER
-                }
-            ]
-        }
-    ],
+    
     logs: [
         {
             time: {
