@@ -289,10 +289,10 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi tạo!" })
         }
     },
-    publicExam: async(req, res)=>{
+    PublicExam: async(req, res)=>{
         try {
             const username = req.user.sub
-            const { id } = req.query
+            const { id } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -327,7 +327,7 @@ const ExamController = {
     CloseExam: async(req, res)=>{
         try {
             const username = req.user.sub
-            const { id } = req.query
+            const { id } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
