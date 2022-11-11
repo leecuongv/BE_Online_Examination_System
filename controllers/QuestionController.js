@@ -48,7 +48,8 @@ const QuestionController = {
 
             console.log(await (await newQuestion.save()).populate('answers'))
             exam.questions.push({ question: newQuestion.id })
-
+            exam.maxPoints += newQuestion.maxPoints
+            exam.numberOfQuestion+=1
             await exam.save()
             console.log(new Date().getTime() - start.getTime())
             return res.status(200).json({
@@ -77,6 +78,8 @@ const QuestionController = {
             if (!question) return res.status(400).json({ message: 'Không tồn tại câu hỏi' })
 
             exam.questions = exam.questions.filter(item => item.question.toString() !== question.id.toString())
+            exam.maxPoints -= question.maxPoints
+            exam.numberOfQuestion-=1
             await exam.save()
 
             await question.deleteOne()
@@ -129,6 +132,8 @@ const QuestionController = {
 
                 
                 exam.questions.push({ question: newQuestion.id })
+                exam.maxPoints += newQuestion.maxPoints
+                exam.numberOfQuestion+=1
                 return newQuestion.save()
                 
             });
