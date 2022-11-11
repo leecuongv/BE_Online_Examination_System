@@ -533,10 +533,6 @@ const CourseController = {
             console.log(listExam)
 
             if (listExam) {
-                // const result = listExam.map(item => {
-                //     let { id, name } = item
-                //     return { id, name, count: item.count }
-                // })
                 listExam = listExam.filter(item=>item.status!==STATUS.PRIVATE)
                 return res.status(200).json(listExam)
             }
