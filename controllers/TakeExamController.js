@@ -184,7 +184,7 @@ const TakeExamController = {
         examId: exam.id,
         userId: user.id,
         startTime: new Date(),
-        submitTime
+        submitTime: new Date()
       });
       let error = newTakeExam.validateSync();
       if (error) {
