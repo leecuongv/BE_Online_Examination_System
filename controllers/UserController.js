@@ -1,7 +1,7 @@
-const jwt_decode =require('jwt-decode')
-const  User  =require('../models/User.js')
-const cloudinary=require('cloudinary').v2 
-const dotenv =require('dotenv')
+const jwt_decode = require('jwt-decode')
+const User = require('../models/User.js')
+const cloudinary = require('cloudinary').v2
+const dotenv = require('dotenv')
 dotenv.config()
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -9,15 +9,14 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_SECRET
 });
 
-const bcrypt =require('bcrypt')
-const { DEFAULT_VALUES } =require('../utils/enum')
-const { sendNotificationToClient } = require('../services/firebase.js')
+const bcrypt = require('bcrypt')
+const { DEFAULT_VALUES, ROLES } = require('../utils/enum')
 const UserController = {
     getInfo: async (req, res) => {
         try {
             const username = req.user.sub
             const user = await User.findOne({ username })
-            const { password,type,id,status, ...rest } = user._doc;
+            const { password, type, id, status, ...rest } = user._doc;
 
             return res.status(200).json({ ...rest })
 
@@ -32,8 +31,8 @@ const UserController = {
             const decodeToken = jwt_decode(token)
             const username = decodeToken.sub
             const user = await User.findOne({ username: username })
-            const { password,...doc } = user._doc;
-            return res.status(200).json({...doc})
+            const { password, ...doc } = user._doc;
+            return res.status(200).json({ ...doc })
 
         } catch (error) {
             console.log(error)
@@ -74,15 +73,15 @@ const UserController = {
     resetAvatar: async (req, res) => {
         try {
             const username = req.user.sub
-            
+
             const data = {
-                avatar:DEFAULT_VALUES.AVATAR
+                avatar: DEFAULT_VALUES.AVATAR
             }
-            try{
+            try {
                 const newUser = await User.findOneAndUpdate({ username }, data, { new: true })
-                return res.status(200).json({avatar: newUser.avatar})
+                return res.status(200).json({ avatar: newUser.avatar })
             }
-            catch(error){
+            catch (error) {
                 return res.status(400).json({ message: "Lỗi cập nhật tài khoản" })
             }
 
@@ -94,19 +93,19 @@ const UserController = {
     updateUser: async (req, res) => {
         try {
             const username = req.user.sub
-            let {fullname, address, phone, school,birthday,gender } = req.body
-            if(birthday===null || new Date(birthday).toLocaleString() === "Invalid Date"){
+            let { fullname, address, phone, school, birthday, gender } = req.body
+            if (birthday === null || new Date(birthday).toLocaleString() === "Invalid Date") {
                 return res.status(400).json({ message: "Ngày sinh không hợp lệ" })
             }
             const data = {
-                fullname, address, phone, school,birthday,gender
+                fullname, address, phone, school, birthday, gender
             }
-            try{
+            try {
                 const newUser = await User.findOneAndUpdate({ username: username }, data, { new: true })
                 const { password, ...rest } = newUser._doc
-                return res.status(200).json({...rest})
+                return res.status(200).json({ ...rest })
             }
-            catch(error){
+            catch (error) {
                 return res.status(400).json({ message: "Lỗi cập nhật tài khoản" })
             }
 
@@ -119,11 +118,11 @@ const UserController = {
         try {
             const username = req.user.sub
             const deviceToken = req.body.deviceToken
-            try{
-                await User.updateOne({username},{deviceToken},{strict:false})
-                return res.status(200).json({ message: "Cập nhật device token thành công"})
+            try {
+                await User.updateOne({ username }, { deviceToken }, { strict: false })
+                return res.status(200).json({ message: "Cập nhật device token thành công" })
             }
-            catch(error){
+            catch (error) {
                 return res.status(400).json({ message: "Cập nhật device token không thành công" })
             }
 
@@ -135,20 +134,20 @@ const UserController = {
     updatePassword: async (req, res) => {
         try {
             const username = req.user.sub
-            const {password, newPassword, cfPassword} = req.body
+            const { password, newPassword, cfPassword } = req.body
             const salt = await bcrypt.genSalt(10);
             const hash = await bcrypt.hash(newPassword, salt);
             const data = {
                 password: hash
             }
-            const user = await User.findOne({ username})
+            const user = await User.findOne({ username })
             const auth = await bcrypt.compare(password, user.password)
             if (auth) {
                 const newUser = await User.findOneAndUpdate({ username: username }, data, { new: true })
                 if (newUser) {
                     return res.status(200).json({ message: "Cập nhật thành công" })
                 }
-                return res.status(400).json( { message: "Cập nhật không thành công" })
+                return res.status(400).json({ message: "Cập nhật không thành công" })
             }
             return res.status(400).json({ message: "Sai mật khẩu" })
 
@@ -160,35 +159,22 @@ const UserController = {
     },
     updateRoles: async (req, res) => {
         try {
-            const rolesRequest = req.body.roles;
-            const id = req.body.id;
-            console.log(id)
+            const username = req.user.sub
+            const user = await User.findOneAndUpdate({ username }, { role: ROLES.TEACHER }, { new: true })
+            if (user) {
+                const { password, type, id, status, ...rest } = user._doc;
+                return res.status(200).json({
+                    message: "Cập nhật quyền thành công",
+                    user: { ...rest }
+                })
 
-            let roles = []
-
-            const getRoles = async (list) => {
-                const roles = []
-                for (let i = 0; i < list.length; i++) {
-                    let role = await Role.findOne({ name: list[i] })
-                    roles.push(role)
-                }
-                return roles
             }
-            roles = await getRoles(rolesRequest)
-            if (id) {
-                console.log(roles.map(item => item.id))
-                const newUser = await User.updateOne({ _id: id }, { roles: roles.map(item => item.id) }, { new: true })
-                if (newUser) {
-                    return res.status(200).json(ResponseData(200, { message: "Cập nhật quyền thành công" }))
-                }
-                else
-                    return res.status(400).json(ResponseDetail(400, { message: "Cập nhật không thành công" }))
-            } else
-                return res.status(400).json(ResponseDetail(400, { message: "Không có username" }))
+            else
+                return res.status(400).json({ message: "Không có username" })
         }
         catch (error) {
             console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Lỗi cập nhật quyền tài khoản" }))
+            return res.status(500).json({ message: "Lỗi cập nhật quyền tài khoản" })
         }
     },
     deleteAccount: async (req, res) => {
@@ -206,20 +192,7 @@ const UserController = {
             return res.status(500).json(ResponseDetail(500, { message: "Lỗi cập nhật quyền tài khoản" }))
         }
     },
-    testNotify: async (req, res) => {
-        try {
-            const user = await User.findOne({username:'tranduy1'})
-            sendNotificationToClient([user.deviceToken],{
-                title:"Thông báo mới",
-                body:"Test"
-            })
-        }
-        catch (error) {
-            console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Lỗi cập nhật quyền tài khoản" }))
-        }
-    },
-    
+   
 
 }
-module.exports = {UserController}
+module.exports = { UserController }
