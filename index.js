@@ -14,16 +14,15 @@ const {
   QuestionRoutes, 
   TakeExamRoutes,
   QuestionBankRoutes,
-  StatisticRoutes
+  StatisticRoutes,
+  UploadRoutes
  } = require('./routers');
 const helmet= require("helmet");
-const passport = require('passport');
+//const passport = require('passport');
 const rateLimit = require('express-rate-limit');
-const session = require('express-session');
+//const session = require('express-session');
 const morgan = require('morgan');
 const fileupload = require("express-fileupload");
-const path = require('path');
-const TakeExam = require('./models/TakeExam');
 
 
 dotenv.config()
@@ -32,7 +31,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const URI = process.env.MONGODB_URI;
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true, limit: '2mb' }))//Giới hạn kích thước request gửi lên server phải nhỏ hơn 3mb
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }))//Giới hạn kích thước request gửi lên server phải nhỏ hơn 3mb
 app.use(fileupload());
 
 const limiter = rateLimit({
@@ -112,10 +111,6 @@ app.get('/', (req, res) => {
   res.send('SUCCESS');
 });
 
-// view engine setup
-app.set('views', path.join(__dirname ,'views'));
-app.set('view engine', 'pug');
-app.use(express.static(path.join(__dirname , 'public')));
 
 // app.use(passport.initialize());
 // app.use(passport.session());
@@ -130,3 +125,4 @@ app.use("/api/question", QuestionRoutes)
 app.use("/api/takeexam", TakeExamRoutes)
 app.use("/api/questionbank", QuestionBankRoutes)
 app.use("/api/statistic", StatisticRoutes)
+app.use("/api/upload", UploadRoutes)

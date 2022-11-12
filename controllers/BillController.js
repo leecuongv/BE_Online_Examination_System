@@ -1,6 +1,5 @@
 const crypto =require('crypto')
 const https =require('https')
-const dateFormat =require('dateformat')
 const moment = require('moment')
 const  User  =require('../models/User')
 const dotenv = require('dotenv')
@@ -126,13 +125,6 @@ const BillController = {
             return res.status(500).json({ error: "Lỗi tạo hoá đơn thanh toán. Vui lòng thực hiện lại thanh toán" });
         }
     },
-    UICreatePaymentVNPay: async (req, res, next) => {
-        
-        let date = new Date();
-
-        let desc = 'Thanh toan don hang thoi gian: ' + dateFormat(date, 'yyyy-mm-dd HH:mm:ss');
-        res.render('order', { title: 'Tạo mới đơn hàng', amount: 10000, description: desc })
-    },
     CreatePaymentVNPay: async (req, res, next) => {
         try{
 
@@ -142,7 +134,6 @@ const BillController = {
                 req.connection.socket.remoteAddress;
             if(ipAddr ==='::1')
                 ipAddr ='127.0.0.1'
-            let dateFormat = require('dateformat');
             let tmnCode = process.env.vnp_TmnCode;
             let secretKey = process.env.vnp_HashSecret;
             let vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
@@ -150,7 +141,6 @@ const BillController = {
             let date = new Date();
     
             let createDate =moment().format('YYYYMMDDHHmmss'); 
-            //let orderId = dateFormat(date, 'HHmmss');
             let orderId = date.getTime()
             let username = req.user.sub
             let amount = req.body.amount;

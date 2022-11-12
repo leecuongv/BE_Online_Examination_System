@@ -8,6 +8,7 @@ const QuestionRoutes = require("./QuestionRoutes")
 const TakeExamRoutes = require("./TakeExamRoutes")
 const QuestionBankRoutes = require("./QuestionBankRoutes")  
 const StatisticRoutes = require("./StatisticRoutes")  
+const UploadRoutes = require("./UploadRoutes")  
 
 module.exports = { 
     AuthRoute, 
@@ -19,5 +20,6 @@ module.exports = {
     QuestionRoutes,
     TakeExamRoutes,
     QuestionBankRoutes,
-    StatisticRoutes
+    StatisticRoutes,
+    UploadRoutes
  }
