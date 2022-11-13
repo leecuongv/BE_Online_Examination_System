@@ -278,7 +278,7 @@ const ExamController = {
             }
 
             await exam.save()
-            console.log("\n haha" + questions)
+            //console.log("\n haha" + questions)
             return res.status(200).json({
                 message: "Lấy danh sách câu hỏi thành công",
                 questions: questions
@@ -289,7 +289,7 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi tạo!" })
         }
     },
-    PublicExam: async(req, res)=>{
+    PublicExam: async (req, res) => {
         try {
             const username = req.user.sub
             const { id } = req.body
@@ -299,8 +299,8 @@ const ExamController = {
 
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             let exitsExam = await Exam.findById(id)
-            
-            
+
+
             console.log(exitsExam)
 
             let error = exitsExam.validateSync()
@@ -310,8 +310,9 @@ const ExamController = {
                     message: "Xuất bản bài thi thất bại!"
                 })
             }
-            const status ="public"
-            exitsExam = await Exam.findByIdAndUpdate(id, {status
+            const status = "public"
+            exitsExam = await Exam.findByIdAndUpdate(id, {
+                status
             }, { new: true })
             return res.status(200).json({
                 message: "Xuất bản bài thi thành công",
@@ -324,7 +325,7 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi xuất bản bài thi" })
         }
     },
-    CloseExam: async(req, res)=>{
+    CloseExam: async (req, res) => {
         try {
             const username = req.user.sub
             const { id } = req.body
@@ -334,8 +335,8 @@ const ExamController = {
 
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             let exitsExam = await Exam.findById(id)
-            
-            
+
+
             console.log(exitsExam)
 
             let error = exitsExam.validateSync()
@@ -345,8 +346,9 @@ const ExamController = {
                     message: "Đóng bài thi thất bại!"
                 })
             }
-            
-            exitsExam = await Exam.findByIdAndUpdate(id, {status: STATUS.CLOSE
+
+            exitsExam = await Exam.findByIdAndUpdate(id, {
+                status: STATUS.CLOSE
             }, { new: true })
             return res.status(200).json({
                 message: "Đóng bài thi thành công",
@@ -357,6 +359,39 @@ const ExamController = {
         } catch (error) {
             console.log(error)
             res.status(400).json({ message: "Lỗi đóng bài thi" })
+        }
+    },
+    DeleteExam: async(req, res)=>{
+        try {
+            const username = req.user.sub
+            const { id } = req.body
+
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+            const user = await User.findOne({ username })
+
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+            let exitsExam = await Exam.findById(id)
+
+
+            console.log(exitsExam)
+
+            let error = exitsExam.validateSync()
+            if (error) {
+                console.log(error)
+                return res.status(400).json({
+                    message: "Xuất bản bài thi thất bại!"
+                })
+            }
+            exitsExam = await Exam.deleteOne(id)
+            return res.status(200).json({
+                message: "Xuất bản bài thi thành công",
+
+                slug: exitsExam._doc.slug
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi xuất bản bài thi" })
         }
     }
 };
