@@ -257,9 +257,9 @@ const QuestionController = {
             await TakeExam.bulkWrite(newTakeExams)
             await exam.save()
 
-            await Question.updateOne({ id: questionId }, newData)
+            let updatedQuestion = await Question.findByIdAndUpdate({ _id: questionId }, newData).populate('answers')
             return res.status(200).json({
-                message: "Tạo câu hỏi mới thành công!",
+                updatedQuestion
                 //question: exitsQuestion
             })
         } catch (error) {
