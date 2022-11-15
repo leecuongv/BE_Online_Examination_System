@@ -50,7 +50,7 @@ const QuestionController = {
 
             console.log(await (await newQuestion.save()).populate('answers'))
             exam.questions.push({ question: newQuestion.id })
-            exam.maxPoints += newQuestion.maxPoints
+            Number(exam.maxPoints) += Number(newQuestion.maxPoints)
             exam.numberofQuestions += 1
             await exam.save()
             console.log(new Date().getTime() - start.getTime())
@@ -80,8 +80,8 @@ const QuestionController = {
             if (!question) return res.status(400).json({ message: 'Không tồn tại câu hỏi' })
 
             exam.questions = exam.questions.filter(item => item.question.toString() !== question.id.toString())
-            exam.maxPoints -= question.maxPoints
-            exam.numberofQuestions -= 1
+            Number(exam.maxPoints) -= Number(question.maxPoints)
+            Number(exam.numberofQuestions) -= 1
             await exam.save()
 
             await question.deleteOne()
@@ -132,7 +132,7 @@ const QuestionController = {
                     newQuestion.answers.push(answer.id)
                 }))
 
-                exam.maxPoints += newQuestion.maxPoints
+                Number(exam.maxPoints) += Number(newQuestion.maxPoints)
                 exam.numberofQuestions += 1
                 exam.questions.push({ question: newQuestion.id })
 
@@ -196,7 +196,7 @@ const QuestionController = {
                 answers: newAnswers
             }
 
-            exam.maxPoints += newData.maxPoints
+            Number(exam.maxPoints) += Number(newData.maxPoints)
 
             let takeExams = await TakeExam.find({
                 "result.question": { $in: mongoose.Types.ObjectId(questionId) }
