@@ -196,7 +196,7 @@ const QuestionController = {
                 answers: newAnswers
             }
 
-            Number(exam.maxPoints) += Number(newData.maxPoints)
+            exam.maxPoints = Number(exam.maxPoints) + Number(newData.maxPoints)
 
             let takeExams = await TakeExam.find({
                 "result.question": { $in: mongoose.Types.ObjectId(questionId) }
@@ -257,7 +257,7 @@ const QuestionController = {
             await TakeExam.bulkWrite(newTakeExams)
             await exam.save()
 
-            let updatedQuestion = await Question.findByIdAndUpdate({questionId }, newData, {new: true}).populate('answers')
+            let updatedQuestion = await Question.findByIdAndUpdate({'_id': new mongoose.Types.ObjectId(question.id)}, newData, {new: true}).populate('answers')
             return res.status(200).json({
                 updatedQuestion
                 //question: exitsQuestion
