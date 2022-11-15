@@ -50,7 +50,7 @@ const QuestionController = {
 
             console.log(await (await newQuestion.save()).populate('answers'))
             exam.questions.push({ question: newQuestion.id })
-            exam.maxPoints = Number(exam.maxPoints) +  Number(newQuestion.maxPoints)
+            exam.maxPoints = Number(exam.maxPoints) + Number(newQuestion.maxPoints)
             exam.numberofQuestions += 1
             await exam.save()
             console.log(new Date().getTime() - start.getTime())
@@ -69,7 +69,7 @@ const QuestionController = {
         try {
             let start = new Date()
             const username = req.user.sub
-            const { examId, questionId } = req.query
+            const { examId, questionId } = req.body
             //if (!username) return res.status(400).json({ message: "Không có người dùng!" })
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng!" })
@@ -81,7 +81,7 @@ const QuestionController = {
 
             exam.questions = exam.questions.filter(item => item.question.toString() !== question.id.toString())
             exam.maxPoints = Number(exam.maxPoints) - Number(question.maxPoints)
-            Number(exam.numberofQuestions) -= 1
+            exam.numberofQuestions = Number(exam.numberofQuestions) - 1
             await exam.save()
 
             await question.deleteOne()
@@ -132,7 +132,7 @@ const QuestionController = {
                     newQuestion.answers.push(answer.id)
                 }))
 
-                Number(exam.maxPoints) += Number(newQuestion.maxPoints)
+                exam.maxPoints = Number(exam.maxPoints) + Number(newQuestion.maxPoints)
                 exam.numberofQuestions += 1
                 exam.questions.push({ question: newQuestion.id })
 
@@ -257,7 +257,7 @@ const QuestionController = {
             await TakeExam.bulkWrite(newTakeExams)
             await exam.save()
 
-            let updatedQuestion = await Question.findByIdAndUpdate({'_id': new mongoose.Types.ObjectId(question.id)}, newData, {new: true}).populate('answers')
+            let updatedQuestion = await Question.findByIdAndUpdate({ '_id': new mongoose.Types.ObjectId(question.id) }, newData, { new: true }).populate('answers')
             return res.status(200).json({
                 updatedQuestion
                 //question: exitsQuestion
