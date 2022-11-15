@@ -50,7 +50,7 @@ const QuestionController = {
 
             console.log(await (await newQuestion.save()).populate('answers'))
             exam.questions.push({ question: newQuestion.id })
-            Number(exam.maxPoints) += Number(newQuestion.maxPoints)
+            exam.maxPoints = Number(exam.maxPoints) +  Number(newQuestion.maxPoints)
             exam.numberofQuestions += 1
             await exam.save()
             console.log(new Date().getTime() - start.getTime())
