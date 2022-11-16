@@ -289,10 +289,9 @@ const ExamController = {
                 if (noneExistQuestion.length === 0) {
                     return res.status(400).json({ message: "Tất cả các câu hỏi trong danh sách đã tồn tại trong hệ thống" })
                 }
-                soCauHoiCanLay = noneExistQuestion.length <= numberofNeedQuestions ? noneExistQuestion.length : numberofNeedQuestions;
 
                 //noneExistQuestion = noneExistQuestion.sort(() => Math.random() - 0.5);
-                for (let i = 0; i < soCauHoiCanLay; i++) {
+                for (let i = 0; i < noneExistQuestion.length; i++) {
                     let newQuetion = noneExistQuestion.pop()
                     questionIdsTaked.push({ question: newQuetion })
                     exam.questions.push({ question: newQuetion })
