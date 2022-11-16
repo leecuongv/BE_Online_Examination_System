@@ -217,7 +217,7 @@ const QuestionBankController = {
         }
     },
 
-    deleteStudentInQuestionBank: async (req, res) => {
+    deleteQuestionInQuestionBank: async (req, res) => {
         try {
             //Lấy cái parameter
             const username = req.user?.sub
