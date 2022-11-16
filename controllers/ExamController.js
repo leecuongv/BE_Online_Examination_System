@@ -265,11 +265,11 @@ const ExamController = {
                         noneExistQuestion.push(questionInQB)
                     }
                 });
-                if(noneExistQuestion.length()===0)
+                if(noneExistQuestion.length ===0)
                 {
                     return res.status(400).json({ message: "Tất cả các câu hỏi đã tồn tại trong hệ thống" })
                 }
-                if(noneExistQuestion.length()<numberofNeedQuestions){
+                if(noneExistQuestion.length <numberofNeedQuestions){
                     questionIds = noneExistQuestion
                 }
                 else{
