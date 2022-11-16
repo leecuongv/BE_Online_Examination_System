@@ -254,6 +254,7 @@ const ExamController = {
                     message: "Không tìm thấy ngân hàng câu hỏi!",
                 })
             let soCauHoiCanLay = 0
+            let questionIdsTaked = []
             if (random === true) {
 
                 let noneExistQuestion = []
@@ -270,20 +271,38 @@ const ExamController = {
                 noneExistQuestion = noneExistQuestion.sort(() => Math.random() - 0.5);
                 for (let i = 0; i < soCauHoiCanLay; i++) {
                     let newQuetion = noneExistQuestion.pop()
-                    questionIds.push({ question: newQuetion })
+                    questionIdsTaked.push({ question: newQuetion })
                     exam.questions.push({ question: newQuetion })
                 }
                 console.log(questionIds)
 
 
             }
+
             else {
-                console.log(numberofNeedQuestions)
+                let noneExistQuestion = []
+                questionIds.forEach(questionInBody=>{
+                    if (!exam.questions.find(item => item.question.toString() === questionInBody.toString())) {
+                        noneExistQuestion.push(questionInBody)
+                    }
+                })
+                if (noneExistQuestion.length === 0) {
+                    return res.status(400).json({ message: "Tất cả các câu hỏi trong danh sách đã tồn tại trong hệ thống" })
+                }
+                soCauHoiCanLay = noneExistQuestion.length < numberofNeedQuestions ? noneExistQuestion.length : numberofNeedQuestions;
+
+                //noneExistQuestion = noneExistQuestion.sort(() => Math.random() - 0.5);
+                for (let i = 0; i < soCauHoiCanLay; i++) {
+                    let newQuetion = noneExistQuestion.pop()
+                    questionIdsTaked.push({ question: newQuetion })
+                    exam.questions.push({ question: newQuetion })
+                }
+                console.log(questionIds)
             }
             await exam.save()
             return res.status(200).json({
                 message: "Lấy danh sách câu hỏi thành công",
-                questions: questionIds,
+                questions: questionIdsTaked,
                 soCauHoiCanLay
 
             })
