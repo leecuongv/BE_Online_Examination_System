@@ -233,11 +233,12 @@ const ExamController = {
     createLogs: async (req, res) => {
 
     },
+
     addQuestionWithQuestionBank: async (req, res) => {
         try {
             //Lấy cái parameter
             const username = req.user?.sub
-            const { examId, questionBankId, numberofQuestions, random } = req.body
+            const { examId, questionBankId, questionIds, numberofNeedQuestions, random } = req.body
 
 
             const user = await User.findOne({ username })
@@ -254,34 +255,54 @@ const ExamController = {
                 return res.status(400).json({
                     message: "Không tìm thấy ngân hàng câu hỏi!",
                 })
-            var questions = []
+
             var n = 1
             var index = 1
             if (random === true) {
-                while (n <= numberofQuestions) {
-                    var newQuestion = questionBank.questions[Math.floor(Math.random() * questionBank.questions.length)]
-
-                    //console.log(newQuestion)
-
+                let noneExistQuestion = []
+                questionBank.questions.forEach(questionInQB => {
                     if (!exam.questions.find(item => item.question.toString() === newQuestion.toString())) {
-                        questions.push({ question: newQuestion });
-                        exam.questions.push({ question: newQuestion });
-                        n++;
+                        noneExistQuestion.push(questionInQB)
                     }
-
-                    index++;
-
-                    if (index === numberofQuestions)
-                        return res.status(400).json({ message: "Các câu hỏi đã tồn tại trong hệ thống" })
+                });
+                if(noneExistQuestion.length()===0)
+                {
+                    return res.status(400).json({ message: "Tất cả các câu hỏi đã tồn tại trong hệ thống" })
                 }
+                if(noneExistQuestion.length()<numberofNeedQuestions){
+                    questionIds = noneExistQuestion
+                }
+                else{
+                    noneExistQuestion = noneExistQuestion.sort(() => Math.random() - 0.5)
+                    for(n; n<=numberofNeedQuestions; n++)
+                    {
+                        questionIds.push(noneExistQuestion.pop())
+                    }
+                }
+                // while (n <= numberofQuestions) {
+                //         var newQuestion = questionBank.questions[Math.floor(Math.random() * questionBank.questions.length)]
+
+                //         //console.log(newQuestion)
+
+                //         if (!exam.questions.find(item => item.question.toString() === newQuestion.toString())) {
+                //             questionIds.push({ question: newQuestion });
+                //             exam.questions.push({ question: newQuestion });
+                //             n++;
+                //         }
+
+                //         index++;
+
+                //         if (index === numberofQuestions)
+                //             return res.status(400).json({ message: "Các câu hỏi đã tồn tại trong hệ thống" })
+                //     }
 
             }
-
-            await exam.save()
+            console.log(questionIds)
+            //await exam.save()
             //console.log("\n haha" + questions)
             return res.status(200).json({
                 message: "Lấy danh sách câu hỏi thành công",
-                questions: questions
+                questions: questionIds
             })
 
         } catch (error) {
@@ -361,7 +382,7 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi đóng bài thi" })
         }
     },
-    DeleteExam: async(req, res)=>{
+    DeleteExam: async (req, res) => {
         try {
             const username = req.user.sub
             const { id } = req.body
