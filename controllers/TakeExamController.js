@@ -25,29 +25,6 @@ const TakeExamController = {
     questions = questions.map((item) => item.question);
     return { ...data, endTime, questions };
   },
-  // CheckTakeExamId: async (req, res) => {
-  //   try {
-  //     const username = req.user.sub;
-  //     const { takeExamId } = req.body;
-
-  //     const user = await User.findOne({ username });
-  //     if (!user)
-  //       return res.status(400).json({ message: "Không có người dùng" });
-
-  //     const takeExam = await TakeExam.findById(takeExamId);
-  //     if (!takeExam || takeExam.status === STATUS.SUBMITTED)
-  //       return res.status(200).json({ message: "invalid" });
-
-  //     const exam = await TakeExamController.getExam(takeExam);
-  //     return res.status(200).json({
-  //       message: "valid",
-  //       exam: exam,
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-  //     return res.status(400).json({ message: "Lỗi làm bài thi" });
-  //   }
-  // },
   CheckExam: async (req, res) => {
     try {
       const username = req.user.sub;
