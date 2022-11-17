@@ -281,7 +281,7 @@ const ExamController = {
 
             else {
                 let noneExistQuestion = []
-                questionIds.forEach(questionInBody=>{
+                questionIds.forEach(questionInBody => {
                     if (!exam.questions.find(item => item.question.toString() === questionInBody.toString())) {
                         noneExistQuestion.push(questionInBody)
                     }
@@ -290,7 +290,6 @@ const ExamController = {
                     return res.status(400).json({ message: "Tất cả các câu hỏi trong danh sách đã tồn tại trong hệ thống" })
                 }
 
-                //noneExistQuestion = noneExistQuestion.sort(() => Math.random() - 0.5);
                 for (let i = 0; i < noneExistQuestion.length; i++) {
                     let newQuetion = noneExistQuestion.pop()
                     questionIdsTaked.push({ question: newQuetion })
