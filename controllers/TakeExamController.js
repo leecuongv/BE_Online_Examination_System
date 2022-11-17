@@ -7,7 +7,7 @@ const TakeExam = require("../models/TakeExam");
 const { STATUS, VIEWPOINT } = require("../utils/enum");
 const moment = require("moment/moment");
 const ExamResult = require("../models/ExamResult");
-
+const Log = require("../models/Log")
 const TakeExamController = {
   getExam: async (takeExam) => {
 
@@ -331,7 +331,7 @@ const TakeExamController = {
       const username = req.user.sub;
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
-      
+
       const takeExam = await TakeExam.findById(takeExamId)
 
       const exam = await Exam.findById(takeExam.examId)
@@ -375,8 +375,42 @@ const TakeExamController = {
 
   },
   createLogs: async (req, res) => {
+    try {
+      const { action, time, takeExamId } = req.body;
+      const username = req.user.sub;
+      if (!username)
+        return res.status(400).json({ message: "Không có người dùng" });
+      const user = await User.findOne({ username });
+      if (!user) return res.status(400).json({ message: "Không có người dùng" });
+      const takeExam = await TakeExam.findById(takeExamId).populate('examId')
+      const takeExams = await TakeExam.find({ examId: takeExam.examId.id, userId: user.id })
+      const index = takeExams.findIndex(item => item.id.toString() === takeExamId)
+      if (!takeExam) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
+      
+      const newLog = await new Log({
+        action,
+        time: new Date(),
+        takeExamId
+      })
+      
+      let error = newLog.validateSync()
+      if (error) {
+        console.log(error)
+        return res.status(400).json({
+            message: "Tạo lịch sử thất bại!"
+        })
+    }
+      const log = await newLog.save()
 
-  }
+      return res.status(200).json({
+        log: newLog._doc
+      })
+    }
+    catch (error) {
+      console.log(error);
+      res.status(400).json({ message: "Lỗi tạo lịch sử" });
+    }
+  },
 };
 
 module.exports = { TakeExamController };
