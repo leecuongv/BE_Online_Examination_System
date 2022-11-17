@@ -18,7 +18,9 @@ const COLLECTION = {
     EXAM: "Exam",
     USER: "User",
     QUESTIONBANK: "Question_bank",
-    LOG: "Logs"
+    LOG: "Logs",
+    ASSIGNMENT: "Assignment",
+    SUBMITASSIGNMEMT:"Submitted_assignment"
   };
 
 const TYPEOFPOINT = {
@@ -51,7 +53,9 @@ const STATUS = {
     INACTIVE:'inactive',
     PUBLIC:'public',
     PRIVATE:'private',
-    CLOSE:'close'
+    CLOSE:'close',
+    ALLOW: 'allow',
+    NOTALLOW:'not allow'
 };
 
 const ROLES = {
