@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const autoinc = require("mongoose-plugin-autoinc");
+const { AssignmentController } = require("../controllers/AssignmentController");
 const { COLLECTION, VIEWPOINT, TYPEOFPOINT, VIEWANSWER, STATUS } = require("../utils/enum");
 
 const assignmentSchema = mongoose.Schema(
@@ -72,5 +73,5 @@ assignmentSchema.plugin(
     field: "slug"
   }
 );
-
-module.exports = mongoose.model(COLLECTION.ASSIGNMENT, assignmentSchema);
+const Assignment = mongoose.model(COLLECTION.ASSIGNMENT, assignmentSchema);
+module.exports= {Assignment} 
