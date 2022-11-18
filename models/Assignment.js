@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const autoinc = require("mongoose-plugin-autoinc");
-const { AssignmentController } = require("../controllers/AssignmentController");
-const { COLLECTION, VIEWPOINT, TYPEOFPOINT, VIEWANSWER, STATUS } = require("../utils/enum");
+const { COLLECTION, VIEWPOINT, STATUS } = require("../utils/enum");
 
 const assignmentSchema = mongoose.Schema(
   {
@@ -10,9 +9,9 @@ const assignmentSchema = mongoose.Schema(
       require: true,
       default: "Bài tập về nhà",
     },
-    content:{
-        type: String,
-        default: false
+    content: {
+      type: String,
+      default: false
     },
     creatorId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -31,41 +30,44 @@ const assignmentSchema = mongoose.Schema(
       require: true,
       default: VIEWPOINT.NO,
     },
-    courseId:{
-        type: mongoose.Schema.Types.ObjectId,
-        default: null
+    courseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null
     },
     slug: {
-        type: Number,
-        require: true,
-      },
-    allowReSubmit:{
-        type: Boolean,
-        default: false 
+      type: Number,
+      require: true,
     },
-    allowSubmitLate:{
-        type: Boolean,
-        default: false
+    allowReSubmit: {
+      type: Boolean,
+      default: false
+    },
+    allowSubmitLate: {
+      type: Boolean,
+      default: false
     },
     status: {
       type: String,
       default: STATUS.PUBLIC,
     },
   },
-  { timestamps: true ,
+  {
+    timestamps: true,
     toObject: {
       transform: function (doc, ret) {
-        ret.id=ret._id
+        ret.id = ret._id
         delete ret._id;
       }
-    }},
-  
+    }
+  },
+
 );
 
 assignmentSchema.method("toJSON", function () {
   const { __v, ...object } = this.toObject();
   return object;
 });
+
 assignmentSchema.plugin(
   autoinc.autoIncrement,
   {
@@ -74,4 +76,4 @@ assignmentSchema.plugin(
   }
 );
 const Assignment = mongoose.model(COLLECTION.ASSIGNMENT, assignmentSchema);
-module.exports= {Assignment} 
+module.exports =  Assignment 

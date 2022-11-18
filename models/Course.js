@@ -42,6 +42,13 @@ const courseSchema = mongoose.Schema({
       ref: COLLECTION.EXAM
     },
   ],
+  
+  assignments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: COLLECTION.ASSIGNMENT
+    },
+  ],
   students: [
     {
       type: mongoose.Schema.Types.ObjectId,

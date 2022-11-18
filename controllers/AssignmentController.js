@@ -53,7 +53,7 @@ const AssignmentController = {
             }
             const assignment = await newAssignment.save();
 
-            course.Assignments.push(assignment.id);
+            course.assignments.push(assignment.id);
             await course.save()
 
             return res.status(200).json({
@@ -100,7 +100,7 @@ const AssignmentController = {
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
 
             const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
-            if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ(không tìm thấy thông tin khóa học hoặc người tạo khóa học" })
+            if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
 
             const existAssignment = await Assignment.findById(assignmentId)
             if (!existAssignment) return res.status(400).json({ message: "Không có bài tập" })
@@ -251,7 +251,176 @@ const AssignmentController = {
             console.log(error)
             res.status(400).json({ message: "Lỗi xuất bản bài thi" })
         }
+    },
+    getListAssignmentOfCourse: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const courseId = req.query.courseId
+            const start = new Date().getTime()
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            console.log(courseId)
+
+            const listAssignment = await Course.aggregate([
+                {
+                    $match: { courseId: Number(courseId) }
+                },
+                {
+                    $lookup:
+                    {
+                        from: "assignments",
+                        localField: "assignments",
+                        foreignField: "_id",
+                        as: "assignments"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$assignments",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "submit_assignments",
+                        localField: "assignments._id",
+                        foreignField: "assignmentId",
+                        as: "submitAssignments"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$submitAssignments",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$assignments._id', "doc": { "$first": "$$ROOT.assignment" }
+                        , count: {
+                            $sum: {
+                                $cond: [{ $ifNull: ['$submitAssignments', false] }, 1, 0]
+                            }
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        id: "$doc._id",
+                        name: "$doc.name",
+                        count: "$count",
+                        slug: "$doc.slug",
+                        status: '$doc.status',
+                        startTime: '$doc.startTime',
+                        endTime: '$doc.endTime',
+                    }
+                }
+            ]
+            )
+            console.log(listAssignment)
+
+            if (listAssignment) {
+                // const result = listExam.map(item => {
+                return res.status(200).json(listAssignment)
+            }
+            return res.status(400).json({
+                message: "Không tìm bài tập",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tạo bài tập" })
+        }
+    },
+    getListExamInCourseOfStudent: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const courseId = req.query.courseId
+            const start = new Date().getTime()
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            console.log(courseId)
+
+            const listExam = await Course.aggregate([
+                {
+                    $match: { courseId: Number(courseId) }
+                },
+                {
+                    $lookup:
+                    {
+                        from: "exams",
+                        localField: "exams",
+                        foreignField: "_id",
+                        as: "exams"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$exams",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "take_exams",
+                        localField: "exams._id",
+                        foreignField: "examId",
+                        as: "takeExams"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$takeExams",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$exams._id', "doc": { "$first": "$$ROOT.exams" }
+                        , count: {
+                            $sum: {
+                                $cond: [{ $ifNull: ['$takeExams', false] }, 1, 0]
+                            }
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        id: "$doc._id",
+                        name: "$doc.name",
+                        count: "$count",
+                        slug: "$doc.slug",
+                        status: '$doc.status',
+                        numberofQuestions: "$doc.numberofQuestions",
+                        startTime: '$doc.startTime',
+                        endTime: '$doc.endTime',
+                        maxTimes: '$doc.maxTimes'
+                    }
+                }
+            ]
+            )
+            console.log(listExam)
+
+            if (listExam) {
+                listExam = listExam.filter(item=>item.status!==STATUS.PRIVATE)
+                return res.status(200).json(listExam)
+            }
+            return res.status(400).json({
+                message: "Không tìm thấy khoá học",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi tạo khoá học" })
+        }
     }
+
 };
 
 
