@@ -7,6 +7,10 @@ router.post('/create', verifyToken, AssignmentController.CreateAssignment);
 
 router.put('/update', verifyToken, AssignmentController.UpdateAssignment);
 
+router.get('/assignment-by-course-of-teacher', verifyToken, AssignmentController.getAssignmentByCourseOfTeacher)
+
+router.get('/assignment-by-course-of-student', verifyToken, AssignmentController.getAssignmentByCourseOfStudent)
+
 //router.get('/get-exambyslug', verifyToken, ExamController.getExamBySlug);
 //router.get("/add-question-with-questionbank", verifyToken, ExamController.addQuestionWithQuestionBank)
 

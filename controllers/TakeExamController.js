@@ -187,6 +187,7 @@ const TakeExamController = {
       res.status(400).json({ message: "Lỗi làm bài thi" });
     }
   },
+
   submitAnswerSheet: async (req, res) => {
     try {
       const username = req.user.sub
@@ -386,20 +387,20 @@ const TakeExamController = {
       const takeExams = await TakeExam.find({ examId: takeExam.examId.id, userId: user.id })
       const index = takeExams.findIndex(item => item.id.toString() === takeExamId)
       if (!takeExam) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
-      
+
       const newLog = await new Log({
         action,
         time: new Date(),
         takeExamId
       })
-      
+
       let error = newLog.validateSync()
       if (error) {
         console.log(error)
         return res.status(400).json({
-            message: "Tạo lịch sử thất bại!"
+          message: "Tạo lịch sử thất bại!"
         })
-    }
+      }
       const log = await newLog.save()
 
       return res.status(200).json({
