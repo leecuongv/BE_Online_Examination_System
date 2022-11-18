@@ -1,6 +1,6 @@
-const mongoose =require("mongoose")
-const autoinc =require("mongoose-plugin-autoinc")
-const { COLLECTION, DEFAULT_VALUES } =require("../utils/enum")
+const mongoose = require("mongoose")
+const autoinc = require("mongoose-plugin-autoinc")
+const { COLLECTION, DEFAULT_VALUES } = require("../utils/enum")
 
 const courseSchema = mongoose.Schema({
   courseId: {
@@ -33,7 +33,7 @@ const courseSchema = mongoose.Schema({
   },
   slug: {
     type: String,
-    unique:true,
+    unique: true,
     default: "",
   },
   exams: [
@@ -42,7 +42,7 @@ const courseSchema = mongoose.Schema({
       ref: COLLECTION.EXAM
     },
   ],
-  
+
   assignments: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -67,13 +67,15 @@ const courseSchema = mongoose.Schema({
   },
 
 },
-  { timestamps: true ,
+  {
+    timestamps: true,
     toObject: {
       transform: function (doc, ret) {
-        ret.id=ret._id
+        ret.id = ret._id
         //delete ret._id;
       }
-    }}
+    }
+  }
 );
 
 courseSchema.plugin(
