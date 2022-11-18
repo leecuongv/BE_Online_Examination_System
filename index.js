@@ -15,7 +15,8 @@ const {
   TakeExamRoutes,
   QuestionBankRoutes,
   StatisticRoutes,
-  UploadRoutes
+  UploadRoutes,
+  AssignmentRoutes
  } = require('./routers');
 const helmet= require("helmet");
 //const passport = require('passport');
@@ -126,3 +127,4 @@ app.use("/api/takeexam", TakeExamRoutes)
 app.use("/api/questionbank", QuestionBankRoutes)
 app.use("/api/statistic", StatisticRoutes)
 app.use("/api/upload", UploadRoutes)
+app.use("/api/assignment", AssignmentRoutes)

@@ -1,0 +1,16 @@
+const express = require('express')
+const { verifyToken, verifyTokenAdmin } = require("../controllers/middlewareController")
+const { AssignmentController } = require('../controllers/AssignmentController')
+const router = express.Router();
+
+router.post('/create', verifyToken, AssignmentController.CreateAssignment);
+
+router.put('/update', verifyToken, AssignmentController.UpdateAssignment);
+
+//router.get('/get-exambyslug', verifyToken, ExamController.getExamBySlug);
+//router.get("/add-question-with-questionbank", verifyToken, ExamController.addQuestionWithQuestionBank)
+
+router.put('/public', verifyToken, AssignmentController.PublicAssignment)
+router.put('/close', verifyToken, AssignmentController.CloseAssignment)
+
+module.exports = router;
