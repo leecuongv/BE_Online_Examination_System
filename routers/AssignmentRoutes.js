@@ -6,6 +6,8 @@ const router = express.Router();
 router.post('/create', verifyToken, AssignmentController.CreateAssignment);
 
 router.put('/update', verifyToken, AssignmentController.UpdateAssignment);
+router.delete('/', verifyToken, AssignmentController.DeleteAssignment);
+
 
 router.get('/assignment-by-course-of-teacher', verifyToken, AssignmentController.getAssignmentByCourseOfTeacher)
 

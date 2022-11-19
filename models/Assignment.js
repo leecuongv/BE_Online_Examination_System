@@ -46,6 +46,10 @@ const assignmentSchema = mongoose.Schema(
       type: Boolean,
       default: false
     },
+    file:{
+      type: String,
+      default: ""
+    },
     status: {
       type: String,
       default: STATUS.PUBLIC,

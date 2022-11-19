@@ -42,4 +42,5 @@ const submitAssigmentSchema = mongoose.Schema({
   return { ...result, id };
 });
 
-module.exports = mongoose.model(COLLECTION.SUBMITASSIGNMEMT, submitAssigmentSchema);
+const SubmitAssignment =  mongoose.model(COLLECTION.SUBMITASSIGNMEMT, submitAssigmentSchema);
+module.exports = SubmitAssignment
