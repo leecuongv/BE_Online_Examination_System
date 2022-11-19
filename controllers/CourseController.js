@@ -437,9 +437,6 @@ const CourseController = {
         try {
 
             const username = req.user?.sub
-            //const { studentId } = req.query
-
-            //const teacher = await User.findOne({ username })
             const student = await User.findOne({ username })
             if (!student) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })

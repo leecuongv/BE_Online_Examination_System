@@ -9,7 +9,7 @@ const AssignmentController = {
     CreateAssignment: async (req, res) => {
         try {
             const username = req.user.sub
-            const { courseId, name, content, startTime, endTime, maxPoints, allowReSubmit, allowSubmitLate, status } = req.body
+            const { courseId, name, content, startTime, endTime, maxPoints, allowReSubmit, allowSubmitLate, status, file } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -39,6 +39,7 @@ const AssignmentController = {
                 allowReSubmit,
                 allowSubmitLate,
                 creatorId: user.id,
+                file,
                 status,
                 startTime: new Date(startTime),
                 endTime: new Date(endTime)
@@ -57,13 +58,13 @@ const AssignmentController = {
             await course.save()
 
             return res.status(200).json({
-                message: "Tạo bài thi mới thành công",
+                message: "Tạo bài tập mới thành công",
                 slug: assignment._doc.slug
             })
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi tạo bài thi" })
+            res.status(400).json({ message: "Lỗi tạo bài tập" })
         }
     },
 
@@ -93,7 +94,7 @@ const AssignmentController = {
     UpdateAssignment: async (req, res) => {
         try {
             const username = req.user.sub
-            const { assignmentId, courseId, name, content, startTime, endTime, maxPoints, allowReSubmit, allowSubmitLate, status } = req.body
+            const { assignmentId, courseId, name, content, startTime, endTime, maxPoints, allowReSubmit, allowSubmitLate, status, file } = req.body
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
 
             const user = await User.findOne({ username })
@@ -123,6 +124,7 @@ const AssignmentController = {
                 maxPoints,
                 allowReSubmit,
                 allowSubmitLate,
+                file,
                 status,
                 startTime: new Date(startTime),
                 endTime: new Date(endTime)
@@ -139,7 +141,7 @@ const AssignmentController = {
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi tạo bài thi" })
+            res.status(400).json({ message: "Lỗi tạo bài tập" })
         }
     },
 
@@ -161,14 +163,14 @@ const AssignmentController = {
                 status: STATUS.PUBLIC
             }, { new: true })
             return res.status(200).json({
-                message: "Xuất bản bài thi thành công",
+                message: "Xuất bản bài tập thành công",
 
                 slug: exitsAssignment._doc.slug
             })
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi xuất bản bài thi" })
+            res.status(400).json({ message: "Lỗi xuất bản bài tập" })
         }
     },
     CloseAssignment: async (req, res) => {
@@ -196,14 +198,14 @@ const AssignmentController = {
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi đóng bài thi" })
+            res.status(400).json({ message: "Lỗi đóng bài tập" })
         }
     },
 
     DeleteAssignment: async (req, res) => {
         try {
             const username = req.user.sub
-            const { id } = req.body
+            const id = req.query.id
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -216,16 +218,15 @@ const AssignmentController = {
 
             console.log(exitsAssignment)
 
-            exitsAssignment = await Assignment.deleteOne(id)
+            exitsAssignment = await Assignment.deleteOne({"_id": mongoose.Types.ObjectId(id)})
+            
             return res.status(200).json({
                 message: "Xóa bài tập thành công",
-
-                slug: exitsAssignment._doc.slug
             })
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi xuất bản bài thi" })
+            res.status(400).json({ message: "Lỗi xuất bản bài tập" })
         }
     },
     getAssignmentByCourseOfTeacher: async (req, res) => {
@@ -239,9 +240,9 @@ const AssignmentController = {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
             const course = await Course.findOne({ courseId, creatorId: user.id })
-            .populate({
-                path: 'assignments'
-            })
+                .populate({
+                    path: 'assignments'
+                })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
             console.log(course)
 
@@ -269,11 +270,43 @@ const AssignmentController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const course = await Course.findOne({ courseId, student: {$in: user.id }})
-            .populate({
-                path: 'assignments',
-                match: {status: STATUS.PUBLIC}
+            const course = await Course.findOne({ courseId, student: { $in: user.id } })
+                .populate({
+                    path: 'assignments',
+                    match: { status: STATUS.PUBLIC }
+                })
+            if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
+            console.log(course)
+
+
+            if (course) {
+                // const result = listExam.map(item => {
+                return res.status(200).json(course._doc.assignments)
+            }
+            return res.status(400).json({
+                message: "Không tìm thấy bài tập",
             })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tìm bài tập" })
+        }
+    },
+    getAssignmentBySlugOfStudent: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const assignment = req.query.slug
+            const start = new Date().getTime()
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            const course = await Course.findOne({ courseId, student: { $in: user.id } })
+                .populate({
+                    path: 'assignments',
+                    match: { status: STATUS.PUBLIC }
+                })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
             console.log(course)
 
