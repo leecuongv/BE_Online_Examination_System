@@ -114,13 +114,6 @@ const ExamController = {
                 creatorId: userId
             });
 
-
-            let error = newExam.validateSync();
-            if (error)
-                return res.status(400).json({
-                    message: "Tạo khoá học không thành công"
-                })
-
             const exam = await newExam.save();
 
             return res.status(200).json({
@@ -172,13 +165,6 @@ const ExamController = {
                 startTime: new Date(startTime),
                 endTime: new Date(endTime)
             })
-            let error = exitExam.validateSync()
-            if (error) {
-                console.log(error)
-                return res.status(400).json({
-                    message: "Tạo bài thi thất bại!"
-                })
-            }
             //const exam = await newExam.save();
 
             //course.exams.push(exam.id);
@@ -323,14 +309,6 @@ const ExamController = {
 
 
             console.log(exitsExam)
-
-            let error = exitsExam.validateSync()
-            if (error) {
-                console.log(error)
-                return res.status(400).json({
-                    message: "Xuất bản bài thi thất bại!"
-                })
-            }
             const status = "public"
             exitsExam = await Exam.findByIdAndUpdate(id, {
                 status
@@ -360,14 +338,6 @@ const ExamController = {
 
             console.log(exitsExam)
 
-            let error = exitsExam.validateSync()
-            if (error) {
-                console.log(error)
-                return res.status(400).json({
-                    message: "Đóng bài thi thất bại!"
-                })
-            }
-
             exitsExam = await Exam.findByIdAndUpdate(id, {
                 status: STATUS.CLOSE
             }, { new: true })
@@ -395,14 +365,6 @@ const ExamController = {
 
 
             console.log(exitsExam)
-
-            let error = exitsExam.validateSync()
-            if (error) {
-                console.log(error)
-                return res.status(400).json({
-                    message: "Xuất bản bài thi thất bại!"
-                })
-            }
             exitsExam = await Exam.deleteOne(id)
             return res.status(200).json({
                 message: "Xuất bản bài thi thành công",

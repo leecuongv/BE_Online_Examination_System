@@ -77,7 +77,7 @@ const AssignmentController = {
             console.log(slug)
             const assignment = await Assignment.findOne({ slug, creatorId: user.id })
             if (assignment) {
-                return res.status(200).json(Assignment._doc)
+                return res.status(200).json(assignment._doc)
             }
 
             return res.status(400).json({
@@ -157,17 +157,8 @@ const AssignmentController = {
 
 
             console.log(exitsAssignment)
-
-            let error = exitsAssignment.validateSync()
-            if (error) {
-                console.log(error)
-                return res.status(400).json({
-                    message: "Xuất bản bài tập thất bại!"
-                })
-            }
-            const status = STATUS.PUBLIC
             exitsAssignment = await Assignment.findByIdAndUpdate(id, {
-                status
+                status: STATUS.PUBLIC
             }, { new: true })
             return res.status(200).json({
                 message: "Xuất bản bài thi thành công",
@@ -194,19 +185,11 @@ const AssignmentController = {
 
             console.log(exitsAssignment)
 
-            let error = exitsAssignment.validateSync()
-            if (error) {
-                console.log(error)
-                return res.status(400).json({
-                    message: "Đóng bài thi thất bại!"
-                })
-            }
-
             exitsAssignment = await Assignment.findByIdAndUpdate(id, {
                 status: STATUS.CLOSE
             }, { new: true })
             return res.status(200).json({
-                message: "Đóng bài thi thành công",
+                message: "Đóng bài tập thành công",
 
                 slug: exitsAssignment._doc.slug
             })
@@ -233,13 +216,6 @@ const AssignmentController = {
 
             console.log(exitsAssignment)
 
-            let error = exitsAssignment.validateSync()
-            if (error) {
-                console.log(error)
-                return res.status(400).json({
-                    message: "Xóa bài tập thất bại!"
-                })
-            }
             exitsAssignment = await Assignment.deleteOne(id)
             return res.status(200).json({
                 message: "Xóa bài tập thành công",
@@ -262,19 +238,17 @@ const AssignmentController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
+            const course = await Course.findOne({ courseId, creatorId: user.id })
+            .populate({
+                path: 'assignments'
+            })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
             console.log(course)
 
-            const listAssignment = await Course.findOne({ slug: course.slug })
-                .populate({
-                    path: 'assignments'
-                })
-            console.log(listAssignment)
 
-            if (listAssignment) {
+            if (course) {
                 // const result = listExam.map(item => {
-                return res.status(200).json(listAssignment._doc.assignments)
+                return res.status(200).json(course._doc.assignments)
             }
             return res.status(400).json({
                 message: "Không tìm thấy bài tập",
@@ -282,7 +256,7 @@ const AssignmentController = {
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Lỗi tạo bài tập" })
+            res.status(500).json({ message: "Lỗi tìm bài tập" })
         }
     },
     getAssignmentByCourseOfStudent: async (req, res) => {
@@ -295,19 +269,18 @@ const AssignmentController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
+            const course = await Course.findOne({ courseId, student: {$in: user.id }})
+            .populate({
+                path: 'assignments',
+                match: {status: STATUS.PUBLIC}
+            })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
             console.log(course)
 
-            const listAssignment = await Course.findOne({ slug: course.slug, 'assignment.status': STATUS.PRIVATE })
-                .populate({
-                    path: 'assignments'
-                })
-            console.log(listAssignment)
 
-            if (listAssignment) {
+            if (course) {
                 // const result = listExam.map(item => {
-                return res.status(200).json(listAssignment._doc.assignments)
+                return res.status(200).json(course._doc.assignments)
             }
             return res.status(400).json({
                 message: "Không tìm thấy bài tập",
@@ -315,7 +288,7 @@ const AssignmentController = {
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Lỗi tạo bài tập" })
+            res.status(500).json({ message: "Lỗi tìm bài tập" })
         }
     },
 

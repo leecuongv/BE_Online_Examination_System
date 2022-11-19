@@ -265,13 +265,6 @@ const QuestionBankController = {
                 description,
                 creatorId: userId
             });
-
-
-            let error = newQuestionBank.validateSync();
-            if (error)
-                return res.status(400).json({
-                    message: "Tạo ngân hàng câu hỏi không thành công. Vui lòng thử lại!"
-                })
             const questionBank = await newQuestionBank.save();
 
             return res.status(200).json({
