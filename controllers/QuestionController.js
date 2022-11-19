@@ -128,8 +128,8 @@ const QuestionController = {
                         content: element.content || "",
                         isCorrect: element.isCorrect || false
                     })
-                    await answer.save()
                     newQuestion.answers.push(answer.id)
+                    answer.save()
                 }))
 
                 exam.maxPoints = Number(exam.maxPoints) + Number(newQuestion.maxPoints)
@@ -139,13 +139,12 @@ const QuestionController = {
                 return newQuestion.save()
 
             });
-            await Promise.all(questions)
-
+            questions = await Promise.all(questions)
             await exam.save()
             console.log(new Date().getTime() - start.getTime())
             return res.status(200).json({
                 message: "Tạo câu hỏi mới thành công!",
-                //question: newQuestion,
+                questions
 
             })
 
@@ -177,16 +176,18 @@ const QuestionController = {
 
             await Promise.all(answers.map(async (element) => {
                 if (mongoose.Types.ObjectId.isValid(element.id)) {
-                    const answer = await Answer.findByIdAndUpdate(element.id, {
+                    newAnswers.push(element.id)
+                    return Answer.findByIdAndUpdate(element.id, {
                         content: element.content || "",
                         isCorrect: element.isCorrect || false
                     }, { upsert: true })
-                    newAnswers.push(answer.id)
+                    
                 }
                 else {
                     let newAnswer = new Answer({ content: element.content, isCorrect: element.isCorrect })
-                    await newAnswer.save()
+                    
                     newAnswers.push(newAnswer.id)
+                    return newAnswer.save()
                 }
             }))
             let newData = {

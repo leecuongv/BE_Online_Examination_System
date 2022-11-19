@@ -82,7 +82,7 @@ const StatisticController = {
                 )
                 return {
                     ...data,
-                    name: userId.fullname,
+                    name: userId?.fullname,
                     maxPoints: exam.maxPoints,
                     points
                 }

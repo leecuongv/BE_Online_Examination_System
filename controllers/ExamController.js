@@ -223,7 +223,7 @@ const ExamController = {
         try {
             //Lấy cái parameter
             const username = req.user?.sub
-            const { examId, questionBankId, questionIds, numberofNeedQuestions, random } = req.body
+            const { examId, questionBankSlug, questionIds, numberofNeedQuestions, random } = req.body
 
             const user = await User.findOne({ username })
             if (!user) {
@@ -234,7 +234,13 @@ const ExamController = {
             if (!exam)
                 return res.status(400).json({ message: "Bài kiểm tra không tồn tại!" })
 
-            let questionBank = await QuestionBank.findOne({ _id: new mongoose.Types.ObjectId(questionBankId), creatorId: user.id })
+            let questionBank = await QuestionBank.findOne({ slug:questionBankSlug, creatorId: user.id })
+                                            .populate({
+                                                path:'questions',
+                                                populate:{
+                                                    path:'questions.answers'
+                                                }
+                                            })
             if (!questionBank)
                 return res.status(400).json({
                     message: "Không tìm thấy ngân hàng câu hỏi!",
@@ -245,50 +251,54 @@ const ExamController = {
 
                 let noneExistQuestion = []
                 questionBank.questions.forEach(questionInQB => {
-                    if (!exam.questions.find(item => item.question.toString() === questionInQB.toString())) {
-                        noneExistQuestion.push(questionInQB)
+                    if (!exam.questions.find(item => item.question.toString() === questionInQB.id.toString())) {
+                        noneExistQuestion.push(questionInQB.id)
                     }
                 });
                 if (noneExistQuestion.length === 0) {
                     return res.status(400).json({ message: "Tất cả các câu hỏi đã tồn tại trong hệ thống" })
                 }
                 soCauHoiCanLay = noneExistQuestion.length <= numberofNeedQuestions ? noneExistQuestion.length : numberofNeedQuestions;
+                
+                noneExistQuestion = await Question.find({_id:{$in:noneExistQuestion}})
 
                 noneExistQuestion = noneExistQuestion.sort(() => Math.random() - 0.5);
                 for (let i = 0; i < soCauHoiCanLay; i++) {
                     let newQuetion = noneExistQuestion.pop()
-                    questionIdsTaked.push({ question: newQuetion })
-                    exam.questions.push({ question: newQuetion })
+                    questionIdsTaked.push(newQuetion)
+                    exam.questions.push({ question: newQuetion.id })
+                    exam.maxPoints += Number(newQuetion.maxPoints) || 0
+                    exam.numberofQuestions += 1
                 }
-                console.log(questionIds)
-
-
             }
 
             else {
                 let noneExistQuestion = []
                 questionIds.forEach(questionInBody => {
                     if (!exam.questions.find(item => item.question.toString() === questionInBody.toString())) {
-                        noneExistQuestion.push(questionInBody)
+                        if(mongoose.Types.ObjectId.isValid(questionInBody))
+                            noneExistQuestion.push(mongoose.Types.ObjectId(questionInBody))
                     }
                 })
                 if (noneExistQuestion.length === 0) {
                     return res.status(400).json({ message: "Tất cả các câu hỏi trong danh sách đã tồn tại trong hệ thống" })
                 }
 
+                noneExistQuestion = await Question.find({_id:{$in:noneExistQuestion}})
+
                 for (let i = 0; i < noneExistQuestion.length; i++) {
                     let newQuetion = noneExistQuestion.pop()
-                    questionIdsTaked.push({ question: newQuetion })
-                    exam.questions.push({ question: newQuetion })
+                    questionIdsTaked.push(newQuetion)
+                    exam.questions.push({ question: newQuetion.id })
+                    exam.maxPoints += Number(newQuetion.maxPoints) || 0
+                    exam.numberofQuestions += 1
                 }
-                console.log(questionIds)
             }
             await exam.save()
             return res.status(200).json({
                 message: "Lấy danh sách câu hỏi thành công",
                 questions: questionIdsTaked,
                 soCauHoiCanLay
-
             })
 
         } catch (error) {
