@@ -3,44 +3,44 @@ const autoinc = require("mongoose-plugin-autoinc");
 const { formatTimeUTC } = require("../utils/Timezone");
 const { COLLECTION, STATUS } = require("../utils/enum");
 
-const submitAssigmentSchema = mongoose.Schema({
-  assigmentId: {
+const submitAssignmentSchema = mongoose.Schema({
+  assignmentId: {
     type: mongoose.Schema.Types.ObjectId,
     require: true,
     default: null,
     ref: COLLECTION.EXAM,
   },
-  userId: {
+  creatorId: {
     type: mongoose.SchemaTypes.ObjectId,
     require: true,
     default: null,
     ref: COLLECTION.USER,
   },
-  content:{
+  content: {
     type: String,
-    default:""
+    default: ""
   },
   submitTime: {
     type: Date,
     default: new Date()// formatTimeUTC,
   },
-  file:{
+  file: {
     type: String,
-    default:""
+    default: ""
   },
   points: {
     type: Number,
-    default: 0,
-  },  
+    default: null,
+  },
 },
   { timestamps: true });
 
 
-  submitAssigmentSchema.method("toJSON", function () {
+submitAssignmentSchema.method("toJSON", function () {
   const { __v, ...object } = this.toObject();
   const { _id: id, ...result } = object;
   return { ...result, id };
 });
 
-const SubmitAssignment =  mongoose.model(COLLECTION.SUBMITASSIGNMEMT, submitAssigmentSchema);
+const SubmitAssignment = mongoose.model(COLLECTION.SUBMITASSIGNMENT, submitAssignmentSchema);
 module.exports = SubmitAssignment
