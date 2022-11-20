@@ -24,12 +24,12 @@ const SubmitAssignmentController = {
                 return res.status(200).json({ message: "Không nằm trong thời gian nộp bài!" })
 
             const newSubmitAssignment = new SubmitAssignment({
-                assignmentId,
-                userId: user.id,
+                assignmentId: assignmentId,
+                creatorId: user.id,
                 content,
                 submitTime: new Date(),
                 file,
-                point
+                point: null
             })
             let error = newSubmitAssignment.validateSync()
             if (error) {
@@ -103,7 +103,7 @@ const SubmitAssignmentController = {
             if (!submitAssignment)
                 return res.status(400).json({ message: "Không tồn tại thông tin nộp bài tập!" })
 
-            const updateSubmitAssignment = await SubmitAssignment.deleteOne(submitAssignmentId)
+            const updateSubmitAssignment = await SubmitAssignment.deleteOne({ "_id": mongoose.Types.ObjectId(submitAssignmentId) })
 
             return res.status(200).json({
                 message: "Xóa lịch sử nộp bài tập thành công"
@@ -114,10 +114,10 @@ const SubmitAssignmentController = {
             res.status(400).json({ message: "Lỗi nộp bài tập" })
         }
     },
-    Marking: async (req, res) => {
+    Mark: async (req, res) => {
         try {
             const username = req.user.sub;
-            const { submitAssignmentId, point } = req.body;
+            const { submitAssignmentId, points } = req.body;
             if (!username)
                 return res.status(400).json({ message: "Không có người dùng" });
             const user = await User.findOne({ username });
@@ -129,7 +129,7 @@ const SubmitAssignmentController = {
                 return res.status(400).json({ message: "Không tồn tại thông tin nộp bài tập!" })
             const updateSubmitAssignment = await SubmitAssignment.findByIdAndUpdate(
                 { "_id": new mongoose.Types.ObjectId(submitAssignmentId) },
-                { point: point },
+                { points: points },
                 { new: true })
 
             return res.status(200).json({
@@ -165,7 +165,54 @@ const SubmitAssignmentController = {
         }
     },
 
-};
+    GetSubmitAssignmentByAssignmentSlug: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const slug = req.query.slug
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+
+            const assignment = await Assignment.findOne({ slug: slug })
+            //console.log(assignment)
+
+            let submitAssignment = await SubmitAssignment.find({ creatorId: user.id, assignmentId: assignment.id })
+                .populate({
+                    path: "creatorId"
+                })
+                console.log(submitAssignment)
+            submitAssignment = submitAssignment.map(item => {
+                let { _id, creatorId, submitTime, maxPoint, points, ...data } = item._doc
+                return {
+                    //...data,
+                    id: _id,
+                    fullname: creatorId.fullname,
+                    submitTime,
+                    maxPoint,
+                    points
+                }
+            })
+
+            console.log(submitAssignment)
+
+            if (assignment) {
+                return res.status(200).json({
+                    submitAssignment
+                })
+            }
+            return res.status(400).json({
+                message: "Không tìm thấy bài tập",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tìm bài tập" })
+        }
+    },
+}
+
 
 
 

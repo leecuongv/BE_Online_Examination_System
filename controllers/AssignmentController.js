@@ -2,8 +2,8 @@ const Assignment = require("../models/Assignment")
 const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
-const QuestionBank = require("../models/QuestionBank");
 const { STATUS } = require("../utils/enum");
+const SubmitAssignment = require("../models/SubmitAssignment")
 
 const AssignmentController = {
     CreateAssignment: async (req, res) => {
@@ -218,8 +218,8 @@ const AssignmentController = {
 
             console.log(exitsAssignment)
 
-            exitsAssignment = await Assignment.deleteOne({"_id": mongoose.Types.ObjectId(id)})
-            
+            exitsAssignment = await Assignment.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
+
             return res.status(200).json({
                 message: "Xóa bài tập thành công",
             })
@@ -296,24 +296,24 @@ const AssignmentController = {
         try {
             //Lấy cái parameter
             const username = req.user?.sub
-            const assignment = req.query.slug
+            const slug = req.query.slug
             const start = new Date().getTime()
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const course = await Course.findOne({ courseId, student: { $in: user.id } })
-                .populate({
-                    path: 'assignments',
-                    match: { status: STATUS.PUBLIC }
+
+            const assignment = await Assignment.findOne({ slug: slug })
+            console.log(assignment)
+
+            const submitAssignment = await SubmitAssignment.findOne({ assignmentId: assignment.id })
+            console.log(submitAssignment)
+
+            if (assignment) {
+                return res.status(200).json({
+                    assignment: assignment,
+                    submitAssignment: submitAssignment
                 })
-            if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
-            console.log(course)
-
-
-            if (course) {
-                // const result = listExam.map(item => {
-                return res.status(200).json(course._doc.assignments)
             }
             return res.status(400).json({
                 message: "Không tìm thấy bài tập",

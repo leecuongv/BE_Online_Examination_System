@@ -7,17 +7,10 @@ router.post('/create', verifyToken, SubmitAssignmentController.Create);
 
 router.put('/update', verifyToken, SubmitAssignmentController.Update);
 router.delete('/', verifyToken, SubmitAssignmentController.Delete);
-router.put("/marking", verifyToken, SubmitAssignmentController.Marking)
-router.get("by-id", verifyToken, SubmitAssignmentController.GetSubmitAssignmentById)
+router.put("/mark", verifyToken, SubmitAssignmentController.Mark)
+router.get("/by-id", verifyToken, SubmitAssignmentController.GetSubmitAssignmentById)
 
-//router.get('/assignment-by-course-of-teacher', verifyToken, AssignmentController.getAssignmentByCourseOfTeacher)
+router.get("/by-assignment-slug", verifyToken, SubmitAssignmentController.GetSubmitAssignmentByAssignmentSlug)
 
-//router.get('/assignment-by-course-of-student', verifyToken, AssignmentController.getAssignmentByCourseOfStudent)
-
-//router.get('/by-slug', verifyToken, AssignmentController.getAssignmentBySlug);
-//router.get("/add-question-with-questionbank", verifyToken, ExamController.addQuestionWithQuestionBank)
-
-//router.put('/public', verifyToken, AssignmentController.PublicAssignment)
-//router.put('/close', verifyToken, AssignmentController.CloseAssignment)
 
 module.exports = router;

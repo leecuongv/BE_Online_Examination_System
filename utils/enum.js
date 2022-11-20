@@ -20,7 +20,7 @@ const COLLECTION = {
     QUESTIONBANK: "Question_bank",
     LOG: "Logs",
     ASSIGNMENT: "Assignment",
-    SUBMITASSIGNMEMT:"Submitted_assignment"
+    SUBMITASSIGNMENT:"Submit_assignment"
   };
 
 const TYPEOFPOINT = {
