@@ -95,15 +95,6 @@ const StatisticController = {
             return res.status(400).json({ message: 'Lỗi thống kê' })
         }
     },
-<<<<<<< HEAD
-    getAllBill: async(req,res) => {
-        try{
-            let listPayments = await Bill.find().populate('creatorId')
-            listPayments=listPayments.map(item=>{return {
-                id:item.id,
-                orderId:item.orderId,
-                fullname:item.creatorId.fullname,
-=======
     getNumberOfCourses: async (req, res) => {
         try {
             const numberOfCourses = await Course.countDocuments()
@@ -183,21 +174,12 @@ const StatisticController = {
                 id:item.id,
                 orderId:item.orderId,
                 name:item.userId.nickname,
->>>>>>> 7efc95651f5c9bb88f5e11374b68bd05865824e3
                 amount:item.amount,
                 description:item.description,
                 status:item.status,
                 method:item.method,
                 updatedAt: item.updatedAt
             }})
-<<<<<<< HEAD
-            return res.status(200).json(listPayments)
-        }catch(error){
-            console.log(error)
-            return res.status(500).json({message:"Không xác định"})
-        }
-    }
-=======
             return res.status(200).json(ResponseData(200,listPayments))
         }catch(error){
             console.log(error)
@@ -299,7 +281,6 @@ const StatisticController = {
             return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
         }
     },*/
->>>>>>> 7efc95651f5c9bb88f5e11374b68bd05865824e3
 
 }
 
