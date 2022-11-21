@@ -184,12 +184,12 @@ const UserController = {
             const deleteUser = await User.deleteOne({ _id: id })
             console.log(deleteUser)
             if (deleteUser)
-                return res.status(200).json(ResponseData(200, { message: "Xoá thành công" }))
-            return res.status(400).json(ResponseDetail(400, "Xoá thất bại"))
+                return res.status(200).json({ message: "Xoá thành công" })
+            return res.status(400).json({message:"Xoá thất bại"})
         }
         catch (error) {
             console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Lỗi cập nhật quyền tài khoản" }))
+            return res.status(500).json({message: "Lỗi cập nhật quyền tài khoản" })
         }
     },
    

@@ -198,7 +198,7 @@ const AdminController = {
                 })
             Course.find().sort({ name: -1 })
                 .then(result => {
-                    res.status(200).json(ResponseData(200, result))
+                    res.status(200).json( result)
                 }).
                 catch(err => {
                     console.log(err)
