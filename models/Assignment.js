@@ -30,6 +30,11 @@ const assignmentSchema = mongoose.Schema(
       require: true,
       default: VIEWPOINT.NO,
     },
+    maxPoints: {
+      type: Number,
+      require: true,
+      default: 1,
+    },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       default: null

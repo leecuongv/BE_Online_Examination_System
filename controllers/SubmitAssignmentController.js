@@ -176,31 +176,31 @@ const SubmitAssignmentController = {
             }
 
             const assignment = await Assignment.findOne({ slug: slug })
+            const course = await Course.findById(assignment.courseId).populate('students')
             //console.log(assignment)
 
-            let submitAssignment = await SubmitAssignment.find({ creatorId: user.id, assignmentId: assignment.id })
-                .populate({
-                    path: "creatorId"
-                })
-                console.log(submitAssignment)
-            submitAssignment = submitAssignment.map(item => {
-                let { _id, creatorId, submitTime, maxPoint, points, ...data } = item._doc
+            let submitAssignment = await SubmitAssignment.find({ assignmentId: assignment.id })
+               
+            
+            let results = course.students.map(student=>{
+                let { _id:studentId,fullname,avatar} = student._doc
+                let submitAssignmentOfStudent = submitAssignment.find(item=>item.creatorId.toString() === studentId.toString())
+                
                 return {
-                    //...data,
-                    id: _id,
-                    fullname: creatorId.fullname,
-                    submitTime,
-                    maxPoint,
-                    points
+                    id:submitAssignmentOfStudent?.id,
+                    fullname,
+                    avatar,
+                    maxPoints:assignment.maxPoints,
+                    submitTime:submitAssignmentOfStudent?.submitTime,
+                    points:submitAssignmentOfStudent?.points,
+                    endTime:assignment.endTime
                 }
             })
 
-            console.log(submitAssignment)
+            console.log(results)
 
             if (assignment) {
-                return res.status(200).json({
-                    submitAssignment
-                })
+                return res.status(200).json(results)
             }
             return res.status(400).json({
                 message: "Không tìm thấy bài tập",

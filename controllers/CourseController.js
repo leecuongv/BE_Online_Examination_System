@@ -275,6 +275,7 @@ const CourseController = {
                         }
                     }
                 },
+                { $match: { _id: { $ne: null }}},
                 {
                     $project: {
                         id: "$doc._id",

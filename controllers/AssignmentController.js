@@ -28,8 +28,8 @@ const AssignmentController = {
 
             }
 
-            if ((new Date(startTime)) < (new Date(course.startTime)) || (new Date(endTime)) > (new Date(course.endTime)))
-                return res.status(400).json({ message: "Thời gian của bài tập không hợp lệ" })
+            // if ((new Date(startTime)) < (new Date(course.startTime)) || (new Date(endTime)) > (new Date(course.endTime)))
+            //     return res.status(400).json({ message: "Thời gian của bài tập không hợp lệ" })
 
             const newAssignment = await new Assignment({
                 courseId,
@@ -114,8 +114,8 @@ const AssignmentController = {
 
             }
 
-            if ((new Date(startTime)) < (new Date(course.startTime)) || (new Date(endTime)) > (new Date(course.endTime)))
-                return res.status(400).json({ message: "Thời gian của bài tập không hợp lệ" })
+            // if ((new Date(startTime)) < (new Date(course.startTime)) || (new Date(endTime)) > (new Date(course.endTime)))
+            //     return res.status(400).json({ message: "Thời gian của bài tập không hợp lệ" })
 
             let newData = {
                 courseId,
@@ -215,7 +215,9 @@ const AssignmentController = {
             let exitsAssignment = await Assignment.findById(id)
             if (!exitsAssignment) return res.status(400).json({ message: "Không có bài tập" })
 
-
+            let course = await Course.findById(exitsAssignment.courseId)
+            course.assignments = course.assignments.filter(item=>item.toString() !== id)
+            await course.save()
             console.log(exitsAssignment)
 
             exitsAssignment = await Assignment.deleteOne({ "_id": mongoose.Types.ObjectId(id) })

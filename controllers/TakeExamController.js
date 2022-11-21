@@ -298,10 +298,10 @@ const TakeExamController = {
     try {
       const { takeExamId } = req.query;
       const username = req.user.sub;
-      if (!username)
-        return res.status(400).json({ message: "Không có người dùng" });
+   
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
+
       const takeExam = await TakeExam.findById(takeExamId).populate('examId')
       const takeExams = await TakeExam.find({ examId: takeExam.examId.id, userId: user.id })
       const index = takeExams.findIndex(item => item.id.toString() === takeExamId)
@@ -309,12 +309,12 @@ const TakeExamController = {
       if (takeExam.examId.viewPoint === 'no')
         return res.status(200).json({
           name: takeExam.examId.name,
-          lanThi: index,
+          lanThi: index + 1,
 
         })
       return res.status(200).json({
         name: takeExam.examId.name,
-        lanThi: index,
+        lanThi: index + 1,
         points: takeExam.points,
         maxPoints: takeExam.examId.maxPoints
       })
@@ -363,8 +363,8 @@ const TakeExamController = {
       return res.status(200).json(
         {
           name: exam.name,
-          startTime: exam.startTime,
-          submitTime: exam.submitTime,
+          startTime: takeExam.startTime,
+          submitTime: takeExam.submitTime,
           questions: questions
         })
 
