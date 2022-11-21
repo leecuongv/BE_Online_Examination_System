@@ -11,6 +11,7 @@ const StatisticRoutes = require("./StatisticRoutes")
 const UploadRoutes = require("./UploadRoutes")  
 const AssignmentRoutes = require("./AssignmentRoutes")
 const SubmitAssignmentRoutes = require("./SubmitAssignmentRoutes")
+const AdminRoutes = require("./AdminRoutes")
 
 module.exports = { 
     AuthRoute, 
@@ -25,5 +26,6 @@ module.exports = {
     StatisticRoutes,
     UploadRoutes,
     AssignmentRoutes,
-    SubmitAssignmentRoutes
+    SubmitAssignmentRoutes,
+    AdminRoutes
  }

@@ -14,7 +14,6 @@ router.get('/assignment-by-course-of-teacher', verifyToken, AssignmentController
 router.get('/assignment-by-course-of-student', verifyToken, AssignmentController.getAssignmentByCourseOfStudent)
 
 router.get('/by-slug', verifyToken, AssignmentController.getAssignmentBySlug);
-//router.get("/add-question-with-questionbank", verifyToken, ExamController.addQuestionWithQuestionBank)
 router.get("/by-slug-of-student", verifyToken, AssignmentController.getAssignmentBySlugOfStudent)
 router.put('/public', verifyToken, AssignmentController.PublicAssignment)
 router.put('/close', verifyToken, AssignmentController.CloseAssignment)
