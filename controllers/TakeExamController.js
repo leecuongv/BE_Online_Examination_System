@@ -388,9 +388,9 @@ const TakeExamController = {
       const index = takeExams.findIndex(item => item.id.toString() === takeExamId)
       if (!takeExam) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
 
-      const newLog = await new Log({
+      const newLog = await new ExamResult({
         action,
-        time: new Date(),
+        time: new Date(time),
         takeExamId
       })
 
