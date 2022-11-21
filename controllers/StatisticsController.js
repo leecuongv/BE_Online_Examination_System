@@ -7,7 +7,7 @@ const TakeExam = require("../models/TakeExam");
 const { STATUS, VIEWPOINT } = require("../utils/enum");
 const moment = require("moment/moment");
 const ExamResult = require("../models/ExamResult");
-
+const  Bill  = require('../models/Bill')
 const StatisticController = {
     getTakeExamByStudent: async (req, res) => {
         try {
@@ -32,7 +32,7 @@ const StatisticController = {
                 )
                 return {
                     ...data,
-                    name: userId.fullname,
+                    name: userId?.fullname,
                     maxPoints: exam.maxPoints,
                     points
                 }
@@ -66,12 +66,9 @@ const StatisticController = {
             if (exam.creatorId.toString() !== user.id.toString()) {//nếu không phải người tạo khoá học thì không trả về kết quả
                 return res.status(403).json({ message: "Không có quyền truy cập" })
             }
-            let takeExams = await TakeExam.find({ examId: exam.id })
-                .populate({
-                    path: 'userId',
-                    //select: 'fullname'
-                })
+            let takeExams = await TakeExam.find({ examId: exam.id }).populate('userId')
             takeExams = takeExams.map(item => {
+                console.log(item)
                 let { result, points, userId, ...data } = item._doc
                 points = result.reduce((total, current)=>{
                     
@@ -98,6 +95,25 @@ const StatisticController = {
             return res.status(400).json({ message: 'Lỗi thống kê' })
         }
     },
+    getAllBill: async(req,res) => {
+        try{
+            let listPayments = await Bill.find().populate('creatorId')
+            listPayments=listPayments.map(item=>{return {
+                id:item.id,
+                orderId:item.orderId,
+                fullname:item.creatorId.fullname,
+                amount:item.amount,
+                description:item.description,
+                status:item.status,
+                method:item.method,
+                updatedAt: item.updatedAt
+            }})
+            return res.status(200).json(listPayments)
+        }catch(error){
+            console.log(error)
+            return res.status(500).json({message:"Không xác định"})
+        }
+    }
 
 }
 
