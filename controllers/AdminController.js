@@ -21,10 +21,10 @@ const AdminController = {
                     message: "Không có quyền truy cập"
                 })
             const userId = req.body.userId;
-            const updateUser = await User.findByIdAndUpdate(userId, { active: true }, { new: true }).populate('roles')
+            const updateUser = await User.findByIdAndUpdate(userId, { active: true }, { new: true })
 
             if (updateUser)
-                return res.status(200).json(ResponseData(200, updateUser))
+                return res.status(200).json(updateUser)
             return res.status(400).json({ message: "Kích hoạt tài khoản thất bại" })
         }
         catch (error) {
@@ -45,9 +45,9 @@ const AdminController = {
                     message: "Không có quyền truy cập"
                 })
             const userId = req.body.userId;
-            const updateUser = await User.findByIdAndUpdate(userId, { active: false }, { new: true }).populate('roles')
+            const updateUser = await User.findByIdAndUpdate(userId, { active: false }, { new: true })
             if (updateUser)
-                return res.status(200).json(ResponseData(200, updateUser))
+                return res.status(200).json(updateUser)
             return res.status(400).json({ message: "Hủy kích hoạt tài khoản thất bại" })
         }
         catch (error) {
@@ -81,9 +81,9 @@ const AdminController = {
             roles = await getRoles(rolesRequest)
             if (username) {
                 const newUser = await User.updateOne({ username }, { roles: roles.map(item => item.id) }, { new: true })
-                if (newUser) {
+                if (newUser)
                     return res.status(200).json({ message: "Cập nhật quyền thành công" })
-                }
+
                 else
                     return res.status(400).json({ message: "Cập nhật không thành công" })
             } else
@@ -206,7 +206,7 @@ const AdminController = {
                 })
         } catch (error) {
             console.log(error)
-            res.status(500).json({message: "Lỗi lấy danh sách khóa học!" })
+            res.status(500).json({ message: "Lỗi lấy danh sách khóa học!" })
         }
     },
 
