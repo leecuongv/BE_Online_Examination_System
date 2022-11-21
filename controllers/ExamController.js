@@ -147,8 +147,7 @@ const ExamController = {
 
             }
 
-            let exitExam = new Exam({
-                id,
+            let data = {
                 name,
                 description,
                 creatorId: user.id,
@@ -164,16 +163,13 @@ const ExamController = {
                 status,
                 startTime: new Date(startTime),
                 endTime: new Date(endTime)
-            })
+            }
             //const exam = await newExam.save();
 
             //course.exams.push(exam.id);
             //await course.save()
 
-            exitExam = await Exam.findByIdAndUpdate(id, {
-                name, description, numberofQuestions, viewPoint, viewAnswer,
-                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, startTime, endTime
-            }, { new: true })
+            exitExam = await Exam.findByIdAndUpdate(id, data, { new: true })
             return res.status(200).json({
                 message: "Tạo bài thi mới thành công",
                 slug: exitExam._doc.slug
@@ -214,9 +210,6 @@ const ExamController = {
             console.log(error);
             res.status(400).json({ message: "Lỗi lấy danh sách câu hỏi" });
         }
-
-    },
-    createLogs: async (req, res) => {
 
     },
     addQuestionWithQuestionBank: async (req, res) => {

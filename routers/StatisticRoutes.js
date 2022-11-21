@@ -14,5 +14,4 @@ router.get("/list-bill-by-user", verifyToken, StatisticController.GetListBillByU
 router.get("/sum-revenue", verifyToken, StatisticController.GetSumRevenue)
 router.get("/total-revenue-by-day", verifyToken, StatisticController.GetTotalRevenueByDay)
 
-
 module.exports = router;
