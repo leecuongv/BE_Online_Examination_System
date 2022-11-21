@@ -230,7 +230,7 @@ const StatisticController = {
             return res.status(200).json(ResponseData(200, listPayments))
         } catch (error) {
             console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Không xác định" }))
+            return res.status(500).json({ message: "Không xác định" })
         }
     },
     GetListBillByUser: async (req, res) => {

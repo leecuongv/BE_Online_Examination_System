@@ -25,11 +25,11 @@ const AdminController = {
 
             if (updateUser)
                 return res.status(200).json(ResponseData(200, updateUser))
-            return res.status(400).json(ResponseDetail(400, { message: "Kích hoạt tài khoản thất bại" }))
+            return res.status(400).json({ message: "Kích hoạt tài khoản thất bại" })
         }
         catch (error) {
             console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Lỗi kích hoạt tài khoản" }))
+            return res.status(500).json({ message: "Lỗi kích hoạt tài khoản" })
         }
     },
 
@@ -48,11 +48,11 @@ const AdminController = {
             const updateUser = await User.findByIdAndUpdate(userId, { active: false }, { new: true }).populate('roles')
             if (updateUser)
                 return res.status(200).json(ResponseData(200, updateUser))
-            return res.status(400).json(ResponseDetail(400, { message: "Hủy kích hoạt tài khoản thất bại" }))
+            return res.status(400).json({ message: "Hủy kích hoạt tài khoản thất bại" })
         }
         catch (error) {
             console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Lỗi hủy kích hoạt tài khoản" }))
+            return res.status(400).json({ message: "Lỗi hủy kích hoạt tài khoản" })
         }
     },
 
@@ -82,16 +82,16 @@ const AdminController = {
             if (username) {
                 const newUser = await User.updateOne({ username }, { roles: roles.map(item => item.id) }, { new: true })
                 if (newUser) {
-                    return res.status(200).json(ResponseData(200, { message: "Cập nhật quyền thành công" }))
+                    return res.status(200).json({ message: "Cập nhật quyền thành công" })
                 }
                 else
-                    return res.status(400).json(ResponseDetail(400, { message: "Cập nhật không thành công" }))
+                    return res.status(400).json({ message: "Cập nhật không thành công" })
             } else
-                return res.status(400).json(ResponseDetail(400, { message: "Không có username" }))
+                return res.status(400).json({ message: "Không có username" })
         }
         catch (error) {
             console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Lỗi cập nhật quyền tài khoản" }))
+            return res.status(500).json({ message: "Lỗi cập nhật quyền tài khoản" })
         }
     },
 
@@ -124,7 +124,7 @@ const AdminController = {
         }
         catch (error) {
             console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Lỗi xóa người dùng" }))
+            return res.status(500).json({ message: "Lỗi xóa người dùng" })
         }
     },
 
@@ -145,11 +145,11 @@ const AdminController = {
                 }).
                 catch(err => {
                     console.log(err)
-                    res.status(400).json(ResponseDetail(400, { message: "Lỗi lấy danh sách người dùng!" }))
+                    res.status(400).json({ message: "Lỗi lấy danh sách người dùng!" })
                 })
         } catch (error) {
             console.log(error)
-            res.status(400).json(ResponseDetail(400, { message: "Lỗi lấy danh sách người dùng" }))
+            res.status(400).json({ message: "Lỗi lấy danh sách người dùng" })
         }
     },
 
@@ -181,7 +181,7 @@ const AdminController = {
             })
         }
         catch (error) {
-            res.status(400).json(ResponseDetail(400, { message: "Lỗi xóa khóa học" }))
+            res.status(400).json({ message: "Lỗi xóa khóa học" })
         }
     },
 
@@ -202,11 +202,11 @@ const AdminController = {
                 }).
                 catch(err => {
                     console.log(err)
-                    res.status(500).json(ResponseDetail(500, { message: "Lấy danh sách khóa học thất bại" }))
+                    res.status(500).json({ message: "Lấy danh sách khóa học thất bại" })
                 })
         } catch (error) {
             console.log(error)
-            res.status(500).json(ResponseDetail(500, { message: "Lỗi lấy danh sách khóa học!" }))
+            res.status(500).json({message: "Lỗi lấy danh sách khóa học!" })
         }
     },
 
