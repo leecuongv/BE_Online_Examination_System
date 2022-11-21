@@ -23,12 +23,12 @@ const StatisticController = {
             let takeExams = await TakeExam.find({ userId: user.id, examId: exam.id })
             takeExams = takeExams.map(item => {
                 let { result, points, userId, ...data } = item._doc
-                points = result.reduce((total, current)=>{
-                    
-                    total+= current.point
+                points = result.reduce((total, current) => {
+
+                    total += current.point
                     return total
                 },
-                0
+                    0
                 )
                 return {
                     ...data,
@@ -39,7 +39,7 @@ const StatisticController = {
             })
             console.log("------------------------------------------------------------------------------")
             console.log(takeExams)
-            
+
             /*let results = takeExams.map(item => ({
                 ...item._doc,
                 maxPoints: exam.maxPoints
@@ -70,12 +70,12 @@ const StatisticController = {
             takeExams = takeExams.map(item => {
                 console.log(item)
                 let { result, points, userId, ...data } = item._doc
-                points = result.reduce((total, current)=>{
-                    
-                    total+= current.point
+                points = result.reduce((total, current) => {
+
+                    total += current.point
                     return total
                 },
-                0
+                    0
                 )
                 return {
                     ...data,
@@ -86,7 +86,7 @@ const StatisticController = {
             })
             console.log("------------------------------------------------------------------------------")
             console.log(takeExams)
-            
+
 
             return res.status(200).json(takeExams)
         }
@@ -95,6 +95,7 @@ const StatisticController = {
             return res.status(400).json({ message: 'Lỗi thống kê' })
         }
     },
+<<<<<<< HEAD
     getAllBill: async(req,res) => {
         try{
             let listPayments = await Bill.find().populate('creatorId')
@@ -102,18 +103,203 @@ const StatisticController = {
                 id:item.id,
                 orderId:item.orderId,
                 fullname:item.creatorId.fullname,
+=======
+    getNumberOfCourses: async (req, res) => {
+        try {
+            const numberOfCourses = await Course.countDocuments()
+            if (!numberOfCourses)
+                return res.status(400).json({
+                    message: "Không đếm được số lượng khóa học!"
+                })
+            return res.status(400).json({
+                numberOfCourses
+            })
+
+        }catch (error) {
+            console.log(error)
+            return res.status(400).json({message:"Lỗi đếm số lượng khóa học!"})
+        }
+    },
+    getNumberOfExams: async (req, res) => {
+        try {
+            const numberOfExam = await Exam.countDocuments()
+            if (!numberOfExam)
+                return res.status(400).json({
+                    message: "Không đếm được số lượng bài kiểm tra!"
+                })
+            return res.status(400).json({
+                numberOfExam
+            })
+
+        }catch (error) {
+            console.log(error)
+            return res.status(400).json({message:"Lỗi đếm số lượng bài kiểm tra!"})
+        }
+    },
+    getNumberOfUsers: async (req, res) => {
+        try {
+            const numberOfUsers = await User.countDocuments()
+            if (!numberOfUsers)
+                return res.status(400).json({
+                    message: "Không đếm được số lượng người dùng!"
+                })
+            return res.status(400).json({
+                numberOfUsers
+            })
+
+        }catch (error) {
+            console.log(error)
+            return res.status(400).json({message:"Lỗi đếm số lượng người dùng!"})
+        }
+    },
+    /*
+    getListBills: async(req,res) => {
+        try{
+            let listPayments= await Bill.find().populate('userId')
+            listPayments=listPayments.map(item=>{return {
+                orderId:item.orderId,
+                name:item.userId.nickname,
+                amount:item.amount,
+                description:item.description,
+                status:item.status,
+                createdAt: item.createdAt
+            }})
+            return res.status(200).json(ResponseData(200,listPayments))
+        }catch(error){
+            console.log(error)
+            return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
+        }
+    },
+    getListBillByUser: async(req,res) => {
+        try{
+            const username = req.user?.sub
+            const user = await User.findOne({username})
+            if(!user){
+                return res.status(400).json(ResponseDetail(400,{message:"Không xác định tài khoản"}))
+            }
+            let listPayments= await Bill.find({userId:user.id})
+           
+            listPayments=listPayments.map(item=>{return {
+                id:item.id,
+                orderId:item.orderId,
+                name:item.userId.nickname,
+>>>>>>> 7efc95651f5c9bb88f5e11374b68bd05865824e3
                 amount:item.amount,
                 description:item.description,
                 status:item.status,
                 method:item.method,
                 updatedAt: item.updatedAt
             }})
+<<<<<<< HEAD
             return res.status(200).json(listPayments)
         }catch(error){
             console.log(error)
             return res.status(500).json({message:"Không xác định"})
         }
     }
+=======
+            return res.status(200).json(ResponseData(200,listPayments))
+        }catch(error){
+            console.log(error)
+            return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
+        }
+    },
+    getSumRevenue: async(req,res)=>{
+        try{
+            let listPayments= await Bill.find()
+            var tempTotalRevenue=0
+            listPayments.forEach((item,index)=>{
+                tempTotalRevenue+=item.amount
+            })
+            return res.status(200).json(ResponseData(200,{totalRevenue:tempTotalRevenue}))
+        }catch(error){
+            console.log(error)
+            return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
+        }
+    },
+    GetTotalRevenueByDay: async (req, res) => {
+        try{
+            let listPayments= await Bill.find()
+            listPayments=listPayments.map(item=>{
+                return {
+                    item,
+                    dateAdd:format(item.createdAt, 'yyyy-MM-dd')
+                }
+            })
+            var result = [];
+            listPayments.reduce(function(res, value) {
+            if (!res[value.dateAdd]) {
+                res[value.dateAdd] = { dateAdd: value.dateAdd, amount: 0 };
+                result.push(res[value.dateAdd])
+            }
+            res[value.dateAdd].amount += value.item.amount;
+            return res;
+            }, {});
+
+            return res.status(200).json(ResponseData(200,result))
+        }catch(error){
+            console.log(error)
+            return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
+        }
+    },
+    GetTotalCreateNovelByDay: async (req, res) => {
+        try {
+            let listNovels= await Novel.find()
+            listNovels=listNovels.map(item=>{
+                return {
+                    item,
+                    dateAdd:format(item.createdAt, 'yyyy-MM-dd')
+                }
+            })
+            var result = [];
+            listNovels.reduce(function(res, value) {
+            if (!res[value.dateAdd]) {
+                res[value.dateAdd] = { dateAdd: value.dateAdd, sum: 0 };
+                result.push(res[value.dateAdd])
+            }
+            res[value.dateAdd].sum++;
+            return res;
+            }, {});
+
+            return res.status(200).json(ResponseData(200,result))
+            
+        } catch (error) {
+            console.log(error)
+            res.status(500).json(ResponseDetail(500, { message: "Lỗi GetNovels" }))
+        }
+    },
+    GetTotalNewUserByDay: async (req, res) => {
+        try{
+            let listUsers= await User.find()
+            listUsers=listUsers.map(item=>{
+                if(item._doc.hasOwnProperty('createdAt')){
+                    return {
+                        item,
+                        dateAdd:format(item.createdAt, 'yyyy-MM-dd')
+                    }
+                }
+                return {
+                    item,
+                    dateAdd:"2022-04-08"
+                }
+            })
+            var result = [];
+            listUsers.reduce(function(res, value) {
+            if (!res[value.dateAdd]) {
+                res[value.dateAdd] = { dateAdd: value.dateAdd, sum: 0 };
+                result.push(res[value.dateAdd])
+            }
+            res[value.dateAdd].sum++;
+            return res;
+            }, {});
+
+            return res.status(200).json(ResponseData(200,result))
+        }catch(error){
+            console.log(error)
+            return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
+        }
+    },*/
+>>>>>>> 7efc95651f5c9bb88f5e11374b68bd05865824e3
 
 }
 
