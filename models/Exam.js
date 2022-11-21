@@ -113,5 +113,5 @@ examSchema.plugin(
     field: "slug"
   }
 );
-
-module.exports = mongoose.model(COLLECTION.EXAM, examSchema);
+const Exam = mongoose.model(COLLECTION.EXAM, examSchema);
+module.exports = Exam

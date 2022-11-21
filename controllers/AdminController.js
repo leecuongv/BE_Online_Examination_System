@@ -10,7 +10,7 @@ const ExamResult = require("../models/ExamResult");
 
 const AdminController = {
 
-    activeByAdmin: async (req, res) => {
+    activeUserByAdmin: async (req, res) => {
         try {
             const admin = req.user.sub
             if (!admin)
@@ -34,7 +34,7 @@ const AdminController = {
         }
     },
 
-    inactiveByAdmin: async (req, res) => {
+    inactiveUserByAdmin: async (req, res) => {
         try {
             const admin = req.user.sub
             if (!admin)
@@ -57,7 +57,7 @@ const AdminController = {
         }
     },
 
-    updateRoles: async (req, res) => {
+    updateUserRole: async (req, res) => {
         try {
             const admin = req.user.sub
             if (!admin)
@@ -96,7 +96,7 @@ const AdminController = {
         }
     },
 
-    deleteAccount: async (req, res) => {
+    deleteUserById: async (req, res) => {
         try {
             const admin = req.user.sub
             if (!admin)
@@ -107,7 +107,7 @@ const AdminController = {
                 return res.status(400).json({
                     message: "Không có quyền truy cập"
                 })
-            const userId = req.body.userId;
+            const userId = req.query.id;
             const user = await User.findById(userId)
             if (!user)
                 return res.status(400).json({
@@ -153,6 +153,7 @@ const AdminController = {
             res.status(400).json(ResponseDetail(400, { message: "Lỗi lấy danh sách người dùng" }))
         }
     },
+
     deleteCourseById: async (req, res) => {
         try {
             const admin = req.user.sub
@@ -184,6 +185,7 @@ const AdminController = {
             res.status(400).json(ResponseDetail(400, { message: "Lỗi xóa khóa học" }))
         }
     },
+
     GetListCourse: (req, res) => {
         try {
             const admin = req.user.sub
@@ -259,3 +261,4 @@ const AdminController = {
 
 
 } */
+module.exports = { AdminController }
