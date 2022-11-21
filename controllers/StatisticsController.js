@@ -97,6 +97,15 @@ const StatisticController = {
     },
     getNumberOfCourses: async (req, res) => {
         try {
+            const admin = req.user.sub
+            if (!admin)
+                return res.status(400).json({
+                    message: "Không tồn tại tài khoản"
+                })
+            if (admin.role !== ROLES.ADMIN)
+                return res.status(400).json({
+                    message: "Không có quyền truy cập"
+                })
             const numberOfCourses = await Course.countDocuments()
             if (!numberOfCourses)
                 return res.status(400).json({
@@ -106,13 +115,23 @@ const StatisticController = {
                 numberOfCourses
             })
 
-        }catch (error) {
+        } catch (error) {
             console.log(error)
-            return res.status(400).json({message:"Lỗi đếm số lượng khóa học!"})
+            return res.status(400).json({ message: "Lỗi đếm số lượng khóa học!" })
+
         }
     },
     getNumberOfExams: async (req, res) => {
         try {
+            const admin = req.user.sub
+            if (!admin)
+                return res.status(400).json({
+                    message: "Không tồn tại tài khoản"
+                })
+            if (admin.role !== ROLES.ADMIN)
+                return res.status(400).json({
+                    message: "Không có quyền truy cập"
+                })
             const numberOfExam = await Exam.countDocuments()
             if (!numberOfExam)
                 return res.status(400).json({
@@ -122,13 +141,23 @@ const StatisticController = {
                 numberOfExam
             })
 
-        }catch (error) {
+        } catch (error) {
             console.log(error)
-            return res.status(400).json({message:"Lỗi đếm số lượng bài kiểm tra!"})
+            return res.status(400).json({ message: "Lỗi đếm số lượng bài kiểm tra!" })
+
         }
     },
     getNumberOfUsers: async (req, res) => {
         try {
+            const admin = req.user.sub
+            if (!admin)
+                return res.status(400).json({
+                    message: "Không tồn tại tài khoản"
+                })
+            if (admin.role !== ROLES.ADMIN)
+                return res.status(400).json({
+                    message: "Không có quyền truy cập"
+                })
             const numberOfUsers = await User.countDocuments()
             if (!numberOfUsers)
                 return res.status(400).json({
@@ -138,9 +167,51 @@ const StatisticController = {
                 numberOfUsers
             })
 
-        }catch (error) {
+        } catch (error) {
             console.log(error)
-            return res.status(400).json({message:"Lỗi đếm số lượng người dùng!"})
+            return res.status(400).json({ message: "Lỗi đếm số lượng người dùng!" })
+        }
+    },
+
+    GetTotalNewUsersByDay: async (req, res) => {
+        try {
+            const admin = req.user.sub
+            if (!admin)
+                return res.status(400).json({
+                    message: "Không tồn tại tài khoản"
+                })
+            if (admin.role !== ROLES.ADMIN)
+                return res.status(400).json({
+                    message: "Không có quyền truy cập"
+                })
+            let listUsers = await User.find()
+            listUsers = listUsers.map(item => {
+                if (item._doc.hasOwnProperty('createdAt')) {
+                    return {
+                        item,
+                        dateAdd: format(item.createdAt, 'yyyy-MM-dd')
+                    }
+                }
+                return {
+                    item,
+                    dateAdd: "2022-04-08"
+                }
+            })
+            var result = [];
+            listUsers.reduce(function (res, value) {
+                if (!res[value.dateAdd]) {
+                    res[value.dateAdd] = { dateAdd: value.dateAdd, sum: 0 };
+                    result.push(res[value.dateAdd])
+                }
+                res[value.dateAdd].sum++;
+                return res;
+            }, {});
+
+            return res.status(200).json(result)
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ message: "Không xác định" })
+
         }
     },
     /*
