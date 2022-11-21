@@ -291,10 +291,10 @@ const StatisticController = {
                 return res;
             }, {});
 
-            return res.status(200).json(ResponseData(200, result))
+            return res.status(200).json(result)
         } catch (error) {
             console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Không xác định" }))
+            return res.status(500).json( { message: "Không xác định" })
         }
     },
     /*
