@@ -44,7 +44,7 @@ const AuthController = {
 
             temp = await User.findOne({ email: req.body.email,type:TYPE_ACCOUNT.NORMAL })
             if (temp) {
-                return res.status(400).json(ResponseDetail(400, { username: "Email đã tồn tại" }))
+                return res.status(400).json({username: "Email đã tồn tại" })
             }
             const activeCode = jwt.sign(
                 { email },
