@@ -111,7 +111,7 @@ const StatisticController = {
 
         }catch (error) {
             console.log(error)
-            return res.status(400).json(message:"Lỗi đếm số lượng khóa học!"))
+            return res.status(400).json(message:"Lỗi đếm số lượng khóa học!")
         }
     },
     getNumberOfExams: async (req, res) => {
