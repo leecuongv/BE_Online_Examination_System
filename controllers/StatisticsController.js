@@ -9,7 +9,7 @@ const moment = require("moment/moment");
 const ExamResult = require("../models/ExamResult");
 const  Bill  = require('../models/Bill')
 const StatisticController = {
-    getTakeExamByStudent: async (req, res) => {
+    GetTakeExamByStudent: async (req, res) => {
         try {
 
             const username = req.user.sub
@@ -51,7 +51,7 @@ const StatisticController = {
             return res.status(500).json({ message: 'Lỗi thống kê' })
         }
     },
-    getTakeExamByTeacher: async (req, res) => {
+    GetTakeExamByTeacher: async (req, res) => {
         try {
 
             const username = req.user.sub
@@ -95,7 +95,7 @@ const StatisticController = {
             return res.status(400).json({ message: 'Lỗi thống kê' })
         }
     },
-    getNumberOfCourses: async (req, res) => {
+    GetNumberOfCourses: async (req, res) => {
         try {
             const admin = req.user.sub
             if (!admin)
@@ -121,7 +121,7 @@ const StatisticController = {
 
         }
     },
-    getNumberOfExams: async (req, res) => {
+    GetNumberOfExams: async (req, res) => {
         try {
             const admin = req.user.sub
             if (!admin)
@@ -147,7 +147,7 @@ const StatisticController = {
 
         }
     },
-    getNumberOfUsers: async (req, res) => {
+    GetNumberOfUsers: async (req, res) => {
         try {
             const admin = req.user.sub
             if (!admin)
@@ -214,87 +214,90 @@ const StatisticController = {
 
         }
     },
-    /*
-    getListBills: async(req,res) => {
-        try{
-            let listPayments= await Bill.find().populate('userId')
-            listPayments=listPayments.map(item=>{return {
-                orderId:item.orderId,
-                name:item.userId.nickname,
-                amount:item.amount,
-                description:item.description,
-                status:item.status,
-                createdAt: item.createdAt
-            }})
-            return res.status(200).json(ResponseData(200,listPayments))
-        }catch(error){
-            console.log(error)
-            return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
-        }
-    },
-    getListBillByUser: async(req,res) => {
-        try{
-            const username = req.user?.sub
-            const user = await User.findOne({username})
-            if(!user){
-                return res.status(400).json(ResponseDetail(400,{message:"Không xác định tài khoản"}))
-            }
-            let listPayments= await Bill.find({userId:user.id})
-           
-            listPayments=listPayments.map(item=>{return {
-                id:item.id,
-                orderId:item.orderId,
-                name:item.userId.nickname,
-                amount:item.amount,
-                description:item.description,
-                status:item.status,
-                method:item.method,
-                updatedAt: item.updatedAt
-            }})
-            return res.status(200).json(ResponseData(200,listPayments))
-        }catch(error){
-            console.log(error)
-            return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
-        }
-    },
-    getSumRevenue: async(req,res)=>{
-        try{
-            let listPayments= await Bill.find()
-            var tempTotalRevenue=0
-            listPayments.forEach((item,index)=>{
-                tempTotalRevenue+=item.amount
+
+    GetListBills: async (req, res) => {
+        try {
+            let listPayments = await Bill.find().populate('creatorId')
+            listPayments = listPayments.map(item => {
+                return {
+                    name: item.creatorId.fullname,
+                    amount: item.amount,
+                    description: item.description,
+                    status: item.status,
+                    createdAt: item.createdAt
+                }
             })
-            return res.status(200).json(ResponseData(200,{totalRevenue:tempTotalRevenue}))
-        }catch(error){
+            return res.status(200).json(ResponseData(200, listPayments))
+        } catch (error) {
             console.log(error)
-            return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
+            return res.status(500).json(ResponseDetail(500, { message: "Không xác định" }))
+        }
+    },
+    GetListBillByUser: async (req, res) => {
+        try {
+            const username = req.user?.sub
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Không xác định tài khoản" })
+            }
+            let listPayments = await Bill.find({ userId: user.id })
+
+            listPayments = listPayments.map(item => {
+                return {
+                    id: item.id,
+                    name: item.creatorId.fullname,
+                    amount: item.amount,
+                    description: item.description,
+                    status: item.status,
+                    method: item.method,
+                    updatedAt: item.updatedAt
+                }
+            })
+            return res.status(200).json(listPayments)
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ message: "Không xác định" })
+        }
+    },
+    GetSumRevenue: async (req, res) => {
+        try {
+            let listPayments = await Bill.find()
+            var tempTotalRevenue = 0
+            listPayments.forEach((item, index) => {
+                tempTotalRevenue += item.amount
+            })
+            return res.status(200).json({ totalRevenue: tempTotalRevenue })
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ message: "Không xác định" })
         }
     },
     GetTotalRevenueByDay: async (req, res) => {
-        try{
-            let listPayments= await Bill.find()
-            listPayments=listPayments.map(item=>{
+        try {
+            let listPayments = await Bill.find()
+            listPayments = listPayments.map(item => {
                 return {
                     item,
-                    dateAdd:format(item.createdAt, 'yyyy-MM-dd')
+                    dateAdd: format(item.createdAt, 'yyyy-MM-dd')
                 }
             })
             var result = [];
-            listPayments.reduce(function(res, value) {
-            if (!res[value.dateAdd]) {
-                res[value.dateAdd] = { dateAdd: value.dateAdd, amount: 0 };
-                result.push(res[value.dateAdd])
-            }
-            res[value.dateAdd].amount += value.item.amount;
-            return res;
+            listPayments.reduce(function (res, value) {
+                if (!res[value.dateAdd]) {
+                    res[value.dateAdd] = { dateAdd: value.dateAdd, amount: 0 };
+                    result.push(res[value.dateAdd])
+                }
+                res[value.dateAdd].amount += value.item.amount;
+                return res;
             }, {});
 
-            return res.status(200).json(ResponseData(200,result))
-        }catch(error){
+            return res.status(200).json(result)
+        } catch (error) {
             console.log(error)
-            return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
+            return res.status(500).json( { message: "Không xác định" })
         }
     },
+    /*
     GetTotalCreateNovelByDay: async (req, res) => {
         try {
             let listNovels= await Novel.find()
@@ -321,37 +324,7 @@ const StatisticController = {
             res.status(500).json(ResponseDetail(500, { message: "Lỗi GetNovels" }))
         }
     },
-    GetTotalNewUserByDay: async (req, res) => {
-        try{
-            let listUsers= await User.find()
-            listUsers=listUsers.map(item=>{
-                if(item._doc.hasOwnProperty('createdAt')){
-                    return {
-                        item,
-                        dateAdd:format(item.createdAt, 'yyyy-MM-dd')
-                    }
-                }
-                return {
-                    item,
-                    dateAdd:"2022-04-08"
-                }
-            })
-            var result = [];
-            listUsers.reduce(function(res, value) {
-            if (!res[value.dateAdd]) {
-                res[value.dateAdd] = { dateAdd: value.dateAdd, sum: 0 };
-                result.push(res[value.dateAdd])
-            }
-            res[value.dateAdd].sum++;
-            return res;
-            }, {});
-
-            return res.status(200).json(ResponseData(200,result))
-        }catch(error){
-            console.log(error)
-            return res.status(500).json(ResponseDetail(500,{message:"Không xác định"}))
-        }
-    },*/
+    */
 
 }
 
