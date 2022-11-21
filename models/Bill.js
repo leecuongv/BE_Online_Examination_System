@@ -36,7 +36,8 @@ const billSchema = mongoose.Schema({
         default:""
     }
 
-});
+},
+{timestamps: true});
 
 billSchema.plugin(
     autoinc.autoIncrement,
