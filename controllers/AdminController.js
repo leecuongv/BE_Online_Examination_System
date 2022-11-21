@@ -153,8 +153,8 @@ const AdminController = {
             res.status(400).json(ResponseDetail(400, { message: "Lỗi lấy danh sách người dùng" }))
         }
     },
-    deleteCourseById: async(req, res)=>{
-        try(
+    deleteCourseById: async (req, res) => {
+        try {
             const admin = req.user.sub
             if (!admin)
                 return res.status(400).json({
@@ -166,54 +166,54 @@ const AdminController = {
                 })
             const courseId = req.query.id
             const course = await Course.findById(courseId)
-            if(!course)
-            return res.status(400).json({
-                message:"Không tồn tại khóa học!"
+            if (!course)
+                return res.status(400).json({
+                    message: "Không tồn tại khóa học!"
+                })
+            let courseName = course.name
+            let deleteCourse = Course.findByIdAndDelete(courseId)
+            if (deleteCourse)
+                return res.status(200).json({
+                    message: "Xóa khóa học " + courseName + " thành công!"
+                })
+            return res.status(200).json({
+                message: "Xóa khóa học " + courseName + " thất bại!"
             })
-        )
-        catch(){
-            
         }
-    }
-}
-
-
-/*
-    deleteNovelById: async(req,res) => {
-        try {
-            const novelId = req.body.novelId
-            const novel = await Novel.findOne({ _id: novelId })
-            if (novel) {
-                const response = await Novel.deleteOne({ _id: novel._id })
-                if (response.deletedCount == 1)
-                    return res.status(200).json(ResponseData(200, { message: "Xoá truyện thành công" }))
-                return res.status(400).json(ResponseDetail(400, { message: "Xoá truyện không thành công" }))
-
-            }
-            else
-                return res.status(400).json(ResponseDetail(400, { message: "Không tìm thấy truyện" }))
-        } catch (error) {
-            console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Lỗi sửa truyện" }))
+        catch (error) {
+            res.status(400).json(ResponseDetail(400, { message: "Lỗi xóa khóa học" }))
         }
     },
-
-    GetNovels: (req, res) => {
+    GetListCourse: (req, res) => {
         try {
-
-            Novel.find().sort({ name: -1 })
+            const admin = req.user.sub
+            if (!admin)
+                return res.status(400).json({
+                    message: "Không tồn tại tài khoản"
+                })
+            if (admin.role !== ROLES.ADMIN)
+                return res.status(400).json({
+                    message: "Không có quyền truy cập"
+                })
+            Course.find().sort({ name: -1 })
                 .then(result => {
                     res.status(200).json(ResponseData(200, result))
                 }).
                 catch(err => {
                     console.log(err)
-                    res.status(500).json(ResponseDetail(500, { message: "Lỗi GetNovels" }))
+                    res.status(500).json(ResponseDetail(500, { message: "Lấy danh sách khóa học thất bại" }))
                 })
         } catch (error) {
             console.log(error)
-            res.status(500).json(ResponseDetail(500, { message: "Lỗi GetNovels" }))
+            res.status(500).json(ResponseDetail(500, { message: "Lỗi lấy danh sách khóa học!" }))
         }
     },
+
+}
+
+
+/*
+   
     GetBills: async (req, res) => {
         try{
             let listPayments= await Bill.find().populate('userId').populate('orderId')
@@ -255,59 +255,7 @@ const AdminController = {
             return res.status(500).json(ResponseDetail(500, { message: "Lỗi cập nhật quyền tài khoản" }))
         }
     },
-    updateDeleteStatus: async (req,res) => {
-        try {
-            const username = req.body.username;
-            const updateUser = await User.findOneAndUpdate( {username:username}, { isDeleted: false })
-            if (updateUser)
-            {
-                updateUser['isDeleted']=true
-                return res.status(200).json(ResponseData(200, updateUser))
-            }
-                
-            return res.status(400).json(ResponseDetail(400, {message:"Xóa tài khoản thất bại"}))
-        }
-        catch (error) {
-            console.log(error)
-            return res.status(500).json(ResponseDetail(500, { message: "Lỗi xóa tài khoản" }))
-        }
-    },
-    GetListOfComments: async (req, res) => {
-        try {
-            let comments = await Comment.find().sort({createdAt:-1}).populate('userId').populate('novelId')
-                comments=comments.map(item=>{return {
-                    nickname:item.userId.nickname,
-                    image:item.userId.image,
-                    content:item.content,
-                    id:item.id,
-                    novelname:item.novelId.name,
-                    username:item.userId.username,
-                    createdAt:item.createdAt
-                }})
-                return res.status(200).json(ResponseData(200, comments))
 
-        } catch (error) {
-            console.log(error)
-            return res.status(500).json(ResponseDetail(200, { message: "Lỗi tạo comment" }))
-        }
-    },
-    GetListRating: async (req, res) => {
-        try {
-            let ratings = await Rating.find().sort({createdAt:-1}).populate('userId').populate('novelId')
-                ratings=ratings.map(item=>{return {
-                    nickname:item.userId.nickname,
-                    image:item.userId.image,
-                    content:item.content,
-                    id:item.id,
-                    username:item.userId.username,
-                    novelname:item.novelId.name,
-                    rating: item.rating,
-                    createdAt:item.createdAt,
-                }})
-                return res.status(200).json(ResponseData(200, ratings))
-        } catch (error) {
-            console.log(error)
-            return res.status(500).json(ResponseDetail(200, { message: "Lỗi tạo comment" }))
-        }
-    },
+
+
 } */
