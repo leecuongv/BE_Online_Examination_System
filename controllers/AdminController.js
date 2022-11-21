@@ -171,6 +171,9 @@ const AdminController = {
                 message:"Không tồn tại khóa học!"
             })
         )
+        catch(){
+            
+        }
     }
 }
 
