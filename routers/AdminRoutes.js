@@ -3,13 +3,13 @@ const { verifyToken, verifyTokenAdmin } = require("../controllers/middlewareCont
 const { AdminController } = require('../controllers/AdminController')
 const router = express.Router();
 
-router.put("/active-user", verifyToken, AdminController.activeUserByAdmin)
-router.put("/inactive-user", verifyToken, AdminController.inactiveUserByAdmin)
-router.put("/update-user-role", verifyToken, AdminController.updateUserRole)
-router.delete("/delete-user-by-id", verifyToken, AdminController.deleteUserById)
-router.get("/list-user", verifyToken, AdminController.GetListUser)
-router.delete("/delete-course-by-id", verifyToken, AdminController.deleteCourseById)
-router.get("/list-course", verifyToken, AdminController.GetListCourse)
+router.put("/active-user", verifyTokenAdmin, AdminController.activeUserByAdmin)
+router.put("/inactive-user", verifyTokenAdmin, AdminController.inactiveUserByAdmin)
+router.put("/update-user-role", verifyTokenAdmin, AdminController.updateUserRole)
+router.delete("/delete-user-by-id", verifyTokenAdmin, AdminController.deleteUserById)
+router.get("/list-user", verifyTokenAdmin, AdminController.GetListUser)
+router.delete("/delete-course-by-id", verifyTokenAdmin, AdminController.deleteCourseById)
+router.get("/list-course", verifyTokenAdmin, AdminController.GetListCourse)
 
 
 
