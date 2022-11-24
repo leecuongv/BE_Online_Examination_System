@@ -65,11 +65,10 @@ const courseSchema = mongoose.Schema({
     type: String,
     default: DEFAULT_VALUES.IMAGE_COURSE,
   },
-  pins:{
+  pins:[{
     type: mongoose.Schema.Types.ObjectId,
     ref: COLLECTION.PIN,
-    default: null
-  }
+  }],
 
 },
   {
