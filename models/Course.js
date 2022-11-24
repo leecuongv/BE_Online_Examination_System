@@ -68,6 +68,7 @@ const courseSchema = mongoose.Schema({
   pins:[{
     type: mongoose.Schema.Types.ObjectId,
     ref: COLLECTION.PIN,
+    default: null
   }],
 
 },
