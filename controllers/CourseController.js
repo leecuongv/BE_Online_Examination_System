@@ -555,8 +555,15 @@ const CourseController = {
             const course = await Course.findById(courseId)
             if (!course)
                 return res.status(400).json({ message: "Không tồn tại khóa học!" })
-            if (pin !== course.pins.code)
+            if(!course.pins){
+                if (!course.pins.find(item => item.code.toString() === pin)) {
+                    //course.students.push(student.id)
+                    ///về nhà rồi nghĩ cách sửa
+                }
+            }
+                if (pin !== course.pins.code)
                 return res.status(400).json({ message: "Sai mã pin" })
+            
             if (course.status !== STATUS.PUBLIC) {
                 return res.status(400).json({ message: "Khóa học này chưa được phát hành!" })
             }

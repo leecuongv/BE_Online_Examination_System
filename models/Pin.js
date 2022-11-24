@@ -4,11 +4,15 @@ const { formatTimeUTC } =require("../utils/Timezone")
 const { COLLECTION } =require("../utils/enum")
 
 const pinSchema = mongoose.Schema({
-  code:[
+  code:
     {
       type: String,
+    },
+    isUsed:{
+      type: Boolean,
+      default: false
     }
-  ]
+
 },
 { timestamps: true ,
   toObject: {
