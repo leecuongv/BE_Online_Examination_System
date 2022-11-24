@@ -16,4 +16,6 @@ router.put('/update-role',verifyToken,UserController.updateRoles)
 
 router.delete('/',verifyTokenAdmin,UserController.deleteAccount)
 
+router.get("/", verifyToken, UserController.searchUsers)
+
 module.exports = router;
