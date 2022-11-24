@@ -26,5 +26,6 @@ router.get('/student-course', verifyToken, CourseController.getStudentCourse)
 // router.post('/update-file',verifyToken, UploadController.Upload);
 // router.get('/download-file', UploadController.Download);
 router.get('/by-student', verifyToken, CourseController.getListExamInCourseOfStudent)
+router.post('/enroll-in-course', verifyToken, CourseController.enrollInCourse)
 
 module.exports = router;

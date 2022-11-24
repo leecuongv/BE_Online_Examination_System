@@ -531,7 +531,7 @@ const CourseController = {
             console.log(listExam)
 
             if (listExam) {
-                listExam = listExam.filter(item=>item.status!==STATUS.PRIVATE)
+                listExam = listExam.filter(item => item.status !== STATUS.PRIVATE)
                 return res.status(200).json(listExam)
             }
             return res.status(400).json({
@@ -541,6 +541,39 @@ const CourseController = {
         } catch (error) {
             console.log(error)
             res.status(400).json({ message: "Lỗi tạo khoá học" })
+        }
+    },
+    enrollInCourse: async (req, res) => {
+        try {
+            const username = req.user?.sub
+            const { courseId, pin } = req.body
+
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại!" })
+            }
+            const course = await Course.findById(courseId)
+            if (!course)
+                return res.status(400).json({ message: "Không tồn tại khóa học!" })
+            if (pin !== course.pins.code)
+                return res.status(400).json({ message: "Sai mã pin" })
+            if (course.status !== STATUS.PUBLIC) {
+                return res.status(400).json({ message: "Khóa học này chưa được phát hành!" })
+            }
+            if (!course.students.find(item => item.toString() === user.id.toString())) {
+                course.students.push(student.id)
+            }
+            else {
+                return res.status(400).json({ message: "Học viên đã thuộc lớp học!" })
+            }
+            await course.save()
+            return res.status(200).json({
+                message: "Tham gia khóa học thành công!",
+            })
+        }
+        catch (error) { 
+            console.log(error)
+            res.status(400).json({ message: "Lỗi đăng ký khoá học!" })
         }
     }
 }
