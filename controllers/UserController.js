@@ -192,7 +192,7 @@ const UserController = {
             return res.status(500).json({message: "Lỗi cập nhật quyền tài khoản" })
         }
     },
-   searchUser: async(req, res)=>{
+   searchUsers: async(req, res)=>{
     try {
         const loginUsername = req.user.sub
         if (!loginUsername)
