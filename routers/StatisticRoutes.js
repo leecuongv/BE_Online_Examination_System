@@ -6,6 +6,7 @@ const router = express.Router();
 router.get('/exam-by-student',verifyToken, StatisticController.GetTakeExamByStudent);
 router.get('/exam-by-teacher',verifyToken, StatisticController.GetTakeExamByTeacher);
 router.get('/exam-detail-by-teacher',verifyToken, StatisticController.GetTakeExamDetailByTeacher);
+router.get('/submit-assignment-detail-by-teacher',verifyToken, StatisticController.GetSubmitAssignmentDetailByTeacher);
 router.get("/number-of-courses", verifyTokenAdmin, StatisticController.GetNumberOfCourses);
 router.get("/number-of-exams",verifyTokenAdmin, StatisticController.GetNumberOfExams)
 router.get("/number-of-users", verifyTokenAdmin, StatisticController.GetNumberOfUsers)
