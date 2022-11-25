@@ -18,6 +18,7 @@ const {
   UploadRoutes,
   AssignmentRoutes,
   SubmitAssignmentRoutes,
+  AdminRoutes,
  } = require('./routers');
 const helmet= require("helmet");
 //const passport = require('passport');
@@ -130,3 +131,4 @@ app.use("/api/statistic", StatisticRoutes)
 app.use("/api/upload", UploadRoutes)
 app.use("/api/assignment", AssignmentRoutes)
 app.use("/api/submitassignment", SubmitAssignmentRoutes)
+app.use("/api/admin", AdminRoutes)
