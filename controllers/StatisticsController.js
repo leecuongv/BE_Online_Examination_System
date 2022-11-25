@@ -4,12 +4,12 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
 const TakeExam = require("../models/TakeExam");
-const { STATUS, VIEWPOINT } = require("../utils/enum");
+const { STATUS, VIEWPOINT, ROLES } = require("../utils/enum");
 const moment = require("moment/moment");
 const ExamResult = require("../models/ExamResult");
-const  Bill  = require('../models/Bill')
+const Bill = require('../models/Bill')
 const StatisticController = {
-    
+
     GetTakeExamByStudent: async (req, res) => {
         try {
 
@@ -146,7 +146,30 @@ const StatisticController = {
             return res.status(400).json({ message: "Lỗi đếm số lượng người dùng!" })
         }
     },
-
+    getDetailOfUsers: async (req, res) => {
+        try {
+            const numberOfUsers = await User.countDocuments()
+            const numberOfTeachers = await User.countDocuments({
+                 role: ROLES.TEACHER 
+            })
+            const numberOfStudents = await User.countDocuments({
+               role: ROLES.STUDENT 
+            })
+            const numberOfVipUsers = await User.countDocuments({
+                premium: true 
+            })
+            return res.status(200).json({
+                numberOfUsers: numberOfUsers,
+                numberOfTeachers: numberOfTeachers,
+                numberOfStudents: numberOfStudents,
+                numberOfVipUsers: numberOfVipUsers
+            })
+        }
+        catch (error) {
+            console.log(error)
+            return res.status(400).json({ message: "Lỗi đếm số lượng người dùng!" })
+        }
+    },
     GetTotalNewUsersByDay: async (req, res) => {
         try {
             // let listUsers = await User.find()
@@ -173,35 +196,35 @@ const StatisticController = {
             // }, {});
             let listUsers = await User.aggregate([
                 {
-                  $addFields: {
-                    createdAtDate: {
-                      $toDate: "$createdAt"
-                    },
-                    
-                  }
-                },
-                {
-                  $group: {
-                    _id: {
-                      $dateToString: {
-                        format: "%Y-%m-%d",
-                        date: "$createdAtDate"
-                      }
-                    },
-                    count: {
-                      $sum: 1
+                    $addFields: {
+                        createdAtDate: {
+                            $toDate: "$createdAt"
+                        },
+
                     }
-                  }
                 },
-                
                 {
-                  $project: {
-                    count: 1,
-                    date: "$_id",
-                    _id: 0
-                  }
+                    $group: {
+                        _id: {
+                            $dateToString: {
+                                format: "%Y-%m-%d",
+                                date: "$createdAtDate"
+                            }
+                        },
+                        count: {
+                            $sum: 1
+                        }
+                    }
+                },
+
+                {
+                    $project: {
+                        count: 1,
+                        date: "$_id",
+                        _id: 0
+                    }
                 }
-              ])
+            ])
             return res.status(200).json(listUsers)
         } catch (error) {
             console.log(error)
@@ -288,43 +311,43 @@ const StatisticController = {
             // }, {});
             let listBills = await Bill.aggregate([
                 {
-                    $match:{status: "success"}
+                    $match: { status: "success" }
                 },
                 {
-                  $addFields: {
-                    createdAtDate: {
-                      $toDate: "$createdAt"
-                    },
-                    
-                  }
-                },
-                {
-                  $group: {
-                    _id: {
-                      $dateToString: {
-                        format: "%Y-%m-%d",
-                        date: "$createdAtDate"
-                      }
-                    },
-                    revenue: {
-                      $sum: 50000
+                    $addFields: {
+                        createdAtDate: {
+                            $toDate: "$createdAt"
+                        },
+
                     }
-                  }
                 },
-                
                 {
-                  $project: {
-                    revenue: 1,
-                    date: "$_id",
-                    _id: 0
-                  }
+                    $group: {
+                        _id: {
+                            $dateToString: {
+                                format: "%Y-%m-%d",
+                                date: "$createdAtDate"
+                            }
+                        },
+                        revenue: {
+                            $sum: 50000
+                        }
+                    }
+                },
+
+                {
+                    $project: {
+                        revenue: 1,
+                        date: "$_id",
+                        _id: 0
+                    }
                 }
-              ])
+            ])
             return res.status(200).json(listBills)
             //return res.status(200).json(result)
         } catch (error) {
             console.log(error)
-            return res.status(500).json( { message: "Không xác định" })
+            return res.status(500).json({ message: "Không xác định" })
         }
     },
     /*
