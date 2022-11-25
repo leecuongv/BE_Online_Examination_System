@@ -193,6 +193,7 @@ const StatisticController = {
                     }
                   }
                 },
+                
                 {
                   $project: {
                     count: 1,
@@ -285,7 +286,10 @@ const StatisticController = {
             //     res[value.dateAdd].amount += value.item.amount;
             //     return res;
             // }, {});
-            let listUsers = await Bill.aggregate([
+            let listBills = await Bill.aggregate([
+                {
+                    $match:{status: "success"}
+                },
                 {
                   $addFields: {
                     createdAtDate: {
@@ -307,6 +311,7 @@ const StatisticController = {
                     }
                   }
                 },
+                
                 {
                   $project: {
                     revenue: 1,
@@ -315,7 +320,7 @@ const StatisticController = {
                   }
                 }
               ])
-            return res.status(200).json(listUsers)
+            return res.status(200).json(listBills)
             //return res.status(200).json(result)
         } catch (error) {
             console.log(error)
