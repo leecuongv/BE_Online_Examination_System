@@ -9,11 +9,12 @@ const ExamResult = require("../models/ExamResult");
 
 const AdminController = {
 
-    activeUserByAdmin: async (req, res) => {
+
+    updateStatus: async (req, res) => {
         try {
-            
-            const userId = req.body.userId;
-            const updateUser = await User.findByIdAndUpdate(userId, { active: true }, { new: true })
+
+            const { userId, status } = req.body;
+            const updateUser = await User.findByIdAndUpdate(userId, { status: status }, { new: true })
 
             if (updateUser)
                 return res.status(200).json(updateUser)
@@ -25,28 +26,13 @@ const AdminController = {
         }
     },
 
-    inactiveUserByAdmin: async (req, res) => {
-        try {
-           
-            const userId = req.body.userId;
-            const updateUser = await User.findByIdAndUpdate(userId, { active: false }, { new: true })
-            if (updateUser)
-                return res.status(200).json(updateUser)
-            return res.status(400).json({ message: "Hủy kích hoạt tài khoản thất bại" })
-        }
-        catch (error) {
-            console.log(error)
-            return res.status(400).json({ message: "Lỗi hủy kích hoạt tài khoản" })
-        }
-    },
-
     updateUserRole: async (req, res) => {
         try {
-            
-            const rolesRequest = req.body.role;
+
+            const { username, role } = req.body;
 
             if (username) {
-                const newUser = await User.updateOne({ username }, { role:rolesRequest }, { new: true })
+                const newUser = await User.updateOne({ username }, { role: role }, { new: true })
                 if (newUser)
                     return res.status(200).json({ message: "Cập nhật quyền thành công" })
 
@@ -63,7 +49,7 @@ const AdminController = {
 
     deleteUserById: async (req, res) => {
         try {
-            
+
             const userId = req.query.id;
             const user = await User.findById(userId)
             if (!user)
@@ -88,7 +74,7 @@ const AdminController = {
 
     GetListUser: (req, res) => {
         try {
-           
+
             User.find().sort({ fullname: -1 })
                 .then(result => {
                     res.status(200).json(result)
@@ -105,7 +91,7 @@ const AdminController = {
 
     deleteCourseById: async (req, res) => {
         try {
-           
+
             const courseId = req.query.id
             const course = await Course.findById(courseId)
             if (!course)
@@ -128,10 +114,10 @@ const AdminController = {
     },
 
     GetListCourse: (req, res) => {
-        try {  
+        try {
             Course.find().sort({ name: -1 })
                 .then(result => {
-                    res.status(200).json( result)
+                    res.status(200).json(result)
                 }).
                 catch(err => {
                     console.log(err)

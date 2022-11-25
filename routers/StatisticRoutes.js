@@ -9,6 +9,7 @@ router.get('/exam-detail-by-teacher',verifyToken, StatisticController.GetTakeExa
 router.get('/submit-assignment-detail-by-teacher',verifyToken, StatisticController.GetSubmitAssignmentDetailByTeacher);
 router.get("/number-of-courses", verifyTokenAdmin, StatisticController.GetNumberOfCourses);
 router.get("/number-of-exams",verifyTokenAdmin, StatisticController.GetNumberOfExams)
+router.get("/number-of-assignments",verifyTokenAdmin, StatisticController.GetNumberOfAssignments)
 router.get("/number-of-users", verifyTokenAdmin, StatisticController.GetNumberOfUsers)
 router.get("/total-new-users-by-day", verifyTokenAdmin, StatisticController.GetTotalNewUsersByDay)
 router.get("/list-bills", verifyTokenAdmin, StatisticController.GetListBills)
