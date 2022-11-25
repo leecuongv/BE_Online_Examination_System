@@ -8,7 +8,7 @@ const submitAssignmentSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     require: true,
     default: null,
-    ref: COLLECTION.EXAM,
+    ref: COLLECTION.ASSIGNMENT,
   },
   creatorId: {
     type: mongoose.SchemaTypes.ObjectId,

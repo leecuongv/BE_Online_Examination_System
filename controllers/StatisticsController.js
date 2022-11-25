@@ -107,7 +107,10 @@ const StatisticController = {
 
             let takeExams = await TakeExam.find()
                 .populate('userId')
-                .populate("examId")
+                .populate({
+                    path: "examId",
+                    match: { creatorId: user.id }
+                })
             takeExams = takeExams.map(item => {
                 console.log(item)
                 let { examId, result, points, userId, ...data } = item._doc
@@ -145,21 +148,28 @@ const StatisticController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(200).json({ message: "Không có tài khoản" })
 
-            let submitAssignment = await SubmitAssignment.find().populate('userId').populate("assignmentId")
-            submitAssignment = submitAssignment.map(item => {
-                console.log(item)
-                let { assignmentId, result, points, userId, ...data } = item._doc
-                points = result.reduce((total, current) => {
+            let submitAssignment = await SubmitAssignment.find()
+                .populate('creatorId')
+                .populate({
+                    path: "assignmentId",
+                    match: { creatorId: user.id }
+                })
 
-                    total += current.point
-                    return total
-                },
-                    0
-                )
+            console.log(submitAssignment)
+            submitAssignment = submitAssignment.map(item => {
+                //console.log(item)
+                let { assignmentId, result, points, creatorId, ...data } = item._doc
+                // points = result.reduce((total, current) => {
+
+                //     total += current.point
+                //     return total
+                // },
+                //     0
+                // )
                 return {
                     ...data,
                     assignmentName: assignmentId.name,
-                    name: userId?.fullname,
+                    name: creatorId?.fullname,
                     maxPoints: assignmentId.maxPoints,
                     points
                 }
