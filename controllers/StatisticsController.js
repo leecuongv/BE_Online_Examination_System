@@ -8,7 +8,8 @@ const SubmitAssignment = require("../models/SubmitAssignment")
 const { STATUS, VIEWPOINT, ROLES } = require("../utils/enum");
 const moment = require("moment/moment");
 const ExamResult = require("../models/ExamResult");
-const Bill = require('../models/Bill')
+const Bill = require('../models/Bill');
+const Assignment = require("../models/Assignment");
 const StatisticController = {
 
     GetTakeExamByStudent: async (req, res) => {
@@ -211,6 +212,23 @@ const StatisticController = {
                 })
             return res.status(200).json({
                 numberOfExam
+            })
+
+        } catch (error) {
+            console.log(error)
+            return res.status(400).json({ message: "Lỗi đếm số lượng bài kiểm tra!" })
+
+        }
+    },
+    GetNumberOfAssignments: async (req, res) => {
+        try {
+            const numberOfAssignment = await Assignment.countDocuments()
+            if (!numberOfAssignment)
+                return res.status(400).json({
+                    message: "Không đếm được số lượng bài kiểm tra!"
+                })
+            return res.status(200).json({
+                numberOfAssignment
             })
 
         } catch (error) {
