@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
 const TakeExam = require("../models/TakeExam");
+const SubmitAssignment = require("../models/SubmitAssignment")
 const { STATUS, VIEWPOINT, ROLES } = require("../utils/enum");
 const moment = require("moment/moment");
 const ExamResult = require("../models/ExamResult");
@@ -100,21 +101,16 @@ const StatisticController = {
         try {
 
             const username = req.user.sub
-            const { examSlug } = req.query
 
             const user = await User.findOne({ username })
             if (!user) return res.status(200).json({ message: "Không có tài khoản" })
 
-            const exam = await Exam.findOne({ slug: examSlug })
-            if (!exam) return res.status(200).json({ message: "Không tìm thấy bài thi!" })
-
-            if (exam.creatorId.toString() !== user.id.toString()) {//nếu không phải người tạo khoá học thì không trả về kết quả
-                return res.status(403).json({ message: "Không có quyền truy cập" })
-            }
-            let takeExams = await TakeExam.find().populate('userId').populate("examId")
+            let takeExams = await TakeExam.find()
+                .populate('userId')
+                .populate("examId")
             takeExams = takeExams.map(item => {
-                 console.log(item)
-                let {examId, result, points, userId, ...data } = item._doc
+                console.log(item)
+                let { examId, result, points, userId, ...data } = item._doc
                 points = result.reduce((total, current) => {
 
                     total += current.point
@@ -126,7 +122,7 @@ const StatisticController = {
                     ...data,
                     examName: examId.name,
                     name: userId?.fullname,
-                    maxPoints: exam.maxPoints,
+                    maxPoints: examId.maxPoints,
                     points
                 }
             })
@@ -141,6 +137,44 @@ const StatisticController = {
             return res.status(400).json({ message: 'Lỗi thống kê' })
         }
     },
+    GetSubmitAssignmentDetailByTeacher: async (req, res) => {
+        try {
+
+            const username = req.user.sub
+
+            const user = await User.findOne({ username })
+            if (!user) return res.status(200).json({ message: "Không có tài khoản" })
+
+            let submitAssignment = await SubmitAssignment.find().populate('userId').populate("assignmentId")
+            submitAssignment = submitAssignment.map(item => {
+                console.log(item)
+                let { assignmentId, result, points, userId, ...data } = item._doc
+                points = result.reduce((total, current) => {
+
+                    total += current.point
+                    return total
+                },
+                    0
+                )
+                return {
+                    ...data,
+                    assignmentName: assignmentId.name,
+                    name: userId?.fullname,
+                    maxPoints: assignmentId.maxPoints,
+                    points
+                }
+            })
+            console.log("------------------------------------------------------------------------------")
+            //console.log(submitAssignment)
+
+
+            return res.status(200).json(submitAssignment)
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(400).json({ message: 'Lỗi thống kê' })
+        }
+    },
     GetNumberOfCourses: async (req, res) => {
         try {
             const numberOfCourses = await Course.countDocuments()
@@ -148,7 +182,7 @@ const StatisticController = {
                 return res.status(400).json({
                     message: "Không đếm được số lượng khóa học!"
                 })
-            return res.status(400).json({
+            return res.status(200).json({
                 numberOfCourses
             })
 
@@ -165,7 +199,7 @@ const StatisticController = {
                 return res.status(400).json({
                     message: "Không đếm được số lượng bài kiểm tra!"
                 })
-            return res.status(400).json({
+            return res.status(200).json({
                 numberOfExam
             })
 
@@ -182,7 +216,7 @@ const StatisticController = {
                 return res.status(400).json({
                     message: "Không đếm được số lượng người dùng!"
                 })
-            return res.status(400).json({
+            return res.status(200).json({
                 numberOfUsers
             })
 
@@ -195,13 +229,13 @@ const StatisticController = {
         try {
             const numberOfUsers = await User.countDocuments()
             const numberOfTeachers = await User.countDocuments({
-                 role: ROLES.TEACHER 
+                role: ROLES.TEACHER
             })
             const numberOfStudents = await User.countDocuments({
-               role: ROLES.STUDENT 
+                role: ROLES.STUDENT
             })
             const numberOfVipUsers = await User.countDocuments({
-                premium: true 
+                premium: true
             })
             return res.status(200).json({
                 numberOfUsers: numberOfUsers,
