@@ -43,20 +43,10 @@ const AdminController = {
     updateUserRole: async (req, res) => {
         try {
             
-            const rolesRequest = req.body.roles;
-            const username = req.body.username;
-            let roles = []
-            const getRoles = async (list) => {
-                const roles = []
-                for (let i = 0; i < list.length; i++) {
-                    let role = await Role.findOne({ name: list[i] })
-                    roles.push(role)
-                }
-                return roles
-            }
-            roles = await getRoles(rolesRequest)
+            const rolesRequest = req.body.role;
+
             if (username) {
-                const newUser = await User.updateOne({ username }, { roles: roles.map(item => item.id) }, { new: true })
+                const newUser = await User.updateOne({ username }, { role:rolesRequest }, { new: true })
                 if (newUser)
                     return res.status(200).json({ message: "Cập nhật quyền thành công" })
 
@@ -101,7 +91,7 @@ const AdminController = {
            
             User.find().sort({ fullname: -1 })
                 .then(result => {
-                    res.status(200).json(ResponseData(200, result))
+                    res.status(200).json(result)
                 }).
                 catch(err => {
                     console.log(err)
@@ -138,8 +128,7 @@ const AdminController = {
     },
 
     GetListCourse: (req, res) => {
-        try {
-            
+        try {  
             Course.find().sort({ name: -1 })
                 .then(result => {
                     res.status(200).json( result)
