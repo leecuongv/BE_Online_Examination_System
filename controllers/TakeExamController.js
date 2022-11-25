@@ -25,6 +25,7 @@ const TakeExamController = {
     questions = questions.map((item) => item.question);
     return { ...data, endTime, questions };
   },
+
   CheckExam: async (req, res) => {
     try {
       const username = req.user.sub;
@@ -97,6 +98,7 @@ const TakeExamController = {
       res.status(400).json({ message: "Lỗi làm bài thi" });
     }
   },
+
   CreateTakeExam: async (req, res) => {
     try {
       const username = req.user.sub;
@@ -375,6 +377,7 @@ const TakeExamController = {
     }
 
   },
+  
   createLogs: async (req, res) => {
     try {
       const { action, time, takeExamId } = req.body;

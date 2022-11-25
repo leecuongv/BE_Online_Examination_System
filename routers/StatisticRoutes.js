@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.get('/exam-by-student',verifyToken, StatisticController.GetTakeExamByStudent);
 router.get('/exam-by-teacher',verifyToken, StatisticController.GetTakeExamByTeacher);
+router.get('/exam-detail-by-teacher',verifyToken, StatisticController.GetTakeExamDetailByTeacher);
 router.get("/number-of-courses", verifyTokenAdmin, StatisticController.GetNumberOfCourses);
 router.get("/number-of-exams",verifyTokenAdmin, StatisticController.GetNumberOfExams)
 router.get("/number-of-users", verifyTokenAdmin, StatisticController.GetNumberOfUsers)
@@ -14,4 +15,5 @@ router.get("/list-bill-by-user", verifyTokenAdmin, StatisticController.GetListBi
 router.get("/sum-revenue", verifyTokenAdmin, StatisticController.GetSumRevenue)
 router.get("/total-revenue-by-day", verifyTokenAdmin, StatisticController.GetTotalRevenueByDay)
 router.get("/detail-of-users", verifyTokenAdmin, StatisticController.getDetailOfUsers)
+
 module.exports = router;
