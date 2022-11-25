@@ -96,6 +96,51 @@ const StatisticController = {
             return res.status(400).json({ message: 'Lỗi thống kê' })
         }
     },
+    GetTakeExamDetailByTeacher: async (req, res) => {
+        try {
+
+            const username = req.user.sub
+            const { examSlug } = req.query
+
+            const user = await User.findOne({ username })
+            if (!user) return res.status(200).json({ message: "Không có tài khoản" })
+
+            const exam = await Exam.findOne({ slug: examSlug })
+            if (!exam) return res.status(200).json({ message: "Không tìm thấy bài thi!" })
+
+            if (exam.creatorId.toString() !== user.id.toString()) {//nếu không phải người tạo khoá học thì không trả về kết quả
+                return res.status(403).json({ message: "Không có quyền truy cập" })
+            }
+            let takeExams = await TakeExam.find().populate('userId').populate("examId")
+            takeExams = takeExams.map(item => {
+                 console.log(item)
+                let {examId, result, points, userId, ...data } = item._doc
+                points = result.reduce((total, current) => {
+
+                    total += current.point
+                    return total
+                },
+                    0
+                )
+                return {
+                    ...data,
+                    examName: examId.name,
+                    name: userId?.fullname,
+                    maxPoints: exam.maxPoints,
+                    points
+                }
+            })
+            console.log("------------------------------------------------------------------------------")
+            console.log(takeExams)
+
+
+            return res.status(200).json(takeExams)
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(400).json({ message: 'Lỗi thống kê' })
+        }
+    },
     GetNumberOfCourses: async (req, res) => {
         try {
             const numberOfCourses = await Course.countDocuments()
