@@ -5,13 +5,13 @@ const router = express.Router();
 
 router.get('/exam-by-student',verifyToken, StatisticController.GetTakeExamByStudent);
 router.get('/exam-by-teacher',verifyToken, StatisticController.GetTakeExamByTeacher);
-router.get("/number-of-courses", verifyToken, StatisticController.GetNumberOfCourses);
-router.get("/number-of-exams",verifyToken, StatisticController.GetNumberOfExams)
-router.get("/number-of-users", verifyToken, StatisticController.GetNumberOfUsers)
-router.get("/total-new-users-by-day", verifyToken, StatisticController.GetTotalNewUsersByDay)
-router.get("/list-bills", verifyToken, StatisticController.GetListBills)
-router.get("/list-bill-by-user", verifyToken, StatisticController.GetListBillByUser)
-router.get("/sum-revenue", verifyToken, StatisticController.GetSumRevenue)
-router.get("/total-revenue-by-day", verifyToken, StatisticController.GetTotalRevenueByDay)
+router.get("/number-of-courses", verifyTokenAdmin, StatisticController.GetNumberOfCourses);
+router.get("/number-of-exams",verifyTokenAdmin, StatisticController.GetNumberOfExams)
+router.get("/number-of-users", verifyTokenAdmin, StatisticController.GetNumberOfUsers)
+router.get("/total-new-users-by-day", verifyTokenAdmin, StatisticController.GetTotalNewUsersByDay)
+router.get("/list-bills", verifyTokenAdmin, StatisticController.GetListBills)
+router.get("/list-bill-by-user", verifyTokenAdmin, StatisticController.GetListBillByUser)
+router.get("/sum-revenue", verifyTokenAdmin, StatisticController.GetSumRevenue)
+router.get("/total-revenue-by-day", verifyTokenAdmin, StatisticController.GetTotalRevenueByDay)
 
 module.exports = router;

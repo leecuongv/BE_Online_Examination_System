@@ -9,6 +9,7 @@ const moment = require("moment/moment");
 const ExamResult = require("../models/ExamResult");
 const  Bill  = require('../models/Bill')
 const StatisticController = {
+    
     GetTakeExamByStudent: async (req, res) => {
         try {
 
@@ -19,7 +20,7 @@ const StatisticController = {
             if (!user) return res.status(200).json({ message: "Không có tài khoản" })
 
             const exam = await Exam.findOne({ slug: examSlug })
-            if (!exam) return res.status(200).json({ message: "Không tìm thấy khoá học" })
+            if (!exam) return res.status(200).json({ message: "Không tìm thấy bài thi!" })
             let takeExams = await TakeExam.find({ userId: user.id, examId: exam.id })
             takeExams = takeExams.map(item => {
                 let { result, points, userId, ...data } = item._doc
@@ -61,7 +62,7 @@ const StatisticController = {
             if (!user) return res.status(200).json({ message: "Không có tài khoản" })
 
             const exam = await Exam.findOne({ slug: examSlug })
-            if (!exam) return res.status(200).json({ message: "Không tìm thấy khoá học" })
+            if (!exam) return res.status(200).json({ message: "Không tìm thấy bài thi!" })
 
             if (exam.creatorId.toString() !== user.id.toString()) {//nếu không phải người tạo khoá học thì không trả về kết quả
                 return res.status(403).json({ message: "Không có quyền truy cập" })
@@ -97,15 +98,6 @@ const StatisticController = {
     },
     GetNumberOfCourses: async (req, res) => {
         try {
-            const admin = req.user.sub
-            if (!admin)
-                return res.status(400).json({
-                    message: "Không tồn tại tài khoản"
-                })
-            if (admin.role !== ROLES.ADMIN)
-                return res.status(400).json({
-                    message: "Không có quyền truy cập"
-                })
             const numberOfCourses = await Course.countDocuments()
             if (!numberOfCourses)
                 return res.status(400).json({
@@ -123,15 +115,6 @@ const StatisticController = {
     },
     GetNumberOfExams: async (req, res) => {
         try {
-            const admin = req.user.sub
-            if (!admin)
-                return res.status(400).json({
-                    message: "Không tồn tại tài khoản"
-                })
-            if (admin.role !== ROLES.ADMIN)
-                return res.status(400).json({
-                    message: "Không có quyền truy cập"
-                })
             const numberOfExam = await Exam.countDocuments()
             if (!numberOfExam)
                 return res.status(400).json({
@@ -149,15 +132,6 @@ const StatisticController = {
     },
     GetNumberOfUsers: async (req, res) => {
         try {
-            const admin = req.user.sub
-            if (!admin)
-                return res.status(400).json({
-                    message: "Không tồn tại tài khoản"
-                })
-            if (admin.role !== ROLES.ADMIN)
-                return res.status(400).json({
-                    message: "Không có quyền truy cập"
-                })
             const numberOfUsers = await User.countDocuments()
             if (!numberOfUsers)
                 return res.status(400).json({
@@ -175,39 +149,59 @@ const StatisticController = {
 
     GetTotalNewUsersByDay: async (req, res) => {
         try {
-            const admin = req.user.sub
-            if (!admin)
-                return res.status(400).json({
-                    message: "Không tồn tại tài khoản"
-                })
-            if (admin.role !== ROLES.ADMIN)
-                return res.status(400).json({
-                    message: "Không có quyền truy cập"
-                })
-            let listUsers = await User.find()
-            listUsers = listUsers.map(item => {
-                if (item._doc.hasOwnProperty('createdAt')) {
-                    return {
-                        item,
-                        dateAdd: format(item.createdAt, 'yyyy-MM-dd')
+            // let listUsers = await User.find()
+            // listUsers = listUsers.map(item => {
+            //     if (item._doc.hasOwnProperty('createdAt')) {
+            //         return {
+            //             item,
+            //             dateAdd: format(item.createdAt, 'yyyy-MM-dd')
+            //         }
+            //     }
+            //     return {
+            //         item,
+            //         dateAdd: "2022-04-08"
+            //     }
+            // })
+            // var result = [];
+            // listUsers.reduce(function (res, value) {
+            //     if (!res[value.dateAdd]) {
+            //         res[value.dateAdd] = { dateAdd: value.dateAdd, sum: 0 };
+            //         result.push(res[value.dateAdd])
+            //     }
+            //     res[value.dateAdd].sum++;
+            //     return res;
+            // }, {});
+            let listUsers = await User.aggregate([
+                {
+                  $addFields: {
+                    createdAtDate: {
+                      $toDate: "$createdAt"
+                    },
+                    
+                  }
+                },
+                {
+                  $group: {
+                    _id: {
+                      $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$createdAtDate"
+                      }
+                    },
+                    count: {
+                      $sum: 1
                     }
+                  }
+                },
+                {
+                  $project: {
+                    count: 1,
+                    date: "$_id",
+                    _id: 0
+                  }
                 }
-                return {
-                    item,
-                    dateAdd: "2022-04-08"
-                }
-            })
-            var result = [];
-            listUsers.reduce(function (res, value) {
-                if (!res[value.dateAdd]) {
-                    res[value.dateAdd] = { dateAdd: value.dateAdd, sum: 0 };
-                    result.push(res[value.dateAdd])
-                }
-                res[value.dateAdd].sum++;
-                return res;
-            }, {});
-
-            return res.status(200).json(result)
+              ])
+            return res.status(200).json(listUsers)
         } catch (error) {
             console.log(error)
             return res.status(500).json({ message: "Không xác định" })
@@ -227,7 +221,7 @@ const StatisticController = {
                     createdAt: item.createdAt
                 }
             })
-            return res.status(200).json(ResponseData(200, listPayments))
+            return res.status(200).json(listPayments)
         } catch (error) {
             console.log(error)
             return res.status(500).json({ message: "Không xác định" })
@@ -272,26 +266,57 @@ const StatisticController = {
             return res.status(500).json({ message: "Không xác định" })
         }
     },
+
     GetTotalRevenueByDay: async (req, res) => {
         try {
-            let listPayments = await Bill.find()
-            listPayments = listPayments.map(item => {
-                return {
-                    item,
-                    dateAdd: format(item.createdAt, 'yyyy-MM-dd')
+            // let listPayments = await Bill.find()
+            // listPayments = listPayments.map(item => {
+            //     return {
+            //         item,
+            //         dateAdd: format(item.createdAt, 'yyyy-MM-dd')
+            //     }
+            // })
+            // var result = [];
+            // listPayments.reduce(function (res, value) {
+            //     if (!res[value.dateAdd]) {
+            //         res[value.dateAdd] = { dateAdd: value.dateAdd, amount: 0 };
+            //         result.push(res[value.dateAdd])
+            //     }
+            //     res[value.dateAdd].amount += value.item.amount;
+            //     return res;
+            // }, {});
+            let listUsers = await Bill.aggregate([
+                {
+                  $addFields: {
+                    createdAtDate: {
+                      $toDate: "$createdAt"
+                    },
+                    
+                  }
+                },
+                {
+                  $group: {
+                    _id: {
+                      $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$createdAtDate"
+                      }
+                    },
+                    revenue: {
+                      $sum: 50000
+                    }
+                  }
+                },
+                {
+                  $project: {
+                    revenue: 1,
+                    date: "$_id",
+                    _id: 0
+                  }
                 }
-            })
-            var result = [];
-            listPayments.reduce(function (res, value) {
-                if (!res[value.dateAdd]) {
-                    res[value.dateAdd] = { dateAdd: value.dateAdd, amount: 0 };
-                    result.push(res[value.dateAdd])
-                }
-                res[value.dateAdd].amount += value.item.amount;
-                return res;
-            }, {});
-
-            return res.status(200).json(result)
+              ])
+            return res.status(200).json(listUsers)
+            //return res.status(200).json(result)
         } catch (error) {
             console.log(error)
             return res.status(500).json( { message: "Không xác định" })
