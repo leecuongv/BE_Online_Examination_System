@@ -7,7 +7,6 @@ const TakeExam = require("../models/TakeExam");
 const SubmitAssignment = require("../models/SubmitAssignment")
 const { STATUS, VIEWPOINT, ROLES } = require("../utils/enum");
 const moment = require("moment/moment");
-const ExamResult = require("../models/ExamResult");
 const Bill = require('../models/Bill');
 const Assignment = require("../models/Assignment");
 const StatisticController = {

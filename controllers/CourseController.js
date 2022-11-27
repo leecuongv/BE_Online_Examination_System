@@ -93,6 +93,37 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tạo khoá học" })
         }
     },
+    getCourseInfoToEnroll: async (req, res) => {
+        try {
+            const { courseId } = req.query
+            const username = req.user.sub
+
+            const course = await Course.findOne({ courseId })
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: 'Không tồn tại tài khoản' })
+            if (course) {
+                if (course.students.find(item => item.toString() === user.id.toString())) {
+                    return res.status(400).json({
+                        message: 'Bạn đã tham gia khoá học'
+                    })
+                }
+                if (course.status === 'private')
+                    return res.status(400).json({
+                        message: 'Không tìm thấy khoá học'
+                    })
+                const { name, } = course._doc
+                return res.status(200).json({ name })
+            }
+
+            return res.status(400).json({
+                message: "Không tìm thấy khoá học",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi lấy thông tin khoá học" })
+        }
+    },
     getCourseByCourseId: async (req, res) => {
         try {
             const { courseId } = req.query
@@ -275,7 +306,7 @@ const CourseController = {
                         }
                     }
                 },
-                { $match: { _id: { $ne: null }}},
+                { $match: { _id: { $ne: null } } },
                 {
                     $project: {
                         id: "$doc._id",
@@ -543,46 +574,66 @@ const CourseController = {
             res.status(400).json({ message: "Lỗi tạo khoá học" })
         }
     },
-    // enrollInCourse: async (req, res) => {
-    //     try {
-    //         const username = req.user?.sub
-    //         const { courseId, pin } = req.body
+    enrollInCourse: async (req, res) => {
+        try {
+            const username = req.user?.sub
+            const { courseId, pin } = req.body
 
-    //         const user = await User.findOne({ username })
-    //         if (!user) {
-    //             return res.status(400).json({ message: "Tài khoản không tồn tại!" })
-    //         }
-    //         const course = await Course.findById(courseId)
-    //         if (!course)
-    //             return res.status(400).json({ message: "Không tồn tại khóa học!" })
-    //         if(!course.pins){
-    //             if (!course.pins.find(item => item.code.toString() === pin)) {
-    //                 //course.students.push(student.id)
-    //                 ///về nhà rồi nghĩ cách sửa
-    //             }
-    //         }
-    //             if (pin !== course.pins.code)
-    //             return res.status(400).json({ message: "Sai mã pin" })
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại!" })
+            }
+            const course = await Course.findOne({courseId})
+            if (!course)
+                return res.status(400).json({ message: "Không tồn tại khóa học!" })
+
+            if (pin !== course.pin)
+                return res.status(400).json({ message: "Sai mã pin" })
+
+            if (course.status !== STATUS.PUBLIC) {
+                return res.status(400).json({ message: "Khóa học này chưa được phát hành!" })
+            }
+            if (!course.students.find(item => item.toString() === user.id.toString())) {
+                course.students.push(user.id)
+            }
+            else {
+                return res.status(400).json({ message: "Học viên đã thuộc lớp học!" })
+            }
+            await course.save()
+            return res.status(200).json({
+                message: "Tham gia khóa học thành công!",
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi đăng ký khoá học!" })
+        }
+    },
+    exitCourse: async (req, res) => {
+        try {
+            const username = req.user?.sub
+            const { courseId } = req.body
+
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại!" })
+            }
+            const course = await Course.findOne({courseId})
+            if (!course)
+                return res.status(400).json({ message: "Không tồn tại khóa học!" })
+
+            course.students = course.students.filter(item=>item.toString() !== user.id.toString())
             
-    //         if (course.status !== STATUS.PUBLIC) {
-    //             return res.status(400).json({ message: "Khóa học này chưa được phát hành!" })
-    //         }
-    //         if (!course.students.find(item => item.toString() === user.id.toString())) {
-    //             course.students.push(student.id)
-    //         }
-    //         else {
-    //             return res.status(400).json({ message: "Học viên đã thuộc lớp học!" })
-    //         }
-    //         await course.save()
-    //         return res.status(200).json({
-    //             message: "Tham gia khóa học thành công!",
-    //         })
-    //     }
-    //     catch (error) { 
-    //         console.log(error)
-    //         res.status(400).json({ message: "Lỗi đăng ký khoá học!" })
-    //     }
-    // }
+            await course.save()
+            return res.status(200).json({
+                message: "Rời khóa học thành công!",
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi rời khoá học!" })
+        }
+    }
 }
 
 module.exports = { CourseController }

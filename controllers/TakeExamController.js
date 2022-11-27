@@ -6,8 +6,7 @@ const User = require("../models/User");
 const TakeExam = require("../models/TakeExam");
 const { STATUS, VIEWPOINT } = require("../utils/enum");
 const moment = require("moment/moment");
-const ExamResult = require("../models/ExamResult");
-const Log = require("../models/Log")
+const ExamLog = require("../models/ExamLog");
 const TakeExamController = {
   getExam: async (takeExam) => {
 
@@ -52,7 +51,7 @@ const TakeExamController = {
           attemptsAllowed: 1,
         });
       let { questions, startTime, maxTimes, ...data } = exam._doc;
-      questions = questions.map((item) => item.question);
+      questions = questions.map((item) => ({ ...item.question._doc,id:item.question._id, index: item.index }));
 
       if (!exam) res.status(200).json({ message: "invalid" });
 
@@ -127,7 +126,7 @@ const TakeExamController = {
         });
       let { questions, startTime, maxTimes, ...data } = exam._doc;
       let endTime = moment(new Date()).add(maxTimes, "minutes").toDate();
-      questions = questions.map((item) => item.question);
+      questions = questions.map((item) => ({ ...item.question._doc,id:item.question._id, index: item.index }));
 
       if (exam.pin !== pin)
         return res.status(400).json({ message: "Sai mật khẩu!" });
@@ -173,8 +172,8 @@ const TakeExamController = {
         });
       }
       const takeExam = await newTakeExam.save();
-      const newExamResult = new ExamResult({ takeExamId: takeExam.id });
-      await newExamResult.save();
+      const newExamLog = new ExamLog({ takeExamId: takeExam.id });
+      await newExamLog.save();
       return res.status(200).json({
         message: "Làm bài thi thành công!",
         takeExamId: takeExam.id,
@@ -300,7 +299,7 @@ const TakeExamController = {
     try {
       const { takeExamId } = req.query;
       const username = req.user.sub;
-   
+
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
 
@@ -344,30 +343,46 @@ const TakeExamController = {
             path: "answers",
             select: "id content isCorrect",
           },
-        })
-      let { questions, startTime, maxTimes, ...data } = exam._doc;
+        }).lean()
+
+      let { questions, startTime, maxTimes, ...data } = exam;
       questions = questions.map((item) => item.question);
 
       const result = takeExam.result
 
       questions = questions.map(item => {
-
-        let resultAnswer = result.find(e => e.question?.toString() === item.id.toString())
+        let { answers, ...questionData } = item
+        let resultAnswer = result.find(e => e.question?.toString() === item._id.toString())
         let choose = []
+        let point = 0
         if (resultAnswer) {
           choose = resultAnswer.answers
+          point = resultAnswer.point
         }
-
-        return { ...item._doc, choose }
+        let toDay = new Date()
+        if (exam.viewAnswer === 'no' || (exam.viewAnswer === 'alldone' && moment().diff(exam.endTime, 'minutes') > 0)) {
+          answers = answers.map(item => {
+            delete item.isCorrect
+            return item
+          })
+        }
+        if (exam.viewPoint === 'no' || (exam.viewPoint === 'alldone' && moment().diff(exam.endTime, 'minutes') > 0)) {
+          return { ...questionData, answers, choose }
+        }
+        return { ...questionData, answers, choose, point }
       })
 
-      console.log(questions)
       return res.status(200).json(
         {
           name: exam.name,
           startTime: takeExam.startTime,
           submitTime: takeExam.submitTime,
-          questions: questions
+          questions: questions,
+          viewPoint: exam.viewPoint,
+          viewAnswer: exam.viewAnswer,
+          maxPoints: exam.maxPoints,
+          points: (exam.viewPoint === 'no' ||
+            (exam.viewPoint === 'alldone' && moment().diff(exam.endTime, 'minutes') > 0)) ? undefined : takeExam.points
         })
 
     }
@@ -377,38 +392,50 @@ const TakeExamController = {
     }
 
   },
-  
+
   createLogs: async (req, res) => {
     try {
-      const { action, time, takeExamId } = req.body;
+      const { action, takeExamId } = req.body;
       const username = req.user.sub;
-      if (!username)
-        return res.status(400).json({ message: "Không có người dùng" });
+
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
-      const takeExam = await TakeExam.findById(takeExamId).populate('examId')
-      const takeExams = await TakeExam.find({ examId: takeExam.examId.id, userId: user.id })
-      const index = takeExams.findIndex(item => item.id.toString() === takeExamId)
+
+      const takeExam = await TakeExam.findById(takeExamId)
       if (!takeExam) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
 
-      const newLog = await new ExamResult({
-        action,
-        time: new Date(time),
-        takeExamId
-      })
+      let examLog = await ExamLog.findOne({ takeExamId: takeExam.id })
 
-      let error = newLog.validateSync()
-      if (error) {
-        console.log(error)
-        return res.status(400).json({
-          message: "Tạo lịch sử thất bại!"
-        })
+      if (!examLog) {
+        examLog = new ExamLog({ takeExamId: takeExam.id ,logs:[]})
+
       }
-      const log = await newLog.save()
-
-      return res.status(200).json({
-        log: newLog._doc
+      examLog.logs.push({
+        time: new Date(),
+        action
       })
+      await examLog.save()
+      return res.status(200).json({
+        message: 'Tạo thành công'
+      })
+    }
+    catch (error) {
+      console.log(error);
+      res.status(400).json({ message: "Lỗi tạo lịch sử" });
+    }
+  },
+  getLogs: async (req, res) => {
+    try {
+      const { takeExamId } = req.query;
+      const username = req.user.sub;
+
+      const user = await User.findOne({ username });
+      if (!user) return res.status(400).json({ message: "Không có người dùng" });
+
+      const examLogs = await TakeExam.findOne({takeExamId:mongoose.Types.ObjectId(takeExamId)})
+      if (!examLogs) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
+
+      return res.status(200).json(examLogs )
     }
     catch (error) {
       console.log(error);

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const autoinc = require("mongoose-plugin-autoinc");
 const { COLLECTION } = require("../utils/enum");
 
-const examResultSchema = mongoose.Schema({
+const examLogSchema = mongoose.Schema({
     logId: {
         type: Number,
         require: true,
@@ -22,6 +22,7 @@ const examResultSchema = mongoose.Schema({
             },
             action: {
                 type: String,
+                default: ''
             }
         }
     ],
@@ -38,10 +39,10 @@ const examResultSchema = mongoose.Schema({
 );
 
 
-examResultSchema.method("toJSON", function () {
+examLogSchema.method("toJSON", function () {
     const { __v, ...object } = this.toObject();
     const { _id: id, ...result } = object;
     return { ...result, id };
 });
 
-module.exports = mongoose.model(COLLECTION.EXAMRESULT, examResultSchema);
+module.exports = mongoose.model(COLLECTION.EXAMLOG, examLogSchema);
