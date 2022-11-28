@@ -287,6 +287,7 @@ const ExamController = {
                     exam.numberofQuestions += 1
                 }
             }
+            exam.questions = exam.questions.map((item,index)=>({...item._doc,index:index+1}))//cập nhật lại index câu hỏi
             await exam.save()
             return res.status(200).json({
                 message: "Lấy danh sách câu hỏi thành công",

@@ -57,7 +57,7 @@ const courseSchema = mongoose.Schema({
   ],
   status: {
     type: String,
-    default: "",
+    default: "public",
   },
 
   image:
@@ -65,11 +65,10 @@ const courseSchema = mongoose.Schema({
     type: String,
     default: DEFAULT_VALUES.IMAGE_COURSE,
   },
-  // pins:[{
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: COLLECTION.PIN,
-  //   default: null
-  // }],
+  pin:{
+    type: String,
+    default: ''
+  },
 
 },
   {

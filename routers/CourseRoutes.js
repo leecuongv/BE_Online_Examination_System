@@ -23,9 +23,9 @@ router.post('/add-student',verifyToken, CourseController.addStudentIntoCourse);
 router.delete('/delete-student',verifyToken, CourseController.deleteStudentInCourse);
 router.post('/update-course',verifyToken, CourseController.UpdateCourse);
 router.get('/student-course', verifyToken, CourseController.getStudentCourse)
-// router.post('/update-file',verifyToken, UploadController.Upload);
-// router.get('/download-file', UploadController.Download);
 router.get('/by-student', verifyToken, CourseController.getListExamInCourseOfStudent)
-//router.post('/enroll-in-course', verifyToken, CourseController.enrollInCourse)
+router.get('/info-to-enroll', verifyToken, CourseController.getCourseInfoToEnroll)
+router.post('/enroll-in-course', verifyToken, CourseController.enrollInCourse)
+router.post('/exit-course', verifyToken, CourseController.exitCourse)
 
 module.exports = router;

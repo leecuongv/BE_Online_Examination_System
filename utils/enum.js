@@ -14,7 +14,7 @@ const COLLECTION = {
   COURSE: "Course",
   QUESTION: "Question",
   TAKEEXAM: "Take_exam",
-  EXAMRESULT: "Exam_result",
+  EXAMLOG: "Exam_log",
   EXAM: "Exam",
   USER: "User",
   QUESTIONBANK: "Question_bank",

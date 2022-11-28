@@ -50,6 +50,7 @@ const QuestionController = {
 
             console.log(await (await newQuestion.save()).populate('answers'))
             exam.questions.push({ question: newQuestion.id })
+            exam.questions = exam.questions.map((item,index)=>({...item._doc,index:index+1}))//cập nhật lại index câu hỏi
             exam.maxPoints = Number(exam.maxPoints) + Number(newQuestion.maxPoints)
             exam.numberofQuestions += 1
             await exam.save()
@@ -80,8 +81,12 @@ const QuestionController = {
             if (!question) return res.status(400).json({ message: 'Không tồn tại câu hỏi' })
 
             exam.questions = exam.questions.filter(item => item.question.toString() !== question.id.toString())
+
+            exam.questions = exam.questions.map((item,index)=>({...item._doc,index}))//cập nhật lại index câu hỏi
+
             exam.maxPoints = Number(exam.maxPoints) - Number(question.maxPoints)
             exam.numberofQuestions = Number(exam.numberofQuestions) - 1
+
             await exam.save()
 
             await question.deleteOne()
@@ -134,7 +139,10 @@ const QuestionController = {
 
                 exam.maxPoints = Number(exam.maxPoints) + Number(newQuestion.maxPoints)
                 exam.numberofQuestions += 1
-                exam.questions.push({ question: newQuestion.id })
+                exam.questions.push({
+                    index: exam.questions.length + 1,
+                    question: newQuestion.id
+                })
 
                 return newQuestion.save()
 
@@ -181,11 +189,11 @@ const QuestionController = {
                         content: element.content || "",
                         isCorrect: element.isCorrect || false
                     }, { upsert: true })
-                    
+
                 }
                 else {
                     let newAnswer = new Answer({ content: element.content, isCorrect: element.isCorrect })
-                    
+
                     newAnswers.push(newAnswer.id)
                     return newAnswer.save()
                 }

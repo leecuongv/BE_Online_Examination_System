@@ -5,7 +5,6 @@ const User = require("../models/User")
 const TakeExam = require("../models/TakeExam");
 const { STATUS, VIEWPOINT, ROLES } = require("../utils/enum");
 const moment = require("moment/moment");
-const ExamResult = require("../models/ExamResult");
 
 const AdminController = {
 
