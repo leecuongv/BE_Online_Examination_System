@@ -51,7 +51,7 @@ const TakeExamController = {
           attemptsAllowed: 1,
         });
       let { questions, startTime, maxTimes, ...data } = exam._doc;
-      questions = questions.map((item) => ({ ...item.question._doc,id:item.question._id, index: item.index }));
+      questions = questions.map((item) => ({ ...item.question._doc, id: item.question._id, index: item.index }));
 
       if (!exam) res.status(200).json({ message: "invalid" });
 
@@ -101,7 +101,10 @@ const TakeExamController = {
   CreateTakeExam: async (req, res) => {
     try {
       const username = req.user.sub;
+
+
       const { slug, pin } = req.body;
+
       const toDay = new Date()
       if (!username)
         return res.status(400).json({ message: "Không có người dùng" });
@@ -126,11 +129,12 @@ const TakeExamController = {
         });
       let { questions, startTime, maxTimes, ...data } = exam._doc;
       let endTime = moment(new Date()).add(maxTimes, "minutes").toDate();
-      questions = questions.map((item) => ({ ...item.question._doc,id:item.question._id, index: item.index }));
+      questions = questions.map((item) => ({ ...item.question._doc, id: item.question._id, index: item.index }));
 
-      if (exam.pin !== pin)
-        return res.status(400).json({ message: "Sai mật khẩu!" });
-
+      if (exam.pin !== "") {
+        if (exam.pin !== pin)
+          return res.status(400).json({ message: "Sai mật khẩu!" });
+      }
       if (!exam) return res.status(400).json({ message: "Không có bài thi!" });
       const course = await Course.findOne({
         $and: [
@@ -407,7 +411,7 @@ const TakeExamController = {
       let examLog = await ExamLog.findOne({ takeExamId: takeExam.id })
 
       if (!examLog) {
-        examLog = new ExamLog({ takeExamId: takeExam.id ,logs:[]})
+        examLog = new ExamLog({ takeExamId: takeExam.id, logs: [] })
 
       }
       examLog.logs.push({
@@ -432,10 +436,10 @@ const TakeExamController = {
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
 
-      const examLogs = await TakeExam.findOne({takeExamId:mongoose.Types.ObjectId(takeExamId)})
+      const examLogs = await TakeExam.findOne({ takeExamId: mongoose.Types.ObjectId(takeExamId) })
       if (!examLogs) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
 
-      return res.status(200).json(examLogs )
+      return res.status(200).json(examLogs)
     }
     catch (error) {
       console.log(error);
