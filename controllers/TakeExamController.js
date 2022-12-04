@@ -436,7 +436,7 @@ const TakeExamController = {
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
 
-      const examLogs = await TakeExam.findOne({ takeExamId: mongoose.Types.ObjectId(takeExamId) })
+      const examLogs = await ExamLog.findOne({ takeExamId: mongoose.Types.ObjectId(takeExamId) })
       if (!examLogs) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
 
       return res.status(200).json(examLogs)
