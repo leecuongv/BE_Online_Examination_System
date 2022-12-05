@@ -428,6 +428,7 @@ const TakeExamController = {
       res.status(400).json({ message: "Lỗi tạo lịch sử" });
     }
   },
+
   getLogs: async (req, res) => {
     try {
       const { takeExamId } = req.query;
