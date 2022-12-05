@@ -39,20 +39,13 @@ const StatisticController = {
                     points
                 }
             })
-            console.log("------------------------------------------------------------------------------")
-            console.log(takeExams)
-
-            /*let results = takeExams.map(item => ({
-                ...item._doc,
-                maxPoints: exam.maxPoints
-
-            }))*/
             return res.status(200).json(takeExams)
         }
         catch (err) {
             return res.status(500).json({ message: 'Lỗi thống kê' })
         }
     },
+
     GetTakeExamByTeacher: async (req, res) => {
         try {
 
@@ -70,7 +63,6 @@ const StatisticController = {
             }
             let takeExams = await TakeExam.find({ examId: exam.id }).populate('userId')
             takeExams = takeExams.map(item => {
-                console.log(item)
                 let { result, points, userId, ...data } = item._doc
                 points = result.reduce((total, current) => {
 
@@ -86,8 +78,6 @@ const StatisticController = {
                     points
                 }
             })
-            console.log("------------------------------------------------------------------------------")
-            console.log(takeExams)
 
 
             return res.status(200).json(takeExams)
@@ -97,6 +87,7 @@ const StatisticController = {
             return res.status(400).json({ message: 'Lỗi thống kê' })
         }
     },
+
     GetTakeExamDetailByTeacher: async (req, res) => {
         try {
 
@@ -112,7 +103,6 @@ const StatisticController = {
                     match: { creatorId: user.id }
                 })
             takeExams = takeExams.map(item => {
-                console.log(item)
                 let { examId, result, points, userId, ...data } = item._doc
                 points = result.reduce((total, current) => {
 
@@ -129,9 +119,6 @@ const StatisticController = {
                     points
                 }
             })
-            console.log("------------------------------------------------------------------------------")
-            console.log(takeExams)
-
 
             return res.status(200).json(takeExams)
         }
@@ -140,6 +127,7 @@ const StatisticController = {
             return res.status(400).json({ message: 'Lỗi thống kê' })
         }
     },
+
     GetSubmitAssignmentDetailByTeacher: async (req, res) => {
         try {
 
@@ -157,17 +145,10 @@ const StatisticController = {
                     match: { creatorId: user.id }
                 })
 
-            console.log(submitAssignment)
             submitAssignment = submitAssignment.map(item => {
-                //console.log(item)
-                let { assignmentId, result, points, creatorId, ...data } = item._doc
-                // points = result.reduce((total, current) => {
 
-                //     total += current.point
-                //     return total
-                // },
-                //     0
-                // )
+                let { assignmentId, result, points, creatorId, ...data } = item._doc
+            
                 return {
                     ...data,
                     assignmentName: assignmentId.name,
@@ -176,10 +157,6 @@ const StatisticController = {
                     points
                 }
             })
-            console.log("------------------------------------------------------------------------------")
-            //console.log(submitAssignment)
-
-
             return res.status(200).json(submitAssignment)
         }
         catch (err) {
@@ -187,6 +164,7 @@ const StatisticController = {
             return res.status(400).json({ message: 'Lỗi thống kê' })
         }
     },
+
     GetNumberOfCourses: async (req, res) => {
         try {
             const numberOfCourses = await Course.countDocuments()
@@ -204,6 +182,7 @@ const StatisticController = {
 
         }
     },
+
     GetNumberOfExams: async (req, res) => {
         try {
             const numberOfExam = await Exam.countDocuments()
@@ -221,6 +200,7 @@ const StatisticController = {
 
         }
     },
+
     GetNumberOfAssignments: async (req, res) => {
         try {
             const numberOfAssignment = await Assignment.countDocuments()
@@ -238,6 +218,7 @@ const StatisticController = {
 
         }
     },
+
     GetNumberOfUsers: async (req, res) => {
         try {
             const numberOfUsers = await User.countDocuments()
@@ -254,6 +235,7 @@ const StatisticController = {
             return res.status(400).json({ message: "Lỗi đếm số lượng người dùng!" })
         }
     },
+
     getDetailOfUsers: async (req, res) => {
         try {
             const numberOfUsers = await User.countDocuments()
@@ -278,6 +260,7 @@ const StatisticController = {
             return res.status(400).json({ message: "Lỗi đếm số lượng người dùng!" })
         }
     },
+
     GetTotalNewUsersByDay: async (req, res) => {
         try {
             let listUsers = await User.aggregate([
@@ -449,7 +432,7 @@ const StatisticController = {
             }
 
             const course = await Course.findOne({ courseId: courseId, creatorId: user.id })
-            
+
             if (!course)
                 return res.status(400).json({ message: "Không tồn tại khóa học!" })
 
@@ -565,7 +548,6 @@ const StatisticController = {
             ]
             )
 
-            console.log(listAssignment)
             var countSubmitAssignments = 0
             listAssignment.forEach((item) => {
                 countSubmitAssignments += item.countSubmitAssignment
@@ -581,9 +563,9 @@ const StatisticController = {
             console.log(error)
             return res.status(500).json({ message: "Không xác định" })
         }
-    }
+    },
 
-
+    
 }
 
 module.exports = { StatisticController }

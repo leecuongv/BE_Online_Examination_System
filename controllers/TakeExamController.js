@@ -447,6 +447,24 @@ const TakeExamController = {
       res.status(400).json({ message: "Lỗi tạo lịch sử" });
     }
   },
+  getAllTakeExam: async (req, res) => {
+    try {
+
+      const username = req.user?.sub
+      const user = await User.findOne({ username })
+      if (!user) {
+        return res.status(400).json({ message: "Tài khoản không tồn tại" })
+      }
+
+      const listTakeExam = await TakeExam.find({ userId: user.id })
+      console.log(listTakeExam)
+
+      return res.status(200).json({ listTakeExam })
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({ message: "Không xác định" })
+    }
+  },
 };
 
 module.exports = { TakeExamController };
