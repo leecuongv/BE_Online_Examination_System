@@ -251,12 +251,12 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tạo khoá học" })
         }
     },
+
     getListExamOfCourse: async (req, res) => {
         try {
             //Lấy cái parameter
             const username = req.user?.sub
             const courseId = req.query.courseId
-            const start = new Date().getTime()
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
@@ -494,16 +494,15 @@ const CourseController = {
             //Lấy cái parameter
             const username = req.user?.sub
             const courseId = req.query.courseId
-            const start = new Date().getTime()
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
             console.log(courseId)
 
-            const listExam = await Course.aggregate([
+            let listExam = await Course.aggregate([
                 {
-                    $match: { courseId: Number(courseId) }
+                    $match: { courseId: Number(courseId)}
                 },
                 {
                     $lookup:
@@ -562,7 +561,7 @@ const CourseController = {
             console.log(listExam)
 
             if (listExam) {
-                listExam = listExam.filter(item => item.status !== STATUS.PRIVATE)
+                listExam = listExam.filter(item => item.status === STATUS.PUBLIC)
                 return res.status(200).json(listExam)
             }
             return res.status(400).json({

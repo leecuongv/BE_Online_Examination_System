@@ -101,31 +101,7 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi tạo bài thi" })
         }
     },
-    UpdateExam: async (req, res) => {//nhớ sửa
-        try {
-            const { slug, name, description, image, userId } = req.body
 
-            const newExam = await new Exam({
-                name,
-                slug,
-                description,
-                email,
-                image,
-                creatorId: userId
-            });
-
-            const exam = await newExam.save();
-
-            return res.status(200).json({
-                message: "Tạo khoá học thành công",
-                slug: exam._doc.slug
-            })
-
-        } catch (error) {
-            console.log(error)
-            res.status(400).json({ message: "Lỗi tạo khoá học" })
-        }
-    },
     UpdateExam: async (req, res) => {
         try {
             const username = req.user.sub
@@ -212,6 +188,7 @@ const ExamController = {
         }
 
     },
+
     addQuestionWithQuestionBank: async (req, res) => {
         try {
             //Lấy cái parameter
@@ -380,7 +357,8 @@ const ExamController = {
             console.log(error)
             res.status(400).json({ message: "Lỗi xuất bản bài thi" })
         }
-    }
+    },
+
 };
 
 
