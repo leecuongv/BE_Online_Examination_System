@@ -148,6 +148,8 @@ const StatisticController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(200).json({ message: "Không có tài khoản" })
 
+
+
             let submitAssignment = await SubmitAssignment.find()
                 .populate('creatorId')
                 .populate({
@@ -278,28 +280,6 @@ const StatisticController = {
     },
     GetTotalNewUsersByDay: async (req, res) => {
         try {
-            // let listUsers = await User.find()
-            // listUsers = listUsers.map(item => {
-            //     if (item._doc.hasOwnProperty('createdAt')) {
-            //         return {
-            //             item,
-            //             dateAdd: format(item.createdAt, 'yyyy-MM-dd')
-            //         }
-            //     }
-            //     return {
-            //         item,
-            //         dateAdd: "2022-04-08"
-            //     }
-            // })
-            // var result = [];
-            // listUsers.reduce(function (res, value) {
-            //     if (!res[value.dateAdd]) {
-            //         res[value.dateAdd] = { dateAdd: value.dateAdd, sum: 0 };
-            //         result.push(res[value.dateAdd])
-            //     }
-            //     res[value.dateAdd].sum++;
-            //     return res;
-            // }, {});
             let listUsers = await User.aggregate([
                 {
                     $addFields: {
@@ -383,6 +363,7 @@ const StatisticController = {
             return res.status(500).json({ message: "Không xác định" })
         }
     },
+
     GetSumRevenue: async (req, res) => {
         try {
             let listPayments = await Bill.find()
@@ -456,34 +437,152 @@ const StatisticController = {
             return res.status(500).json({ message: "Không xác định" })
         }
     },
-    /*
-    GetTotalCreateNovelByDay: async (req, res) => {
-        try {
-            let listNovels= await Novel.find()
-            listNovels=listNovels.map(item=>{
-                return {
-                    item,
-                    dateAdd:format(item.createdAt, 'yyyy-MM-dd')
-                }
-            })
-            var result = [];
-            listNovels.reduce(function(res, value) {
-            if (!res[value.dateAdd]) {
-                res[value.dateAdd] = { dateAdd: value.dateAdd, sum: 0 };
-                result.push(res[value.dateAdd])
-            }
-            res[value.dateAdd].sum++;
-            return res;
-            }, {});
 
-            return res.status(200).json(ResponseData(200,result))
+    getDetailOfCourse: async (req, res) => {
+        try {
+            const courseId = req.query.courseId
+
+            const username = req.user?.sub
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+
+            const course = await Course.findOne({ courseId: courseId, creatorId: user.id })
             
+            if (!course)
+                return res.status(400).json({ message: "Không tồn tại khóa học!" })
+
+            const listExam = await Course.aggregate([
+                {
+                    $match: { courseId: Number(courseId) }
+                },
+                {
+                    $lookup:
+                    {
+                        from: "exams",
+                        localField: "exams",
+                        foreignField: "_id",
+                        as: "exams"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$exams",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "take_exams",
+                        localField: "exams._id",
+                        foreignField: "examId",
+                        as: "takeExams"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$takeExams",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$exams._id', "doc": { "$first": "$$ROOT.exams" },
+                        countTakeExam: {
+                            $sum: {
+                                $cond: [{ $ifNull: ['$takeExams', false] }, 1, 0]
+                            }
+                        }
+                    }
+                },
+                { $match: { _id: { $ne: null } } },
+                {
+                    $project: {
+                        id: "$doc._id",
+                        name: "$doc.name",
+                        countTakeExam: "$countTakeExam",
+                    }
+                }
+            ]
+            )
+            var countTakeExams = 0
+            listExam.forEach((item) => {
+                countTakeExams += item.countTakeExam
+            })
+
+            const listAssignment = await Course.aggregate([
+                {
+                    $match: { courseId: Number(courseId) }
+                },
+                {
+                    $lookup:
+                    {
+                        from: "assignments",
+                        localField: "assignments",
+                        foreignField: "_id",
+                        as: "assignments"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$assignments",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "submit_assignments",
+                        localField: "assignments._id",
+                        foreignField: "assignmentId",
+                        as: "submitAssignments"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$submitAssignments",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$assignments._id', "doc": { "$first": "$$ROOT.assignments" },
+                        countSubmitAssignment: {
+                            $sum: {
+                                $cond: [{ $ifNull: ['$submitAssignments', false] }, 1, 0]
+                            }
+                        }
+                    }
+                },
+                { $match: { _id: { $ne: null } } },
+                {
+                    $project: {
+                        id: "$doc._id",
+                        name: "$doc.name",
+                        countSubmitAssignment: "$countSubmitAssignment",
+                    }
+                }
+            ]
+            )
+
+            console.log(listAssignment)
+            var countSubmitAssignments = 0
+            listAssignment.forEach((item) => {
+                countSubmitAssignments += item.countSubmitAssignment
+            })
+
+            let countExams = course.exams.length
+            let countAssignments = course.assignments.length
+            let countStudents = course.students.length
+
+
+            return res.status(200).json({ countStudents, countExams, countAssignments, countTakeExams, countSubmitAssignments })
         } catch (error) {
             console.log(error)
-            res.status(500).json(ResponseDetail(500, { message: "Lỗi GetNovels" }))
+            return res.status(500).json({ message: "Không xác định" })
         }
-    },
-    */
+    }
+
 
 }
 
