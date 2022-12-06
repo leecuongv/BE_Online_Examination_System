@@ -107,9 +107,9 @@ const ExamController = {
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
-            const { slug, shuffle } = req.query
+            const { slug } = req.query
             console.log(slug)
-            const exam = await Exam.findOne({ slug, creatorId: user.id })
+            const exam = await Exam.findOne({ slug })
                 .populate({
                     path: 'questions.question',
                     populate: {
@@ -121,19 +121,13 @@ const ExamController = {
                     message: "Không tìm thấy bài thi",
                 })
             }
-            // console.log(exam._doc)
-            console.log("Chưa random \n " + exam.questions)
-            let randomArray = exam.questions.sort(() => Math.random() - 0.5)
-            //noneExistQuestion = noneExistQuestion.sort(() => Math.random() - 0.5);
-            console.log("Đã random \n" + randomArray)
+            if (exam.shuffle === true) {
 
-            return res.status(200).json({message: "Chưa randome",
-                                         exam:    exam._doc.questions,
-                                        message2: "Đã random",
-                                        randomArray})
-
-
-
+                console.log("Chưa random \n " + exam)
+                let randomArray = [...exam.questions].sort(() => Math.random() - 0.5)
+                exam.questions = await randomArray
+            }
+            return res.status(200).json(exam)
 
         } catch (error) {
             console.log(error)
@@ -295,10 +289,10 @@ const ExamController = {
                 noneExistQuestion = await Question.find({ _id: { $in: noneExistQuestion } })
 
                 for (let i = 0; i < noneExistQuestion.length; i++) {
-                    let newQuetion = noneExistQuestion.pop()
-                    questionIdsTaken.push(newQuetion)
-                    exam.questions.push({ question: newQuetion.id })
-                    exam.maxPoints += Number(newQuetion.maxPoints) || 0
+                    let newQuestion = noneExistQuestion.pop()
+                    questionIdsTaken.push(newQuestion)
+                    exam.questions.push({ question: newQuestion.id })
+                    exam.maxPoints += Number(newQuestion.maxPoints) || 0
                     exam.numberofQuestions += 1
                 }
             }
