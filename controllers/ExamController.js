@@ -101,7 +101,45 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi tạo bài thi" })
         }
     },
+    getExamBySlugByStudent: async (req, res) => {
+        try {
+            const username = req.user.sub
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+            const { slug, shuffle } = req.query
+            console.log(slug)
+            const exam = await Exam.findOne({ slug, creatorId: user.id })
+                .populate({
+                    path: 'questions.question',
+                    populate: {
+                        path: 'answers'
+                    }
+                })
+            if (!exam) {
+                return res.status(400).json({
+                    message: "Không tìm thấy bài thi",
+                })
+            }
+            // console.log(exam._doc)
+            console.log("Chưa random \n " + exam.questions)
+            let randomArray = exam.questions.sort(() => Math.random() - 0.5)
+            //noneExistQuestion = noneExistQuestion.sort(() => Math.random() - 0.5);
+            console.log("Đã random \n" + randomArray)
 
+            return res.status(200).json({message: "Chưa randome",
+                                         exam:    exam._doc.questions,
+                                        message2: "Đã random",
+                                        randomArray})
+
+
+
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi tạo bài thi" })
+        }
+    },
     UpdateExam: async (req, res) => {
         try {
             const username = req.user.sub
@@ -204,19 +242,19 @@ const ExamController = {
             if (!exam)
                 return res.status(400).json({ message: "Bài kiểm tra không tồn tại!" })
 
-            let questionBank = await QuestionBank.findOne({ slug:questionBankSlug, creatorId: user.id })
-                                            .populate({
-                                                path:'questions',
-                                                populate:{
-                                                    path:'questions.answers'
-                                                }
-                                            })
+            let questionBank = await QuestionBank.findOne({ slug: questionBankSlug, creatorId: user.id })
+                .populate({
+                    path: 'questions',
+                    populate: {
+                        path: 'questions.answers'
+                    }
+                })
             if (!questionBank)
                 return res.status(400).json({
                     message: "Không tìm thấy ngân hàng câu hỏi!",
                 })
             let soCauHoiCanLay = 0
-            let questionIdsTaked = []
+            let questionIdsTaken = []
             if (random === true) {
 
                 let noneExistQuestion = []
@@ -229,15 +267,15 @@ const ExamController = {
                     return res.status(400).json({ message: "Tất cả các câu hỏi đã tồn tại trong hệ thống" })
                 }
                 soCauHoiCanLay = noneExistQuestion.length <= numberofNeedQuestions ? noneExistQuestion.length : numberofNeedQuestions;
-                
-                noneExistQuestion = await Question.find({_id:{$in:noneExistQuestion}})
+
+                noneExistQuestion = await Question.find({ _id: { $in: noneExistQuestion } })
 
                 noneExistQuestion = noneExistQuestion.sort(() => Math.random() - 0.5);
                 for (let i = 0; i < soCauHoiCanLay; i++) {
-                    let newQuetion = noneExistQuestion.pop()
-                    questionIdsTaked.push(newQuetion)
-                    exam.questions.push({ question: newQuetion.id })
-                    exam.maxPoints += Number(newQuetion.maxPoints) || 0
+                    let newQuestion = noneExistQuestion.pop()
+                    questionIdsTaken.push(newQuestion)
+                    exam.questions.push({ question: newQuestion.id })
+                    exam.maxPoints += Number(newQuestion.maxPoints) || 0
                     exam.numberofQuestions += 1
                 }
             }
@@ -246,7 +284,7 @@ const ExamController = {
                 let noneExistQuestion = []
                 questionIds.forEach(questionInBody => {
                     if (!exam.questions.find(item => item.question.toString() === questionInBody.toString())) {
-                        if(mongoose.Types.ObjectId.isValid(questionInBody))
+                        if (mongoose.Types.ObjectId.isValid(questionInBody))
                             noneExistQuestion.push(mongoose.Types.ObjectId(questionInBody))
                     }
                 })
@@ -254,21 +292,21 @@ const ExamController = {
                     return res.status(400).json({ message: "Tất cả các câu hỏi trong danh sách đã tồn tại trong hệ thống" })
                 }
 
-                noneExistQuestion = await Question.find({_id:{$in:noneExistQuestion}})
+                noneExistQuestion = await Question.find({ _id: { $in: noneExistQuestion } })
 
                 for (let i = 0; i < noneExistQuestion.length; i++) {
                     let newQuetion = noneExistQuestion.pop()
-                    questionIdsTaked.push(newQuetion)
+                    questionIdsTaken.push(newQuetion)
                     exam.questions.push({ question: newQuetion.id })
                     exam.maxPoints += Number(newQuetion.maxPoints) || 0
                     exam.numberofQuestions += 1
                 }
             }
-            exam.questions = exam.questions.map((item,index)=>({...item._doc,index:index+1}))//cập nhật lại index câu hỏi
+            exam.questions = exam.questions.map((item, index) => ({ ...item._doc, index: index + 1 }))//cập nhật lại index câu hỏi
             await exam.save()
             return res.status(200).json({
                 message: "Lấy danh sách câu hỏi thành công",
-                questions: questionIdsTaked,
+                questions: questionIdsTaken,
                 soCauHoiCanLay
             })
 
