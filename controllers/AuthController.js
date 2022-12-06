@@ -69,7 +69,7 @@ const AuthController = {
             const user = await User.findOne({ username: username })
 
             if (!user) {
-                return res.status(404).json({ username: "Sai tên đăng nhập hoặc mật khẩu" })
+                return res.status(404).json({ message: "Sai tên đăng nhập hoặc mật khẩu" })
             }
             const auth = await bcrypt.compare(password, user.password)
             if (auth) {
