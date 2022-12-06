@@ -124,6 +124,7 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi lấy thông tin khoá học" })
         }
     },
+    
     getCourseByCourseId: async (req, res) => {
         try {
             const { courseId } = req.query
@@ -145,6 +146,7 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tạo khoá học" })
         }
     },
+
     getListCourseTeacher: async (req, res) => {
         try {
             const username = req.user?.sub
@@ -197,6 +199,7 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tạo khoá học" })
         }
     },
+
     getListStudentOfCourse: async (req, res) => {
         try {
             //Lấy cái parameter
@@ -465,6 +468,7 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tạo khoá học" })
         }
     },
+
     getStudentCourse: async (req, res) => {
         try {
 
@@ -489,6 +493,7 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi thêm học viên" })
         }
     },
+
     getListExamInCourseOfStudent: async (req, res) => {
         try {
             //Lấy cái parameter
@@ -573,6 +578,7 @@ const CourseController = {
             res.status(400).json({ message: "Lỗi tạo khoá học" })
         }
     },
+
     enrollInCourse: async (req, res) => {
         try {
             const username = req.user?.sub
