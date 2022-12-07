@@ -148,7 +148,7 @@ const StatisticController = {
             submitAssignment = submitAssignment.map(item => {
 
                 let { assignmentId, result, points, creatorId, ...data } = item._doc
-            
+
                 return {
                     ...data,
                     assignmentName: assignmentId.name,
@@ -320,6 +320,7 @@ const StatisticController = {
             return res.status(500).json({ message: "Không xác định" })
         }
     },
+
     GetListBillByUser: async (req, res) => {
         try {
             const username = req.user?.sub
@@ -564,8 +565,55 @@ const StatisticController = {
             return res.status(500).json({ message: "Không xác định" })
         }
     },
+    DetailOfStudent: async (req, res) => {
+        try {
+            const username = req.user?.sub
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
 
-    
+            const numberOfCoursesJoined = await Course.countDocuments({
+                students: { $in: [mongoose.Types.ObjectId(user.id)] }
+            })
+            const numberOfExamsTaken = await TakeExam.countDocuments({ userId: user.id })
+            const numberOfAssignmentsSubmitted = await SubmitAssignment.countDocuments({ userId: user.id })
+
+            return res.status(201).json({
+                    numberOfCoursesJoined,
+                    numberOfExamsTaken,
+                    numberOfAssignmentsSubmitted
+                })
+
+        } catch (error) {
+            console.log(error)
+            return res.status(400).json({ message: "Lỗi đếm số lượng người dùng!" })
+        }
+    },
+    DetailOfTeacher: async (req, res) => {
+        try {
+            const username = req.user?.sub
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+
+            const numberOfCoursesCreated = await Course.countDocuments({creatorId: user.id})
+            const numberOfExamCreated = await Exam.countDocuments({creatorId: user.id})
+            const numberOfAssignmentsCreated = await SubmitAssignment.countDocuments({creatorId: user.id})
+
+            return res.status(201).json({
+                    numberOfCoursesCreated,
+                    numberOfExamCreated,
+                    numberOfAssignmentsCreated
+                })
+
+        } catch (error) {
+            console.log(error)
+            return res.status(400).json({ message: "Lỗi đếm số lượng người dùng!" })
+        }
+    },
+
 }
 
 module.exports = { StatisticController }

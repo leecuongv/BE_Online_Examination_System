@@ -18,5 +18,6 @@ router.get("/sum-revenue", verifyTokenAdmin, StatisticController.GetSumRevenue)
 router.get("/total-revenue-by-day", verifyTokenAdmin, StatisticController.GetTotalRevenueByDay)
 router.get("/detail-of-users", verifyTokenAdmin, StatisticController.getDetailOfUsers)
 router.get("/detail-of-course", verifyToken, StatisticController.getDetailOfCourse)
-
+router.get("/detail-of-student", verifyToken, StatisticController.DetailOfStudent)
+router.get("/detail-of-teacher", verifyToken, StatisticController.DetailOfTeacher)
 module.exports = router;
