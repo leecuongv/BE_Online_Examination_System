@@ -566,7 +566,7 @@ const CourseController = {
             console.log(listExam)
 
             if (listExam) {
-                listExam = listExam.filter(item => item.status === STATUS.PUBLIC)
+                listExam = listExam.filter(item => item.status !== STATUS.PRIVATE)
                 return res.status(200).json(listExam)
             }
             return res.status(400).json({
