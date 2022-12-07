@@ -126,8 +126,16 @@ const TakeExamController = {
           maxTimes: 1,
           tracking: 1,
           pin: 1,
+          shuffle: 1,
         });
-      let { questions, startTime, maxTimes, ...data } = exam._doc;
+      
+      if (exam.shuffle === true) {
+
+        console.log("Chưa random \n " + exam)
+        let randomArray = [...exam.questions].sort(() => Math.random() - 0.5)
+        exam.questions = await randomArray
+    }
+    let { questions, startTime, maxTimes, ...data } = exam._doc;
       let endTime = moment(new Date()).add(maxTimes, "minutes").toDate();
       questions = questions.map((item) => ({ ...item.question._doc, id: item.question._id, index: item.index }));
 
