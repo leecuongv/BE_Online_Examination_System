@@ -20,6 +20,8 @@ const {
   SubmitAssignmentRoutes,
   AdminRoutes,
  } = require('./routers');
+
+ const { notFound, errorHandler } = require("./routers/errorMiddleware");
 const helmet= require("helmet");
 //const passport = require('passport');
 const rateLimit = require('express-rate-limit');
@@ -101,7 +103,7 @@ app.use(function (req, res, next) {
 
 mongoose.connect(URI)
   .then(async() => {
-    console.log('Connected')
+    console.log('Connected to Database')
   }).catch(err => {
     console.log('err', err)
   })
@@ -132,3 +134,6 @@ app.use("/api/upload", UploadRoutes)
 app.use("/api/assignment", AssignmentRoutes)
 app.use("/api/submitassignment", SubmitAssignmentRoutes)
 app.use("/api/admin", AdminRoutes)
+
+app.use(notFound);
+app.use(errorHandler);
