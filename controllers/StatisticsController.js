@@ -34,7 +34,6 @@ const StatisticController = {
                 )
                 return {
                     ...data,
-                    
                     maxPoints: exam.maxPoints,
                     points
                 }
@@ -75,10 +74,8 @@ const StatisticController = {
                     0
                 )
                 return {
-                    ...data,
-                    //examName: exam.name,
-                    name: userId?.fullname,
-                    //typeofPoint: exam.typeofPoint,
+                    ...data,  
+                    name: userId?.fullname,   
                     maxPoints: exam.maxPoints,
                     points
                 }
@@ -124,6 +121,7 @@ const StatisticController = {
                     examName: examId.name,
                     name: userId?.fullname,
                     maxPoints: examId.maxPoints,
+                    typeofPoint: examId.typeofPoint,
                     points
                 }
             })
