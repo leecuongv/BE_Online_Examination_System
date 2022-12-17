@@ -34,12 +34,15 @@ const StatisticController = {
                 )
                 return {
                     ...data,
-                    name: userId?.fullname,
+                    
                     maxPoints: exam.maxPoints,
                     points
                 }
             })
-            return res.status(200).json(takeExams)
+            return res.status(200).json({
+                name: exam.name,
+                typeofPoint: exam.typeofPoint,
+                takeExams})
         }
         catch (err) {
             return res.status(500).json({ message: 'Lỗi thống kê' })
@@ -73,14 +76,19 @@ const StatisticController = {
                 )
                 return {
                     ...data,
+                    //examName: exam.name,
                     name: userId?.fullname,
+                    //typeofPoint: exam.typeofPoint,
                     maxPoints: exam.maxPoints,
                     points
                 }
             })
 
 
-            return res.status(200).json(takeExams)
+            return res.status(200).json({
+                examName: exam.name,
+                typeofPoint: exam.typeofPoint,
+                takeExams})
         }
         catch (err) {
             console.log(err)
