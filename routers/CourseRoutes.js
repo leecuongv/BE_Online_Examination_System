@@ -27,5 +27,5 @@ router.get('/by-student', verifyToken, CourseController.getListExamInCourseOfStu
 router.get('/info-to-enroll', verifyToken, CourseController.getCourseInfoToEnroll)
 router.post('/enroll-in-course', verifyToken, CourseController.enrollInCourse)
 router.post('/exit-course', verifyToken, CourseController.exitCourse)
-
+router.delete('/delete-exam',verifyToken, CourseController.deleteExam);
 module.exports = router;
