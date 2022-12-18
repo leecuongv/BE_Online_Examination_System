@@ -6,6 +6,7 @@ const { ROLES, STATUS } = require("../utils/enum")
 const cloudinary = require('cloudinary').v2
 const dotenv = require('dotenv')
 const TakeExam = require("../models/TakeExam")
+const Exam = require("../models/Exam")
 dotenv.config()
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -637,6 +638,45 @@ const CourseController = {
         catch (error) {
             console.log(error)
             res.status(400).json({ message: "Lỗi rời khoá học!" })
+        }
+    },
+    deleteExam: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const { examId, courseId } = req.body
+
+            const teacher = await User.findOne({ username })
+            //const student = await User.findById(studentId)
+            const exam = await Exam.findOne({ _id: new mongoose.Types.ObjectId(examId), creatorId: teacher.id })
+
+            if (!teacher) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            if(!exam){
+                return res.status(400).json({message:"Bài tập không tồn tại"})
+            }
+
+            let course = await Course.findOne({ _id: new mongoose.Types.ObjectId(courseId), creatorId: teacher.id })
+            if (!course)
+                return res.status(400).json({
+                    message: "Không tìm thấy khoá học",
+                })
+
+            if (course.exams.find(item => item.toString() === exam.id.toString())) {//nếu chưa có sinh viên trên
+                course.exams = course.exams.filter(item => item.toString() !== exam.id.toString())
+            }
+            else {
+                return res.status(400).json({ message: "Bài kiểm tra không thuộc khóa học." })
+            }
+            await course.save()
+            return res.status(200).json({
+                message: "Xoá bài kiểm tra thành công!",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi xóa bài kiểm tra!" })
         }
     }
 }
