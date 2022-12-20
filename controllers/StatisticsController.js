@@ -333,6 +333,7 @@ const StatisticController = {
                     amount: item.amount,
                     description: item.description,
                     status: item.status,
+                    method: item.method,
                     createdAt: item.createdAt
                 }
             })
