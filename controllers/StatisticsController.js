@@ -22,9 +22,11 @@ const StatisticController = {
 
             const exam = await Exam.findOne({ slug: examSlug })
             if (!exam) return res.status(200).json({ message: "Không tìm thấy bài thi!" })
-            let takeExams = await TakeExam.find({ userId: user.id, examId: exam.id })
+            let takeExams = await TakeExam.find({ examId: exam.id, userId: user.id }).populate('userId')
             takeExams = takeExams.map(item => {
-                let { result, points, userId, ...data } = item._doc
+                let {name, examId, __v,result, points, userId, ...data } = item._doc
+
+                
                 points = result.reduce((total, current) => {
 
                     total += current.point
@@ -33,15 +35,22 @@ const StatisticController = {
                     0
                 )
                 return {
-                    ...data,
-                    maxPoints: exam.maxPoints,
+                    ...data, 
+
+                    //name: userId?.fullname,   
+                    //maxPoints: exam.maxPoints,
                     points
                 }
             })
+
+
             return res.status(200).json({
-                name: exam.name,
+                examName: exam.name,
+                examId: exam.id,
+                maxPoints: exam.maxPoints,
                 typeofPoint: exam.typeofPoint,
-                takeExams})
+                takeExams
+            })
         }
         catch (err) {
             return res.status(500).json({ message: 'Lỗi thống kê' })
@@ -65,7 +74,8 @@ const StatisticController = {
             }
             let takeExams = await TakeExam.find({ examId: exam.id }).populate('userId')
             takeExams = takeExams.map(item => {
-                let { result, points, userId, ...data } = item._doc
+                let {examId, __v,result, points, userId, ...data } = item._doc
+
                 points = result.reduce((total, current) => {
 
                     total += current.point
@@ -74,9 +84,10 @@ const StatisticController = {
                     0
                 )
                 return {
-                    ...data,  
+                    ...data, 
+
                     name: userId?.fullname,   
-                    maxPoints: exam.maxPoints,
+                    //maxPoints: exam.maxPoints,
                     points
                 }
             })
@@ -84,8 +95,11 @@ const StatisticController = {
 
             return res.status(200).json({
                 examName: exam.name,
+                examId: exam.id,
+                maxPoints: exam.maxPoints,
                 typeofPoint: exam.typeofPoint,
-                takeExams})
+                takeExams
+            })
         }
         catch (err) {
             console.log(err)
