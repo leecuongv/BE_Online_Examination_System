@@ -305,9 +305,7 @@ const TakeExamController = {
   },
 
   getResultTakeExam: async (req, res) => {
-    // query:{takeExamId},
-    // trả về thông tin của TakeExam như số điểm/điểm tối đa, lần thi thứ mấy, tên bài kiểm tra
-    // dựa vào thông tin cho phép xem điểm hay không để quyết định có trả về điểm hay ko, nếu ko trả điểm thì trả thêm mục viewPoints: 'no' hoặc 'alldone'
+
     try {
       const { takeExamId } = req.query;
       const username = req.user.sub;
@@ -317,19 +315,27 @@ const TakeExamController = {
 
       const takeExam = await TakeExam.findById(takeExamId).populate('examId')
       const takeExams = await TakeExam.find({ examId: takeExam.examId.id, userId: user.id })
+      
+      const course = await Course.findOne({exams:{$in:[takeExam.examId.id]}})
+      console.log("Course finding: \n"+ course.id)
+
       const index = takeExams.findIndex(item => item.id.toString() === takeExamId)
       if (!takeExam) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
       if (takeExam.examId.viewPoint === 'no')
         return res.status(200).json({
           name: takeExam.examId.name,
           lanThi: index + 1,
+          courseId: course.courseId,
+          viewAnswer: takeExam.examId.viewAnswer
 
         })
       return res.status(200).json({
         name: takeExam.examId.name,
         lanThi: index + 1,
         points: takeExam.points,
-        maxPoints: takeExam.examId.maxPoints
+        maxPoints: takeExam.examId.maxPoints,
+        courseId: course.courseId,
+        viewAnswer: takeExam.examId.viewAnswer
       })
     }
     catch (error) {

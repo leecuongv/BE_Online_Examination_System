@@ -125,7 +125,7 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi lấy thông tin khoá học" })
         }
     },
-    
+
     getCourseByCourseId: async (req, res) => {
         try {
             const { courseId } = req.query
@@ -504,11 +504,11 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            console.log(courseId)
-
+            console.log(user.id)
+            let userId = user.id
             let listExam = await Course.aggregate([
                 {
-                    $match: { courseId: Number(courseId)}
+                    $match: { courseId: Number(courseId) }
                 },
                 {
                     $lookup:
@@ -528,20 +528,44 @@ const CourseController = {
                 {
                     $lookup: {
                         from: "take_exams",
+                        
                         localField: "exams._id",
+
                         foreignField: "examId",
+                        // pipeline: [{
+                        //      $match:
+                        //         { $expr:
+                        //             { $and:
+                        //                 [
+                        //                    { $gt: [ "$userid", user.id] },
+                        //                    //{ $eq: ["$$post_title", "$postTitle" ] }
+                        //                 ]
+                        //             }
+                        //         }
+                            
+                        // }],
                         as: "takeExams"
                     }
                 },
                 {
+                    $match:{ 'takeExams.userId': { $in: [ user.id] }} 
+                    
+                },
+
+                {
                     $unwind: {
                         path: "$takeExams",
                         preserveNullAndEmptyArrays: true
+
                     }
                 },
+                // {
+                //     $match:{ 'takeExams': { $elemMatch: { userId: user.id } } }
+                // },
                 {
                     $group: {
                         _id: '$exams._id', "doc": { "$first": "$$ROOT.exams" }
+                        
                         , count: {
                             $sum: {
                                 $cond: [{ $ifNull: ['$takeExams', false] }, 1, 0]
@@ -559,11 +583,11 @@ const CourseController = {
                         numberofQuestions: "$doc.numberofQuestions",
                         startTime: '$doc.startTime',
                         endTime: '$doc.endTime',
-                        maxTimes: '$doc.maxTimes'
+                        maxTimes: '$doc.maxTimes',
+                        //userId: '$doc.userId'
                     }
                 }
-            ]
-            )
+            ])
             console.log(listExam)
 
             if (listExam) {
@@ -589,7 +613,7 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
             }
-            const course = await Course.findOne({courseId})
+            const course = await Course.findOne({ courseId })
             if (!course)
                 return res.status(400).json({ message: "Không tồn tại khóa học!" })
 
@@ -624,12 +648,12 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
             }
-            const course = await Course.findOne({courseId})
+            const course = await Course.findOne({ courseId })
             if (!course)
                 return res.status(400).json({ message: "Không tồn tại khóa học!" })
 
-            course.students = course.students.filter(item=>item.toString() !== user.id.toString())
-            
+            course.students = course.students.filter(item => item.toString() !== user.id.toString())
+
             await course.save()
             return res.status(200).json({
                 message: "Rời khóa học thành công!",
@@ -653,8 +677,8 @@ const CourseController = {
             if (!teacher) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            if(!exam){
-                return res.status(400).json({message:"Bài tập không tồn tại"})
+            if (!exam) {
+                return res.status(400).json({ message: "Bài tập không tồn tại" })
             }
 
             let course = await Course.findOne({ _id: new mongoose.Types.ObjectId(courseId), creatorId: teacher.id })
@@ -665,7 +689,7 @@ const CourseController = {
 
             if (course.exams.find(item => item.toString() === exam.id.toString())) {//nếu chưa có sinh viên trên
                 course.exams = course.exams.filter(item => item.toString() !== exam.id.toString())
-                await TakeExam.deleteMany({examId})
+                await TakeExam.deleteMany({ examId })
             }
             else {
                 return res.status(400).json({ message: "Bài kiểm tra không thuộc khóa học." })
