@@ -665,6 +665,7 @@ const CourseController = {
 
             if (course.exams.find(item => item.toString() === exam.id.toString())) {//nếu chưa có sinh viên trên
                 course.exams = course.exams.filter(item => item.toString() !== exam.id.toString())
+                await TakeExam.deleteMany({examId})
             }
             else {
                 return res.status(400).json({ message: "Bài kiểm tra không thuộc khóa học." })
