@@ -150,7 +150,7 @@ const SubmitAssignmentController = {
             const user = await User.findOne({ username });
             if (!user)
                 return res.status(400).json({ message: "Không có người dùng" });
-            const submitAssignment = await SubmitAssignment.findById(submitAssignmentId)
+            const submitAssignment = await SubmitAssignment.findById({submitAssignmentId})
 
             if (!submitAssignment)
                 return res.status(400).json({ message: "Không tồn tại thông tin nộp bài tập!" })
