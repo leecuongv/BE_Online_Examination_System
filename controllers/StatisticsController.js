@@ -149,6 +149,48 @@ const StatisticController = {
         }
     },
 
+    GetTakeExamDetail: async (req, res) => {
+        try {
+
+            const username = req.user.sub
+
+            const user = await User.findOne({ username })
+            if (!user) return res.status(200).json({ message: "Không có tài khoản" })
+
+            let takeExams = await TakeExam.find()
+                .populate('userId')
+                .populate({
+                    path: "examId",
+                    
+                })
+                console.log("takeExams"+takeExams)
+            takeExams = takeExams.map(item => {
+                let { examId, result, points, userId, ...data } = item._doc
+                points = result.reduce((total, current) => {
+
+                    total += current.point
+                    return total
+                },
+                    0
+                )
+                return {
+                    ...data,
+                    examName: examId.name,
+                    name: userId?.fullname,
+                    maxPoints: examId.maxPoints,
+                    typeofPoint: examId.typeofPoint,
+                    points
+                }
+            })
+
+            return res.status(200).json(takeExams)
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(400).json({ message: 'Lỗi thống kê' })
+        }
+    },
+
     GetSubmitAssignmentDetailByTeacher: async (req, res) => {
         try {
 
