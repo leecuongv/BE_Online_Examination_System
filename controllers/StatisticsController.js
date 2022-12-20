@@ -107,6 +107,7 @@ const StatisticController = {
                     path: "examId",
                     match: { creatorId: user.id }
                 })
+                console.log("takeExams"+takeExams)
             takeExams = takeExams.map(item => {
                 let { examId, result, points, userId, ...data } = item._doc
                 points = result.reduce((total, current) => {
@@ -311,6 +312,7 @@ const StatisticController = {
     GetListBills: async (req, res) => {
         try {
             let listPayments = await Bill.find().populate('creatorId')
+            console.log(listPayments)
             listPayments = listPayments.map(item => {
                 return {
                     name: item.creatorId.fullname,

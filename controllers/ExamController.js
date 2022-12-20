@@ -365,6 +365,7 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi đóng bài thi" })
         }
     },
+
     DeleteExam: async (req, res) => {
         try {
             const username = req.user.sub
@@ -375,7 +376,7 @@ const ExamController = {
 
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             let exitsExam = await Exam.findById(id)
-
+            
 
             console.log(exitsExam)
             exitsExam = await Exam.deleteOne(id)
