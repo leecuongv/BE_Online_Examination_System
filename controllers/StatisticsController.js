@@ -75,7 +75,8 @@ const StatisticController = {
                 )
                 return {
                     ...data,  
-                    name: userId?.fullname,   
+                    name: userId?.fullname, 
+                    userAvatar: user.avatar,  
                     maxPoints: exam.maxPoints,
                     points
                 }
@@ -85,6 +86,7 @@ const StatisticController = {
             return res.status(200).json({
                 examName: exam.name,
                 typeofPoint: exam.typeofPoint,
+                
                 takeExams})
         }
         catch (err) {

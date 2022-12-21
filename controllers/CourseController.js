@@ -525,7 +525,7 @@ const CourseController = {
                                     "pipeline": [
                                         {
                                             "$match": {
-                                                "userId": user.id
+                                                "userId": user._id
                                             }
                                         }
                                     ],
