@@ -4,6 +4,7 @@ const Course = require("../models/Course")
 const User = require("../models/User")
 const QuestionBank = require("../models/QuestionBank");
 const { STATUS } = require("../utils/enum");
+const TakeExam = require("../models/TakeExam");
 
 const ExamController = {
     CreateExam: async (req, res) => {
@@ -380,6 +381,7 @@ const ExamController = {
 
             console.log(exitsExam)
             exitsExam = await Exam.deleteOne(id)
+            await TakeExam.deleteMany({examId: id})
             return res.status(200).json({
                 message: "Xuất bản bài thi thành công",
 
