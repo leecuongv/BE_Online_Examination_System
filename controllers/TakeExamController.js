@@ -43,6 +43,8 @@ const TakeExamController = {
           },
         })
         .select({
+          startTime:1,
+          endTime:1,
           slug: 1,
           name: 1,
           questions: 1,
@@ -60,10 +62,22 @@ const TakeExamController = {
       if (takeExam.length === 0)
         return res.status(200).json({ message: "checkpin" });
 
+
+      const toDay = new Date()
+
       const lastTakeExam = takeExam[takeExam.length - 1];
       const remainTime = moment(lastTakeExam.startTime)
         .add(exam.maxTimes, "minutes")
         .diff(new Date(), "minutes");
+
+      if ((new Date(toDay)) < (new Date(exam.startTime)) ||
+        (new Date(toDay)) > (new Date(exam.endTime))) {
+        console.log(toDay)
+        return res.status(400).json({
+          message: "Thời gian thực hiện bài thi không hợp lệ"
+        })
+      }
+
       if (exam.attemptsAllowed === 0) {
         if (lastTakeExam.status === STATUS.SUBMITTED)
           return res.status(200).json({ message: "checkpin" });
@@ -128,14 +142,14 @@ const TakeExamController = {
           pin: 1,
           shuffle: 1,
         });
-      
+
       if (exam.shuffle === true) {
 
         console.log("Chưa random \n " + exam)
         let randomArray = [...exam.questions].sort(() => Math.random() - 0.5)
         exam.questions = await randomArray
-    }
-    let { questions, startTime, maxTimes, ...data } = exam._doc;
+      }
+      let { questions, startTime, maxTimes, ...data } = exam._doc;
       let endTime = moment(new Date()).add(maxTimes, "minutes").toDate();
       questions = questions.map((item) => ({ ...item.question._doc, id: item.question._id, index: item.index }));
 
@@ -143,6 +157,7 @@ const TakeExamController = {
         if (exam.pin !== pin)
           return res.status(400).json({ message: "Sai mật khẩu!" });
       }
+      //if()
       if (!exam) return res.status(400).json({ message: "Không có bài thi!" });
       const course = await Course.findOne({
         $and: [
