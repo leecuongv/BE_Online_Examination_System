@@ -84,10 +84,11 @@ const StatisticController = {
                     0
                 )
                 return {
-                    ...data, 
+                    ...data,  
+                    name: userId?.fullname, 
+                    userAvatar: user.avatar,  
+                    maxPoints: exam.maxPoints,
 
-                    name: userId?.fullname,   
-                    //maxPoints: exam.maxPoints,
                     points
                 }
             })
@@ -97,9 +98,10 @@ const StatisticController = {
                 examName: exam.name,
                 examId: exam.id,
                 maxPoints: exam.maxPoints,
-                typeofPoint: exam.typeofPoint,
+                typeofPoint: exam.typeofPoint,    
                 takeExams
-            })
+                })
+
         }
         catch (err) {
             console.log(err)
