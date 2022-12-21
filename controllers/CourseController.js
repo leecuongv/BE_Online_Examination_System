@@ -504,9 +504,9 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            console.log(user.id)
-            let userId = user.id
-            let listExam = await Course.aggregate([
+            console.log(courseId)
+
+            let listCourse = await Course.aggregate([
                 {
                     $match: { courseId: Number(courseId) }
                 },
@@ -516,91 +516,47 @@ const CourseController = {
                         from: "exams",
                         localField: "exams",
                         foreignField: "_id",
+                        "pipeline": [
+                            {
+                                "$lookup": {
+                                    "from": "take_exams",
+                                    localField: "_id",
+                                    foreignField: "examId",
+                                    "pipeline": [
+                                        {
+                                            "$match": {
+                                                "userId": user.id
+                                            }
+                                        }
+                                    ],
+                                    "as": "takeExams"
+                                }
+                            }
+                        ],
                         as: "exams"
                     }
                 },
-                {
-                    $unwind: {
-                        path: "$exams",
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "take_exams",
-                        
-                        localField: "exams._id",
-
-                        foreignField: "examId",
-                        // pipeline: [{
-                        //      $match:
-                        //         { $expr:
-                        //             { $and:
-                        //                 [
-                        //                    { $gt: [ "$userid", user.id] },
-                        //                    //{ $eq: ["$$post_title", "$postTitle" ] }
-                        //                 ]
-                        //             }
-                        //         }
-                            
-                        // }],
-                        as: "takeExams"
-                    }
-                },
-                {
-                    $match:{ 'takeExams.userId': { $in: [ user.id] }} 
-                    
-                },
-
-                {
-                    $unwind: {
-                        path: "$takeExams",
-                        preserveNullAndEmptyArrays: true
-
-                    }
-                },
-                // {
-                //     $match:{ 'takeExams': { $elemMatch: { userId: user.id } } }
-                // },
-                {
-                    $group: {
-                        _id: '$exams._id', "doc": { "$first": "$$ROOT.exams" }
-                        
-                        , count: {
-                            $sum: {
-                                $cond: [{ $ifNull: ['$takeExams', false] }, 1, 0]
-                            }
-                        }
-                    }
-                },
-                {
-                    $project: {
-                        id: "$doc._id",
-                        name: "$doc.name",
-                        count: "$count",
-                        slug: "$doc.slug",
-                        status: '$doc.status',
-                        numberofQuestions: "$doc.numberofQuestions",
-                        startTime: '$doc.startTime',
-                        endTime: '$doc.endTime',
-                        maxTimes: '$doc.maxTimes',
-                        //userId: '$doc.userId'
-                    }
-                }
             ])
-            console.log(listExam)
 
-            if (listExam) {
-                listExam = listExam.filter(item => item.status !== STATUS.PRIVATE)
-                return res.status(200).json(listExam)
-            }
-            return res.status(400).json({
-                message: "Không tìm thấy khoá học",
+            if (listCourse.length === 0)
+                return res.status(400).json({
+                    message: "Không tìm thấy khoá học",
+                })
+            let listExam = listCourse[0].exams
+
+            listExam = listExam.filter(item => item.status !== STATUS.PRIVATE)
+            listExam = listExam.map(item => {
+                let count = item.takeExams.length
+                delete item.takeExams
+                delete item.questions
+                return { ...item, count }
             })
+            return res.status(200).json(listExam)
+
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi tạo khoá học" })
+            res.status(400).json({ message: "Lỗi lấy danh sách đề thi" })
         }
     },
 
