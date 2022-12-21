@@ -269,7 +269,8 @@ const AssignmentController = {
             let listAssignment = await Assignment.aggregate([
                 {
                     $match: {
-                        courseId: course._id
+                        courseId: course._id,
+                        status: STATUS.PUBLIC
                     }
                 },
                 {
@@ -294,6 +295,7 @@ const AssignmentController = {
                     return { ...item, isSubmit: true }
                 return { ...item, isSubmit: false }
             })
+
 
 
             return res.status(200).json(listAssignment)
