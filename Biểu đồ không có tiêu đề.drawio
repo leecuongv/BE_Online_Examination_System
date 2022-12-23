@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-12-23T09:10:21.327Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36" etag="hN8p-uBIdXsvhNYg3quL" version="20.7.4" type="github" pages="3">
+<mxfile host="app.diagrams.net" modified="2022-12-23T09:31:56.877Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36" etag="tL-9T6s8xDbOki92Dx9D" version="20.7.4" type="github" pages="3">
   <diagram id="kCKb7sFNtNQACJCm1Rp3" name="Database diagram">
     <mxGraphModel dx="778" dy="459" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1200" background="#F1FAEE" math="0" shadow="0">
       <root>
@@ -723,7 +723,7 @@
     </mxGraphModel>
   </diagram>
   <diagram name="Class diagram" id="aMsMthis1kP3WCRf0f7O">
-    <mxGraphModel dx="4020" dy="1238" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1200" background="#F1FAEE" math="0" shadow="0">
+    <mxGraphModel dx="2760" dy="495" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1200" background="#F1FAEE" math="0" shadow="0">
       <root>
         <mxCell id="d6iJt7ldyD2bKDcAEx3L-0" />
         <mxCell id="d6iJt7ldyD2bKDcAEx3L-1" parent="d6iJt7ldyD2bKDcAEx3L-0" />
@@ -843,7 +843,7 @@
           <mxGeometry y="606" width="400" height="26" as="geometry" />
         </mxCell>
         <mxCell id="d6iJt7ldyD2bKDcAEx3L-50" value="course" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;rounded=1;glass=0;sketch=0;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneLine=0;" vertex="1" parent="d6iJt7ldyD2bKDcAEx3L-1">
-          <mxGeometry x="430" y="40" width="400" height="710" as="geometry" />
+          <mxGeometry x="430" y="40" width="400" height="814" as="geometry" />
         </mxCell>
         <mxCell id="d6iJt7ldyD2bKDcAEx3L-51" value="# id: ObjectId" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=1;glass=0;sketch=0;fontColor=#1D3557;swimlaneLine=0;" vertex="1" parent="d6iJt7ldyD2bKDcAEx3L-50">
           <mxGeometry y="26" width="400" height="26" as="geometry" />
@@ -925,6 +925,18 @@
         </mxCell>
         <mxCell id="WMltpXtRNNyqU0ROHcx3-34" value="+ EnrolCourse(courseId: Number): Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=1;glass=0;sketch=0;fontColor=#1D3557;swimlaneLine=0;" vertex="1" parent="d6iJt7ldyD2bKDcAEx3L-50">
           <mxGeometry y="684" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="CdvPJoGDc_YJExhipPT7-0" value="+ AddExam(examId: ObjectId, courseId: ObjectId): Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=1;glass=0;sketch=0;fontColor=#1D3557;swimlaneLine=0;" vertex="1" parent="d6iJt7ldyD2bKDcAEx3L-50">
+          <mxGeometry y="710" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="CdvPJoGDc_YJExhipPT7-1" value="+ AddAssignment(assignmentId: ObjectId, courseId: ObjectId): Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=1;glass=0;sketch=0;fontColor=#1D3557;swimlaneLine=0;" vertex="1" parent="d6iJt7ldyD2bKDcAEx3L-50">
+          <mxGeometry y="736" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="CdvPJoGDc_YJExhipPT7-2" value="+ DeleteExam(assignmentId: ObjectId, courseId: ObjectId): Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=1;glass=0;sketch=0;fontColor=#1D3557;swimlaneLine=0;" vertex="1" parent="d6iJt7ldyD2bKDcAEx3L-50">
+          <mxGeometry y="762" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="CdvPJoGDc_YJExhipPT7-3" value="+ DeleteExam(assignmentId: ObjectId, courseId: ObjectId): Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=1;glass=0;sketch=0;fontColor=#1D3557;swimlaneLine=0;" vertex="1" parent="d6iJt7ldyD2bKDcAEx3L-50">
+          <mxGeometry y="788" width="400" height="26" as="geometry" />
         </mxCell>
         <mxCell id="d6iJt7ldyD2bKDcAEx3L-76" value="exam" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;rounded=1;glass=0;sketch=0;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneLine=0;" vertex="1" parent="d6iJt7ldyD2bKDcAEx3L-1">
           <mxGeometry x="1100" y="40" width="200" height="494" as="geometry" />
