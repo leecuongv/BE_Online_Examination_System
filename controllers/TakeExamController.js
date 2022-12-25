@@ -348,8 +348,8 @@ const TakeExamController = {
           name: takeExam.examId.name,
           lanThi: index + 1,
           courseId: course.courseId,
-          viewAnswer: takeExam.examId.viewAnswer
-
+          viewAnswer: takeExam.examId.viewAnswer,
+          slug: takeExam.examId.slug,
         })
       return res.status(200).json({
         name: takeExam.examId.name,
