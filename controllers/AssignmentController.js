@@ -215,6 +215,8 @@ const AssignmentController = {
             console.log(exitsAssignment)
 
             exitsAssignment = await Assignment.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
+            
+            await SubmitAssignment.deleteMany({assignmentId: id})
 
             return res.status(200).json({
                 message: "Xóa bài tập thành công",
