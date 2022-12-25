@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const User = require("../models/User")
 const axios = require('axios');
 const FormData = require('form-data');
-const tokenBot = 'bot5684898171:AAH2OsGKaWNllMyA7QmGcleN9V3Gd78aDxU'
+const tokenBot = 'bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs'
 const UploadController = {
     UploadImage: async (req, res) => {
         try {
@@ -18,7 +18,7 @@ const UploadController = {
             }
 
             var bodyFormData = new FormData();
-            bodyFormData.append('chat_id', 1668897001)
+            bodyFormData.append('chat_id', 5813484449)
             bodyFormData.append('document', file.data, { filename: file.name })
             
             axios.post(`https://api.telegram.org/${tokenBot}/sendDocument`,
@@ -65,7 +65,7 @@ const UploadController = {
             }
 
             var bodyFormData = new FormData();
-            bodyFormData.append('chat_id', 1668897001)
+            bodyFormData.append('chat_id', 5813484449)
             bodyFormData.append('document', file.data, { filename: file.name })
             
             axios.post(`https://api.telegram.org/${tokenBot}/sendDocument`,
