@@ -10,7 +10,7 @@ const ExamController = {
     CreateExam: async (req, res) => {
         try {
             const username = req.user.sub
-            const { name, description, courseId, numberofQuestions, viewPoint, viewAnswer,
+            const { name, description,pin, courseId, numberofQuestions, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -37,6 +37,7 @@ const ExamController = {
 
                 name,
                 description,
+                pin,
                 creatorId: user.id,
                 numberofQuestions: 0,
                 viewPoint,
@@ -138,7 +139,7 @@ const ExamController = {
     UpdateExam: async (req, res) => {
         try {
             const username = req.user.sub
-            const { id, name, description, courseId, numberofQuestions, viewPoint, viewAnswer,
+            const { id, name, description,pin, courseId, numberofQuestions, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -159,6 +160,7 @@ const ExamController = {
             let data = {
                 name,
                 description,
+                pin,
                 creatorId: user.id,
                 numberofQuestions,
                 viewPoint,
