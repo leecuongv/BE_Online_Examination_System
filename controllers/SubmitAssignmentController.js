@@ -127,6 +127,8 @@ const SubmitAssignmentController = {
 
             if (!submitAssignment)
                 return res.status(400).json({ message: "Không tồn tại thông tin nộp bài tập!" })
+            if (points < 0)
+                return res.status(400).json({ message: "Điểm phải lớn hơn hoặc bằng 0!" })
             const updateSubmitAssignment = await SubmitAssignment.findByIdAndUpdate(
                 { "_id": new mongoose.Types.ObjectId(submitAssignmentId) },
                 { points: points },
@@ -150,7 +152,7 @@ const SubmitAssignmentController = {
             const user = await User.findOne({ username });
             if (!user)
                 return res.status(400).json({ message: "Không có người dùng" });
-            const submitAssignment = await SubmitAssignment.findById({submitAssignmentId})
+            const submitAssignment = await SubmitAssignment.findById(submitAssignmentId)
 
             if (!submitAssignment)
                 return res.status(400).json({ message: "Không tồn tại thông tin nộp bài tập!" })
@@ -180,20 +182,20 @@ const SubmitAssignmentController = {
             //console.log(assignment)
 
             let submitAssignment = await SubmitAssignment.find({ assignmentId: assignment.id })
-               
-            
-            let results = course.students.map(student=>{
-                let { _id:studentId,fullname,avatar} = student._doc
-                let submitAssignmentOfStudent = submitAssignment.find(item=>item.creatorId.toString() === studentId.toString())
-                
+
+
+            let results = course.students.map(student => {
+                let { _id: studentId, fullname, avatar } = student._doc
+                let submitAssignmentOfStudent = submitAssignment.find(item => item.creatorId.toString() === studentId.toString())
+
                 return {
-                    id:submitAssignmentOfStudent?.id,
+                    id: submitAssignmentOfStudent?.id,
                     fullname,
                     avatar,
-                    maxPoints:assignment.maxPoints,
-                    submitTime:submitAssignmentOfStudent?.submitTime,
-                    points:submitAssignmentOfStudent?.points,
-                    endTime:assignment.endTime
+                    maxPoints: assignment.maxPoints,
+                    submitTime: submitAssignmentOfStudent?.submitTime,
+                    points: submitAssignmentOfStudent?.points,
+                    endTime: assignment.endTime
                 }
             })
 
