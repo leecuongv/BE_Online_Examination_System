@@ -43,15 +43,22 @@ const TakeExamController = {
           },
         })
         .select({
-          startTime:1,
-          endTime:1,
+          startTime: 1,
+          endTime: 1,
           slug: 1,
           name: 1,
           questions: 1,
           maxTimes: 1,
           tracking: 1,
           attemptsAllowed: 1,
+          shuffle: 1
         });
+      if (exam.shuffle === true) {
+
+        console.log("Chưa random \n " + exam)
+        let randomArray = [...exam.questions].sort(() => Math.random() - 0.5)
+        exam.questions = await randomArray
+      }
       let { questions, startTime, maxTimes, ...data } = exam._doc;
       questions = questions.map((item) => ({ ...item.question._doc, id: item.question._id, index: item.index }));
 
@@ -330,9 +337,9 @@ const TakeExamController = {
 
       const takeExam = await TakeExam.findById(takeExamId).populate('examId')
       const takeExams = await TakeExam.find({ examId: takeExam.examId.id, userId: user.id })
-      
-      const course = await Course.findOne({exams:{$in:[takeExam.examId.id]}})
-      console.log("Course finding: \n"+ course.id)
+
+      const course = await Course.findOne({ exams: { $in: [takeExam.examId.id] } })
+      console.log("Course finding: \n" + course.id)
 
       const index = takeExams.findIndex(item => item.id.toString() === takeExamId)
       if (!takeExam) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
@@ -346,11 +353,13 @@ const TakeExamController = {
         })
       return res.status(200).json({
         name: takeExam.examId.name,
+        slug: takeExam.examId.slug,
         lanThi: index + 1,
         points: takeExam.points,
         maxPoints: takeExam.examId.maxPoints,
         courseId: course.courseId,
-        viewAnswer: takeExam.examId.viewAnswer
+        viewAnswer: takeExam.examId.viewAnswer,
+
       })
     }
     catch (error) {
