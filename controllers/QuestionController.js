@@ -82,14 +82,16 @@ const QuestionController = {
 
             exam.questions = exam.questions.filter(item => item.question.toString() !== question.id.toString())
 
-            exam.questions = exam.questions.map((item,index)=>({...item._doc,index}))//cập nhật lại index câu hỏi
+            exam.questions = exam.questions.map((item,index)=>({...item._doc,index}))
 
             exam.maxPoints = Number(exam.maxPoints) - Number(question.maxPoints)
+
             exam.numberofQuestions = Number(exam.numberofQuestions) - 1
 
             await exam.save()
 
             await question.deleteOne()
+            
             console.log(new Date().getTime() - start.getTime())
             return res.status(200).json({
                 message: "Xoá câu hỏi mới thành công!"
