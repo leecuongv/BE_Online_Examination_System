@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
 const QuestionBank = require("../models/QuestionBank");
+const Question = require("../models/Question")
 const { STATUS } = require("../utils/enum");
 const TakeExam = require("../models/TakeExam");
 
@@ -241,10 +242,10 @@ const ExamController = {
 
             let questionBank = await QuestionBank.findOne({ slug: questionBankSlug, creatorId: user.id })
                 .populate({
-                    path: 'questions',
-                    populate: {
-                        path: 'questions.answers'
-                    }
+                    path: 'questions.answers',
+                    // populate: {
+                    //     path: 'questions.answers'
+                    // }
                 })
             if (!questionBank)
                 return res.status(400).json({
@@ -312,6 +313,8 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi tạo!" })
         }
     },
+
+    
     PublicExam: async (req, res) => {
         try {
             const username = req.user.sub

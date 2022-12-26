@@ -209,6 +209,7 @@ const QuestionBankController = {
             await questionBank.save()
             return res.status(200).json({
                 message: "Thêm câu hỏi thành công",
+                newQuestion
             })
 
         } catch (error) {
@@ -239,9 +240,10 @@ const QuestionBankController = {
                     message: "Không tìm thấy ngân hàng câu hỏi!",
                 })
 
-            if (questionBank.questions.find(item => item.toString() === question.id.toString())) {//nếu chưa có sinh viên trên
+            if (questionBank.questions.find(item => item.toString() === question.id.toString())) {
                 questionBank.questions = questionBank.questions.filter(item => item.toString() !== question.id.toString())
             }
+            
             else {
                 return res.status(400).json({ message: "Câu hỏi không nằm trong ngân hàng câu hỏi." })
             }

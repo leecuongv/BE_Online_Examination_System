@@ -86,6 +86,7 @@ const QuestionController = {
             exam.questions = exam.questions.map((item, index) => ({ ...item._doc, index }))
 
             exam.maxPoints = Number(exam.maxPoints) - Number(question.maxPoints)
+
             exam.numberofQuestions = Number(exam.numberofQuestions) - 1
 
 
@@ -101,6 +102,7 @@ const QuestionController = {
             await exam.save()
 
             //await question.deleteOne()
+
 
             console.log(new Date().getTime() - start.getTime())
             return res.status(200).json({
