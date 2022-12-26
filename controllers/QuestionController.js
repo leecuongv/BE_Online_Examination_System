@@ -89,22 +89,61 @@ const QuestionController = {
 
             exam.numberofQuestions = Number(exam.numberofQuestions) - 1
 
+            let listQuestionBank = await QuestionBank.find({
+                questions: { $in: [mongoose.Types.ObjectId(questionId)] }
+            })
 
+            let listExam = await Exam.find({
+                '$and': [
+                    { 'questions.question': { '$in': [question.id] } },
+                    { '_id': { '$ne': exam.id } }
+                ]
+            })
+            await exam.save()
 
-            // let questionBank = await QuestionBank.find({
-            //     questions: { $in: [mongoose.type.ObjectId(questionId)] }
-            // })
+            if (listExam.length === 0 && listQuestionBank.length === 0) {
+                //nếu không thuộc QB và Exam khác thì xoá câu hỏi trên db
+                await question.deleteOne()
+            }
 
             // if (questionBank) {
             //     questionBank.questions = questionBank.questions.filter(item => item.question.toString() !== questionId)
             // }
 
-            await exam.save()
+            return res.status(200).json({
+                message: "Xoá câu hỏi thành công!"
+            })
 
-            //await question.deleteOne()
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi xóa câu hỏi!" })
+        }
+    },
+    DeleteQuestionInQuestionBank: async (req, res) => {
+        try {
+            const username = req.user.sub
+            const { questionBankId, questionId } = req.body
+            //if (!username) return res.status(400).json({ message: "Không có người dùng!" })
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có người dùng!" })
+            const questionBank = await QuestionBank.findOne({ _id: mongoose.Types.ObjectId(questionBankId), creatorId: user._id })
+            if (!questionBank) return res.status(400).json({ message: "Không tồn tại!" })
 
+            const question = await Question.findOne({ _id: mongoose.Types.ObjectId(questionId) })
+            if (!question) return res.status(400).json({ message: 'Không tồn tại câu hỏi' })
 
-            console.log(new Date().getTime() - start.getTime())
+            questionBank.questions = questionBank.questions
+                .filter(item => item.toString() !== question.id.toString())
+
+            await questionBank.save()
+            let listExam = await Exam.find({
+                'questions.question': { '$in': [question.id] }
+            })
+            if (listExam.length === 0) {
+                //nếu không thuộc QB và Exam khác thì xoá câu hỏi trên db
+                await question.deleteOne()
+            }
+
             return res.status(200).json({
                 message: "Xoá câu hỏi thành công!"
             })
