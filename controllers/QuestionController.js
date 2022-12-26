@@ -8,6 +8,7 @@ const mongoose = require("mongoose")
 const User = require("../models/User")
 const Exam = require("../models/Exam")
 const Answer = require("../models/Answer")
+const QuestionBank = require("../models/QuestionBank")
 const TakeExam = require("../models/TakeExam")
 const { STATUS } = require("../utils/enum")
 
@@ -50,7 +51,7 @@ const QuestionController = {
 
             console.log(await (await newQuestion.save()).populate('answers'))
             exam.questions.push({ question: newQuestion.id })
-            exam.questions = exam.questions.map((item,index)=>({...item._doc,index:index+1}))//cập nhật lại index câu hỏi
+            exam.questions = exam.questions.map((item, index) => ({ ...item._doc, index: index + 1 }))//cập nhật lại index câu hỏi
             exam.maxPoints = Number(exam.maxPoints) + Number(newQuestion.maxPoints)
             exam.numberofQuestions += 1
             await exam.save()
@@ -76,30 +77,41 @@ const QuestionController = {
             if (!user) return res.status(400).json({ message: "Không có người dùng!" })
             const exam = await Exam.findOne({ _id: mongoose.Types.ObjectId(examId), creatorId: user._id })
             if (!exam) return res.status(400).json({ message: "Không tồn tại!" })
-            if (exam.status === STATUS.PUBLIC) return res.status(400).json({ message: "Không thể xóa câu hỏi" })
+            if (exam.status === STATUS.PUBLIC) return res.status(400).json({ message: "Không thể xóa câu hỏi trong bài thi đã được phát hành!" })
             const question = await Question.findOne({ _id: mongoose.Types.ObjectId(questionId) })
             if (!question) return res.status(400).json({ message: 'Không tồn tại câu hỏi' })
 
             exam.questions = exam.questions.filter(item => item.question.toString() !== question.id.toString())
 
-            exam.questions = exam.questions.map((item,index)=>({...item._doc,index}))
+            exam.questions = exam.questions.map((item, index) => ({ ...item._doc, index }))
 
             exam.maxPoints = Number(exam.maxPoints) - Number(question.maxPoints)
 
             exam.numberofQuestions = Number(exam.numberofQuestions) - 1
 
+
+
+            // let questionBank = await QuestionBank.find({
+            //     questions: { $in: [mongoose.type.ObjectId(questionId)] }
+            // })
+
+            // if (questionBank) {
+            //     questionBank.questions = questionBank.questions.filter(item => item.question.toString() !== questionId)
+            // }
+
             await exam.save()
 
-            await question.deleteOne()
-            
+            //await question.deleteOne()
+
+
             console.log(new Date().getTime() - start.getTime())
             return res.status(200).json({
-                message: "Xoá câu hỏi mới thành công!"
+                message: "Xoá câu hỏi thành công!"
             })
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi tạo câu hỏi!" })
+            res.status(400).json({ message: "Lỗi xóa câu hỏi!" })
         }
     },
     CreateQuestionByFile: async (req, res) => {
