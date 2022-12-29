@@ -49,6 +49,8 @@ const StatisticController = {
                 examId: exam.id,
                 maxPoints: exam.maxPoints,
                 typeofPoint: exam.typeofPoint,
+                viewPoint: exam.viewPoint,
+                viewAnswer: exam.viewAnswer,
                 takeExams
             })
         }
