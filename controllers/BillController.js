@@ -18,6 +18,23 @@ const BillController = {
             //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
             //parameters
             const username = req.user.sub
+<<<<<<< Updated upstream
+=======
+
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Không tồn tại tài khoản" })
+            }
+            const newBill = new Bill({
+                creatorId: user.id,
+                description: "Nâng cấp tài khoản bằng Momo",
+                amount,
+                method: "Momo"
+            })
+
+            await newBill.save()//lưu bill vào db
+            
+>>>>>>> Stashed changes
             let partnerCode = "MOMOALSN20220816";
             let accessKey = "u9nAcZb9iznbA05s";
             let secretkey = "A6pa8FuUSdrbg73MhT37DGKiHbCov12g";
