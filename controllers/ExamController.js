@@ -242,10 +242,10 @@ const ExamController = {
 
             let questionBank = await QuestionBank.findOne({ slug: questionBankSlug, creatorId: user.id })
                 .populate({
-                    path: 'questions.answers',
-                    // populate: {
-                    //     path: 'questions.answers'
-                    // }
+                    path: 'questions',
+                    populate: {
+                        path: 'answers'
+                    }
                 })
             if (!questionBank)
                 return res.status(400).json({
@@ -261,6 +261,7 @@ const ExamController = {
                         noneExistQuestion.push(questionInQB.id)
                     }
                 });
+                console.log(noneExistQuestion)
                 if (noneExistQuestion.length === 0) {
                     return res.status(400).json({ message: "Tất cả các câu hỏi đã tồn tại trong hệ thống" })
                 }

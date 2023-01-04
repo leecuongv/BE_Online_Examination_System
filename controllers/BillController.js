@@ -18,8 +18,6 @@ const BillController = {
             //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
             //parameters
             const username = req.user.sub
-<<<<<<< Updated upstream
-=======
 
             const user = await User.findOne({ username })
             if (!user) {
@@ -27,19 +25,19 @@ const BillController = {
             }
             const newBill = new Bill({
                 creatorId: user.id,
+
                 description: "Nâng cấp tài khoản bằng Momo",
                 amount,
                 method: "Momo"
+
             })
 
             await newBill.save()//lưu bill vào db
-            
->>>>>>> Stashed changes
             let partnerCode = "MOMOALSN20220816";
             let accessKey = "u9nAcZb9iznbA05s";
             let secretkey = "A6pa8FuUSdrbg73MhT37DGKiHbCov12g";
             let requestId = partnerCode + new Date().getTime();
-            let orderId = req.body.orderId;
+            let orderId = new Date().getTime();
             let orderInfo = "Thanh toán đơn hàng #" + orderId;
             let redirectUrl = frontendUrl + "result-payment";
             let ipnUrl = backendUrl + "api/bill/upgrade-momo";
@@ -47,7 +45,11 @@ const BillController = {
             // let ipnUrl = redirectUrl = "https://webhook.site/454e7b77-f177-4ece-8236-ddf1c26ba7f8";
             let amount = req.body.amount;
             let requestType = "captureWallet"
-            let extraData = Buffer.from(JSON.stringify(username)).toString('base64');; //pass empty value if your merchant does not have stores
+            let extraData = Buffer.from(JSON.stringify(
+                {
+                    username,
+                    billId: newBill.id.toString()
+                })).toString('base64');; //pass empty value if your merchant does not have stores
 
             //before sign HMAC SHA256 with format
             //accessKey=$accessKey&amount=$amount&extraData=$extraData&ipnUrl=$ipnUrl&orderId=$orderId&orderInfo=$orderInfo&partnerCode=$partnerCode&redirectUrl=$redirectUrl&requestId=$requestId&requestType=$requestType
@@ -89,6 +91,8 @@ const BillController = {
                     'Content-Length': Buffer.byteLength(requestBody)
                 }
             }
+
+
             let payUrl = ""
             //Send the request and get the response
             const reqPayment = https.request(options, response => {
@@ -126,22 +130,23 @@ const BillController = {
         try {
             console.log(req.body)
             let resultCode = req.body.resultCode;
-            let partnerCode = "MOMOALSN20220816";
-            let accessKey = "u9nAcZb9iznbA05s";
-            let secretkey = "A6pa8FuUSdrbg73MhT37DGKiHbCov12g";
-            let orderId = req.body.orderId;
+            let transId = req.body.transId;
             let extraData = req.body.extraData
             let statusPayment = resultCode === 0 ? "Thành công" : "Thất bại"
             if (resultCode === 0) {
-                let username = JSON.parse(Buffer.from(extraData, 'base64').toString('ascii')).username;
+                let { username, billId } = JSON.parse(Buffer.from(extraData, 'base64').toString('ascii'));
+                const bill = await Bill.findOneAndUpdate({ _id: mongoose.Types.ObjectId(billId) }
+                    , { status: STATUS.SUCCESS, transactionId: transId}
+                    , { new: true })
+                const newUser = await User.findOneAndUpdate({ username }, { premium: true }, { new: true })
             }
-            const newUser = await User.findOneAndUpdate({ username }, { premium: true }, { new: true })
             return res.status(204).json({});
         }
         catch (e) {
             return res.status(500).json({ error: "Lỗi tạo hoá đơn thanh toán. Vui lòng thực hiện lại thanh toán" });
         }
     },
+    
     CreatePaymentVNPay: async (req, res, next) => {
         try{
 
