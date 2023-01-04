@@ -25,13 +25,14 @@ const BillController = {
             }
             const newBill = new Bill({
                 creatorId: user.id,
-                description: "Nâng cấp tài khoản bằng VNPay",
+
+                description: "Nâng cấp tài khoản bằng Momo",
                 amount,
-                method: "VNPay"
+                method: "Momo"
+
             })
 
             await newBill.save()//lưu bill vào db
-            
             let partnerCode = "MOMOALSN20220816";
             let accessKey = "u9nAcZb9iznbA05s";
             let secretkey = "A6pa8FuUSdrbg73MhT37DGKiHbCov12g";
