@@ -18,7 +18,7 @@ const BillController = {
             //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
             //parameters
             const username = req.user.sub
-
+            let amount = req.body.amount;
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Không tồn tại tài khoản" })
@@ -43,7 +43,7 @@ const BillController = {
             let ipnUrl = backendUrl + "api/bill/upgrade-momo";
             //let ipnUrl ='https://playerhostedapitest.herokuapp.com/api/myorders';
             // let ipnUrl = redirectUrl = "https://webhook.site/454e7b77-f177-4ece-8236-ddf1c26ba7f8";
-            let amount = req.body.amount;
+            
             let requestType = "captureWallet"
             let extraData = Buffer.from(JSON.stringify(
                 {
