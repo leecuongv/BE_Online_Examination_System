@@ -18,7 +18,7 @@ const BillController = {
             //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
             //parameters
             const username = req.user.sub
-            let amount = req.body.amount;
+            let amount = 50000;
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Không tồn tại tài khoản" })
@@ -165,7 +165,7 @@ const BillController = {
             let createDate =moment().format('YYYYMMDDHHmmss'); 
             let orderId = date.getTime()
             let username = req.user.sub
-            let amount = req.body.amount;
+            let amount = 50000;
             let bankCode = req.body.bankCode;
     
             let orderInfo = req.body.orderDescription || "Nang cap tai khoan "+username;
