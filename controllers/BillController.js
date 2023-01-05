@@ -39,7 +39,7 @@ const BillController = {
             let orderId = new Date().getTime();
             let orderInfo = "Thanh toán đơn hàng #" + orderId;
             let redirectUrl = frontendUrl + "result-payment";
-            let ipnUrl = backendUrl + "api/bill/upgrade-momo";
+            let ipnUrl = backendUrl + "api/payment/upgrade-momo";
             //let ipnUrl ='https://playerhostedapitest.herokuapp.com/api/myorders';
             // let ipnUrl = redirectUrl = "https://webhook.site/454e7b77-f177-4ece-8236-ddf1c26ba7f8";
             
