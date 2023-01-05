@@ -133,11 +133,16 @@ const BillController = {
             let transId = req.body.transId;
             let extraData = req.body.extraData
             let statusPayment = resultCode === 0 ? "Thành công" : "Thất bại"
+            console.log("resultCode: ",resultCode)
             if (resultCode === 0) {
-                let { username, billId } = JSON.parse(Buffer.from(extraData, 'base64').toString('ascii'));
+                
+                let data = JSON.parse(Buffer.from(extraData, 'base64').toString('ascii'));
+                let username = data.username
+                let billId = data.billId
                 const bill = await Bill.findOneAndUpdate({ _id: mongoose.Types.ObjectId(billId) }
                     , { status: STATUS.SUCCESS, transactionId: transId}
                     , { new: true })
+                console.log("billId: ", billId)
                 const newUser = await User.findOneAndUpdate({ username }, { premium: true }, { new: true })
             }
             return res.status(204).json({});
