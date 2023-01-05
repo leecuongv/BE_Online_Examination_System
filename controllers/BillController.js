@@ -25,7 +25,6 @@ const BillController = {
             }
             const newBill = new Bill({
                 creatorId: user.id,
-
                 description: "Nâng cấp tài khoản bằng Momo",
                 amount,
                 method: "Momo"
