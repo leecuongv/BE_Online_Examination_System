@@ -7,6 +7,6 @@ router.post("/create-payment/vnpay", verifyToken, BillController.CreatePaymentVN
 router.get("/vnpay-return", BillController.VNPayIPN)
 
 router.post("/create-payment/momo", verifyToken, BillController.createPaymentMomo)
-router.get("/upgrade-momo", BillController.upgradeAccountWithMomo)
+router.post("/upgrade-momo", BillController.upgradeAccountWithMomo)
 
 module.exports = router;
