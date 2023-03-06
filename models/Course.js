@@ -55,6 +55,12 @@ const courseSchema = mongoose.Schema({
       ref: COLLECTION.USER
     }
   ],
+  lesson: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: COLLECTION.LESSON
+    }
+  ],
   status: {
     type: String,
     default: "public",
@@ -65,7 +71,7 @@ const courseSchema = mongoose.Schema({
     type: String,
     default: DEFAULT_VALUES.IMAGE_COURSE,
   },
-  pin:{
+  pin: {
     type: String,
     default: ''
   },
