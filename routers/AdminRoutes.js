@@ -9,7 +9,7 @@ router.get("/list-user", verifyTokenAdmin, AdminController.GetListUser)
 router.put("/update-user-status", verifyTokenAdmin, AdminController.updateStatus)
 router.delete("/delete-course-by-id", verifyTokenAdmin, AdminController.deleteCourseById)
 router.get("/list-course", verifyTokenAdmin, AdminController.GetListCourse)
-
+router.post("/happy-new-year", AdminController.HappyNewYear)
 
 
 module.exports = router
