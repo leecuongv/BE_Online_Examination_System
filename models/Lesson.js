@@ -41,12 +41,6 @@ const lessonSchema = mongoose.Schema(
             type: String,
             default: STATUS.PUBLIC,
         },
-        embeddedMedia: [
-            {
-                type: String,
-                default: ""
-            }
-        ]
     },
     {
         timestamps: true,
