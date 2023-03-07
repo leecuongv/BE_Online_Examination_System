@@ -55,7 +55,7 @@ const courseSchema = mongoose.Schema({
       ref: COLLECTION.USER
     }
   ],
-  lesson: [
+  lessons: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: COLLECTION.LESSON

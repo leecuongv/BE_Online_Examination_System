@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
 const { STATUS } = require("../utils/enum");
-const SubmitLesson = require("../models/SubmitLesson")
 
 const LessonController = {
     Create: async (req, res) => {
@@ -46,14 +45,14 @@ const LessonController = {
                     message: "Tạo bài giảng thất bại!"
                 })
             }
-            const Lesson = await newLesson.save();
+            const lesson = await newLesson.save();
 
-            course.Lessons.push(Lesson.id);
+            course.lessons.push(lesson.id);
             await course.save()
 
             return res.status(200).json({
                 message: "Tạo bài giảng mới thành công",
-                slug: Lesson._doc.slug
+                slug: lesson._doc.slug
             })
 
         } catch (error) {
@@ -88,7 +87,7 @@ const LessonController = {
     Update: async (req, res) => {
         try {
             const username = req.user.sub
-            const { LessonId, courseId, name, content, startTime, endTime, embeddedMedia, status, file } = req.body
+            const { lessonId, courseId, name, content, startTime, endTime, embeddedMedia, status, file } = req.body
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
 
             const user = await User.findOne({ username })
@@ -97,7 +96,7 @@ const LessonController = {
             const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
 
-            const existLesson = await Lesson.findById(LessonId)
+            const existLesson = await Lesson.findById(lessonId)
             if (!existLesson) return res.status(400).json({ message: "Không có bài giảng" })
 
 
@@ -121,7 +120,7 @@ const LessonController = {
 
             }
 
-            let updatedLesson = await Lesson.findByIdAndUpdate({ "_id": new mongoose.Types.ObjectId(LessonId) }, newData, { new: true })
+            let updatedLesson = await Lesson.findByIdAndUpdate({ "_id": new mongoose.Types.ObjectId(lessonId) }, newData, { new: true })
 
             await course.save()
 
@@ -206,14 +205,13 @@ const LessonController = {
             if (!exitsLesson) return res.status(400).json({ message: "Không có bài giảng" })
 
             let course = await Course.findById(exitsLesson.courseId)
-            course.Lessons = course.Lessons.filter(item => item.toString() !== id)
+            course.lessons = course.lessons.filter(item => item.toString() !== id)
             await course.save()
             console.log(exitsLesson)
 
             exitsLesson = await Lesson.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
             
-            await SubmitLesson.deleteMany({LessonId: id})
-
+            
             return res.status(200).json({
                 message: "Xóa bài giảng thành công",
             })
