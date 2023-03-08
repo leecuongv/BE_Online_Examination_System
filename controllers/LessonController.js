@@ -69,9 +69,9 @@ const LessonController = {
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             const { slug } = req.query
             console.log(slug)
-            const Lesson = await Lesson.findOne({ slug, creatorId: user.id })
-            if (Lesson) {
-                return res.status(200).json(Lesson._doc)
+            const lesson = await Lesson.findOne({ slug, creatorId: user.id })
+            if (lesson) {
+                return res.status(200).json(lesson._doc)
             }
 
             return res.status(400).json({
@@ -232,7 +232,7 @@ const LessonController = {
             }
             const course = await Course.findOne({ courseId, creatorId: user.id })
                 .populate({
-                    path: 'Lessons'
+                    path: 'lessons'
                 })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
             console.log(course)
@@ -240,7 +240,7 @@ const LessonController = {
 
             if (course) {
                 // const result = listExam.map(item => {
-                return res.status(200).json(course._doc.Lessons)
+                return res.status(200).json(course._doc.lessons)
             }
             return res.status(400).json({
                 message: "Không tìm thấy bài giảng",
