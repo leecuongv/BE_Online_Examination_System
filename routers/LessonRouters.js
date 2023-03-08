@@ -8,7 +8,7 @@ router.post('/create', verifyToken, LessonController.Create);
 router.put('/update', verifyToken, LessonController.Update);
 router.delete('/', verifyToken, LessonController.Delete);
 
-router.get('/Lesson-by-course-of-teacher', verifyToken, LessonController.getLessonByCourseOfTeacher)
+router.get('/lesson-by-course-of-teacher', verifyToken, LessonController.getLessonByCourseOfTeacher)
 
 
 router.get('/by-slug', verifyToken, LessonController.getLessonBySlug);
