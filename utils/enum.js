@@ -22,7 +22,8 @@ const COLLECTION = {
   ASSIGNMENT: "Assignment",
   SUBMITASSIGNMENT: "Submit_assignment",
   PIN: "Pin",
-  LESSON: "Lesson"
+  LESSON: "Lesson",
+  TICK: "Tick",
 };
 
 const TYPEOFPOINT = {
