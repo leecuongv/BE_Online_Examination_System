@@ -2,6 +2,9 @@ const Tick = require("../models/Tick")
 const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
+const Assignment = require("../models/Assignment")
+const Exam = require("../models/Exam")
+const Lesson = require("../models/Lesson")
 const { STATUS } = require("../utils/enum");
 
 const TickController = {
@@ -155,7 +158,36 @@ const TickController = {
             res.status(400).json({ message: "Lỗi lấy thông tin đánh dấu" })
         }
     },
+    GetTickInCourseByStudentId: async(req, res)=>{
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const courseId = req.query.courseId
+            const course = await Course.findOne({ courseId })
+            const start = new Date().getTime()
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            let listAssignment = await Assignment.aggregate([
+                {
+                    $match: {
+                        courseId: course._id,
+                        status: STATUS.PUBLIC
+                    }
+                },
+            ])
 
+            //Trong các khóa học có sinh viên, lấy danh sách assignment, exam với các mốc thời gian và add vào cục bo chung
+
+            return res.status(200).json(listAssignment)
+
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tìm bài tập" })
+        }
+    },
 
 };
 
