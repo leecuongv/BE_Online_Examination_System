@@ -130,16 +130,13 @@ const CourseController = {
         try {
             const { courseId } = req.query
             const username = req.user?.sub
-            const student = await User.findOne({username})
+            const student = await User.findOne({ username })
             const course = await Course.aggregate([
                 {
-                    // $match: { $and:[
-                    //     {students: { $in: [mongoose.Types.ObjectId(student.id)] }},
-                    //     {courseId:Number(courseId)}
-                    // ] }
-                    $match: 
-                    
+                    $match: { $and:[
+                        {students: { $in: [mongoose.Types.ObjectId(student.id)] }},
                         {courseId:Number(courseId)}
+                    ] }
                 },
                 {
                     $facet: {
@@ -147,7 +144,7 @@ const CourseController = {
                             {
                                 $lookup: {
                                     from: "take_exams",
-                                    let: { examId: "$examId" },
+                                    let: { examIds: "$exams" },
                                     pipeline: [
                                         {
                                             $match:
@@ -156,8 +153,8 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$userId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $eq: ["$exams", "$$examId"] }
+                                                            { $eq: ["$userId",mongoose.Types.ObjectId(student.id)] },
+                                                            { $in: ["$examId", "$$examIds"] }
                                                         ]
                                                 }
                                             }
@@ -170,7 +167,7 @@ const CourseController = {
                             {
                                 $lookup: {
                                     from: "submit_assignments",
-                                    let: { assignmentId: "$assignmentId" },
+                                    let: { assignmentIds: "$assignments" },
                                     pipeline: [
                                         {
                                             $match:
@@ -179,8 +176,8 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $eq: ["$assignments", "$$assignmentId"] }
+                                                            { $eq: ["$creatorId",mongoose.Types.ObjectId(student.id)] },
+                                                            { $in: ["$assignmentId", "$$assignmentIds"] }
                                                         ]
                                                 }
                                             }
@@ -193,7 +190,7 @@ const CourseController = {
                             {
                                 $lookup: {
                                     from: "seen_lessons",
-                                    let: { lessonId: "$lessonId" },
+                                    let: { lessonIds: "$lessons" },
                                     pipeline: [
                                         {
                                             $match:
@@ -202,8 +199,8 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $eq: ["$lessons", "$$lessonId"] }
+                                                            { $eq: ["$creatorId",mongoose.Types.ObjectId(student.id)] },
+                                                            { $in: ["$lessonId", "$$lessonIds"] }
                                                         ]
                                                 }
                                             }
@@ -241,15 +238,17 @@ const CourseController = {
                             },
                             {
                                 $project: {
-                                  'doc':'$$ROOT',
-                                    'total':{
-                                     $size:
-                                      { $concatArrays: [
-                                        '$exams', {$ifNull:['$assignments',[]]}, { $ifNull: ['$lessons', []] }] }
+                                    'doc': '$$ROOT',
+                                    'total': {
+                                        $size:
+                                        {
+                                            $concatArrays: [
+                                                '$exams', { $ifNull: ['$assignments', []] }, { $ifNull: ['$lessons', []] }]
+                                        }
                                     }
                                 }
                             },
-                           
+
                         ]
                     }
                 },
@@ -266,7 +265,7 @@ const CourseController = {
                 {
                     $group: {
                         _id: "$all._id",
-                        doc:{'$last':'$all.doc'},
+                        doc: { '$last': '$all.doc' },
                         count: { $sum: "$all.count" },
                         total: { $sum: "$all.total" },
 
@@ -274,12 +273,12 @@ const CourseController = {
                 },
                 {
                     $project: {
-                        _id:1,
-                        name:'$doc.name',
-                        image:'$doc.image',
+                        _id: 1,
+                        name: '$doc.name',
+                        image: '$doc.image',
                         courseId: "$doc.courseId",
-                        exams:'$doc.exams',
-                        description:'$doc.description',
+                        exams: '$doc.exams',
+                        description: '$doc.description',
                         count: 1,
                         total: 1,
                         avg: { $cond: [{ $eq: ["$total", 0] }, "0", { "$divide": ["$count", "$total"] }] }
@@ -289,8 +288,29 @@ const CourseController = {
             ]);
             if (course.length > 0) {
                 console.log(course[0])
-                const { _id, courseId, name, description, exams, image, status, startTime, endTime,avg } = course[0]
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime,avg })
+                const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg } = course[0]
+                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg })
+            }
+
+            return res.status(400).json({
+                message: "Không tìm thấy khoá học",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tạo khoá học" })
+        }
+    },
+    getCourseByCourseIdOfTeacher: async (req, res) => {
+        try {
+            const { courseId } = req.query
+            const username = req.user?.sub
+            const student = await User.findOne({ username })
+            const course = await Course.findOne({ courseId: Number(courseId) });
+
+            if (course) {
+                const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg } = course._doc
+                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg })
             }
 
             return res.status(400).json({
@@ -646,7 +666,7 @@ const CourseController = {
                             {
                                 $lookup: {
                                     from: "take_exams",
-                                    let: { examId: "$examId" },
+                                    let: { examIds: "$exams" },
                                     pipeline: [
                                         {
                                             $match:
@@ -655,8 +675,8 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$userId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $eq: ["$exams", "$$examId"] }
+                                                            { $eq: ["$userId",mongoose.Types.ObjectId(student.id)] },
+                                                            { $in: ["$examId", "$$examIds"] }
                                                         ]
                                                 }
                                             }
@@ -669,7 +689,7 @@ const CourseController = {
                             {
                                 $lookup: {
                                     from: "submit_assignments",
-                                    let: { assignmentId: "$assignmentId" },
+                                    let: { assignmentIds: "$assignments" },
                                     pipeline: [
                                         {
                                             $match:
@@ -678,8 +698,8 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $eq: ["$assignments", "$$assignmentId"] }
+                                                            { $eq: ["$creatorId",mongoose.Types.ObjectId(student.id)] },
+                                                            { $in: ["$assignmentId", {$ifNull:["$$assignmentIds",[]]}] }
                                                         ]
                                                 }
                                             }
@@ -692,7 +712,7 @@ const CourseController = {
                             {
                                 $lookup: {
                                     from: "seen_lessons",
-                                    let: { lessonId: "$lessonId" },
+                                    let: { lessonIds: "$lessons" },
                                     pipeline: [
                                         {
                                             $match:
@@ -701,8 +721,8 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $eq: ["$lessons", "$$lessonId"] }
+                                                            { $eq: ["$creatorId",mongoose.Types.ObjectId(student.id)] },
+                                                            { $in: ["$lessonId", {$ifNull:["$$lessonIds",[]]}] }
                                                         ]
                                                 }
                                             }
@@ -720,7 +740,6 @@ const CourseController = {
                             {
                                 $unwind: {
                                     path: "$counts",
-                                    preserveNullAndEmptyArrays: true
                                 }
                             },
                             {
@@ -740,15 +759,17 @@ const CourseController = {
                             },
                             {
                                 $project: {
-                                  'doc':'$$ROOT',
-                                    'total':{
-                                     $size:
-                                      { $concatArrays: [
-                                        '$exams', {$ifNull:['$assignments',[]]}, { $ifNull: ['$lessons', []] }] }
+                                    'doc': '$$ROOT',
+                                    'total': {
+                                        $size:
+                                        {
+                                            $concatArrays: [
+                                                '$exams', { $ifNull: ['$assignments', []] }, { $ifNull: ['$lessons', []] }]
+                                        }
                                     }
                                 }
                             },
-                           
+
                         ]
                     }
                 },
@@ -765,7 +786,7 @@ const CourseController = {
                 {
                     $group: {
                         _id: "$all._id",
-                        doc:{'$last':'$all.doc'},
+                        doc: { '$last': '$all.doc' },
                         count: { $sum: "$all.count" },
                         total: { $sum: "$all.total" },
 
@@ -773,9 +794,9 @@ const CourseController = {
                 },
                 {
                     $project: {
-                        _id:1,
-                        name:'$doc.name',
-                        image:'$doc.image',
+                        _id: 1,
+                        name: '$doc.name',
+                        image: '$doc.image',
                         courseId: "$doc.courseId",
                         count: 1,
                         total: 1,
@@ -784,7 +805,7 @@ const CourseController = {
                 }
 
             ]);
-            
+
             if (!studentCourse)
                 return res.status(400).json({ message: "Học viên chưa thuộc khóa học nào." })
 
