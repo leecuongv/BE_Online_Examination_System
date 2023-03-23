@@ -3,12 +3,13 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
 const { STATUS } = require("../utils/enum");
+const SeenLesson = require("../models/SeenLesson");
 
 const LessonController = {
     Create: async (req, res) => {
         try {
             const username = req.user.sub
-            const { courseId, name, content, startTime, endTime, embeddedMedia,  status, file } = req.body
+            const { courseId, name, content, startTime, endTime, embeddedMedia, status, file } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -210,8 +211,8 @@ const LessonController = {
             console.log(exitsLesson)
 
             exitsLesson = await Lesson.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
-            
-            
+
+
             return res.status(200).json({
                 message: "Xóa bài giảng thành công",
             })
@@ -251,7 +252,389 @@ const LessonController = {
             res.status(500).json({ message: "Lỗi tìm bài giảng" })
         }
     },
-    
+    getLessonByCourseOfStudent: async (req, res) => {
+        try {
+            const username = req.user?.sub
+            const courseId = req.query.courseId
+            const user = await User.findOne({ username })
+            
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            const course = await Course.aggregate([
+                {
+                    $match: {
+                        $and:[
+                            {courseId: Number(courseId)},
+                            {students: { $in: [user._id] }}
+                        ]
+                        
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'lessons',
+                        let: { 'lessonIds': '$lessons', lessonId: '$lessonId' },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $in: ['$_id', '$$lessonIds']
+                                    }
+                                }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'seen_lessons',
+                                    let: { 'lessonId': '$_id' },
+                                    pipeline: [
+                                        {
+                                            $match: {
+                                                $expr: {
+                                                    $and: [
+                                                        { $eq: ['$lessonId', '$$lessonId'] },
+                                                        { $eq: ['$creatorId', user._id] }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    as: 'seen'
+                                }
+                            },
+                            {
+                                $set: {
+                                    seen: { $ne: ['$seen', []] }
+                                }
+                            }
+                        ],
+                        as: 'lessons'
+                    }
+                }
+            ])
+            console.log(course)
+
+            if (course.length===0) return res.status(400).json({ message: "Thông tin không hợp lệ" })
+
+            // const result = listExam.map(item => {            
+            return res.status(200).json(course[0].lessons)
+
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tìm bài giảng" })
+        }
+    },
+
+    SeenLesson: async (req, res) => {
+        try {
+            const username = req.user.sub
+            const { lessonId } = req.body
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+
+            const existLesson = await Lesson.findById(lessonId)
+            if (!existLesson) return res.status(400).json({ message: "Không có bài giảng" })
+
+            let newData = new SeenLesson({
+                lessonId: existLesson.id,
+                creatorId: user.id
+            })
+
+            await newData.save()
+
+            return res.status(200).json({
+                message: 'Thành công'
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi tạo bài giảng" })
+        }
+    },
+    UnseenLesson: async (req, res) => {
+        try {
+            const username = req.user.sub
+            const { lessonId } = req.query
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+
+            const existLesson = await Lesson.findById(lessonId)
+            if (!existLesson) return res.status(400).json({ message: "Không có bài giảng" })
+
+            await SeenLesson.findOneAndDelete({
+                lessonId: existLesson.id,
+                creatorId: user.id
+            })
+
+            return res.status(200).json({
+                message: 'Thành công'
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi tạo bài giảng" })
+        }
+    },
+    UnseenLesson2: async (req, res) => {
+        try {
+            const username = req.user.sub
+            const { lessonId } = req.body
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+
+            const existLesson = await Lesson.findById(lessonId)
+            if (!existLesson) return res.status(400).json({ message: "Không có bài giảng" })
+
+            await SeenLesson.aggregate([
+                {
+                    $match: { students: { $in: [ObjectId('63428c02cd5e93a197c4d92f')] } }
+                },
+                {
+                    $facet: {
+                        'temp': [
+                            {
+                                $lookup: {
+                                    from: "take_exams",
+                                    let: { examId: "$examId" },
+                                    pipeline: [
+                                        {
+                                            $match:
+                                            {
+                                                $expr:
+                                                {
+                                                    $and:
+                                                        [
+                                                            { $eq: ["$userId", ObjectId('63428c02cd5e93a197c4d92f')] },
+                                                            { $eq: ["$exams", "$$examId"] }
+                                                        ]
+                                                }
+                                            }
+                                        },
+                                        { $project: { _id: 0, countId: "$examId" } },
+                                    ],
+                                    as: "takeExams"
+                                }
+                            },
+                            {
+                                $lookup: {
+                                    from: "submit_assignments",
+                                    let: { assignmentId: "$assignmentId" },
+                                    pipeline: [
+                                        {
+                                            $match:
+                                            {
+                                                $expr:
+                                                {
+                                                    $and:
+                                                        [
+                                                            { $eq: ["$creatorId", ObjectId('63428c02cd5e93a197c4d92f')] },
+                                                            { $eq: ["$assignments", "$$assignmentId"] }
+                                                        ]
+                                                }
+                                            }
+                                        },
+                                        { $project: { _id: 0, countId: "$assignmentId" } },
+                                    ],
+                                    as: "assigns"
+                                }
+                            },
+                            {
+                                $lookup: {
+                                    from: "seen_lessons",
+                                    let: { lessonId: "$lessonId" },
+                                    pipeline: [
+                                        {
+                                            $match:
+                                            {
+                                                $expr:
+                                                {
+                                                    $and:
+                                                        [
+                                                            { $eq: ["$creatorId", ObjectId('63428c02cd5e93a197c4d92f')] },
+                                                            { $eq: ["$lessons", "$$lessonId"] }
+                                                        ]
+                                                }
+                                            }
+                                        },
+                                        { $project: { _id: 0, countId: "$lessonId" } },
+                                    ],
+                                    as: "seenLessons"
+                                }
+                            },
+                            {
+                                $project: {
+                                    'counts': { $concatArrays: ['$assigns', '$takeExams', '$seenLessons'] }
+                                }
+                            },
+                            {
+                                $unwind: {
+                                    path: "$counts",
+                                    preserveNullAndEmptyArrays: true
+                                }
+                            },
+                            {
+                                $group: {
+                                    _id: '$counts.countId', "doc": { "$first": "$_id" }
+                                }
+                            },
+                            {
+                                $group: {
+                                    _id: '$doc', count: { $sum: 1 }
+                                }
+                            }
+
+
+                        ],
+                        'main': [
+                            {
+                                $project: {
+                                    'counts': { $concatArrays: ['$exams', '$assignments', { $ifNull: ['$lessons', []] }] }
+                                }
+                            },
+                            {
+                                $unwind: {
+                                    path: '$counts',
+                                }
+                            },
+                            {
+                                $group: {
+                                    _id: '$_id',
+                                    total: { $sum: 1 }
+                                }
+                            },
+
+                        ]
+                    }
+                },
+                {
+                    $project: {
+                        all: {
+                            $concatArrays: ["$temp", "$main"]
+                        }
+                    }
+                },
+                {
+                    $unwind: "$all"
+                },
+                {
+                    $group: {
+                        _id: "$all._id",
+                        count: { $sum: "$all.count" },
+                        total: { $sum: "$all.total" },
+
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        group: "$_id",
+                        count: 1,
+                        total: 1,
+                        avg: { $cond: [{ $eq: ["$total", 0] }, "0", { "$divide": ["$count", "$total"] }] }
+                    }
+                }
+
+            ])
+
+            return res.status(200).json({
+                message: 'Thành công'
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi tạo bài giảng" })
+        }
+    },
+
+    getCalendarOfStudent: async (req, res) => {
+        try {
+            const timeZone = -420 * 60000
+            const username = req.user?.sub
+            const courseId = req.query.courseId
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            const course = await Course.find({ students: { $in: [user.id] } })
+                .populate({
+                    path: 'lessons'
+                })
+                .populate({
+                    path: 'exams',
+                    select: 'name startTime endTime _id slug'
+                })
+                .populate({
+                    path: 'assignments',
+                    select: 'name startTime endTime _id slug'
+                })
+            if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
+            console.log(course)
+
+
+            if (course) {
+                let calendar = {}
+                course.forEach(item => {
+                    item.exams?.forEach(exam => {
+                        let dateMark = new Date(exam.startTime - timeZone).toISOString().substring(0, 10)
+                        if (!calendar[dateMark])
+                            calendar[dateMark] = []
+                        calendar[dateMark].push(exam)
+
+                        dateMark = new Date(exam.endTime - timeZone).toISOString().substring(0, 10)
+                        if (!calendar[dateMark])
+                            calendar[dateMark] = []
+                        calendar[dateMark].push(exam)
+                    })
+
+                    item.assignments?.forEach(assignment => {
+                        let dateMark = new Date(assignment.startTime - timeZone).toISOString().substring(0, 10)
+                        if (!calendar[dateMark])
+                            calendar[dateMark] = []
+                        calendar[dateMark].push(assignment)
+
+                        dateMark = new Date(assignment.endTime - timeZone).toISOString().substring(0, 10)
+                        if (!calendar[dateMark])
+                            calendar[dateMark] = []
+                        calendar[dateMark].push(assignment)
+                    })
+                })
+                calendar = Object.keys(calendar).sort().reduce(
+                    (obj, key) => {
+                        obj[key] = calendar[key];
+                        return obj;
+                    },
+                    {}
+                );
+
+                let result =
+                    Object.keys(calendar).map((key, index) => {
+                        return {
+                            index,
+                            date: key,
+                            activities: calendar[key]
+                        }
+                    })
+                console.log(result)
+                // const result = listExam.map(item => {
+                return res.status(200).json(result)
+            }
+            return res.status(400).json({
+                message: "Không tìm thấy bài giảng",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tìm bài giảng" })
+        }
+    },
+
 
 };
 
