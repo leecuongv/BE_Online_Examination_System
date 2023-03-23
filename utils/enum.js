@@ -24,6 +24,7 @@ const COLLECTION = {
   PIN: "Pin",
   LESSON: "Lesson",
   TICK: "Tick",
+  SEENLESSON:'Seen_lesson'
 };
 
 const TYPEOFPOINT = {

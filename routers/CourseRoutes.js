@@ -7,11 +7,12 @@ const router = express.Router();
 
 router.post('',verifyToken, CourseController.CreateCourse);
 
-router.put('/', CourseController.UpdateCourse);
+router.put('/',verifyToken, CourseController.UpdateCourse);
 
-router.get('', CourseController.getCourseBySlug);
+router.get('', verifyToken,CourseController.getCourseBySlug);
 
-router.get('/by-courseid', CourseController.getCourseByCourseId);
+router.get('/by-courseid-student',verifyToken, CourseController.getCourseByCourseId);
+router.get('/by-courseid-teacher',verifyToken, CourseController.getCourseByCourseIdOfTeacher);
 
 router.get('/by-teacher',verifyToken, CourseController.getListCourseTeacher);
 
