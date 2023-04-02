@@ -133,10 +133,10 @@ const CourseController = {
             const student = await User.findOne({ username })
             const course = await Course.aggregate([
                 {
-                    $match: { $and:[
-                        {students: { $in: [mongoose.Types.ObjectId(student.id)] }},
-                        {courseId:Number(courseId)}
-                    ] }
+                    $match:
+
+                        { courseId: Number(courseId) }
+
                 },
                 {
                     $facet: {
@@ -153,7 +153,7 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$userId",mongoose.Types.ObjectId(student.id)] },
+                                                            { $eq: ["$userId", mongoose.Types.ObjectId(student.id)] },
                                                             { $in: ["$examId", "$$examIds"] }
                                                         ]
                                                 }
@@ -176,7 +176,7 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$creatorId",mongoose.Types.ObjectId(student.id)] },
+                                                            { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
                                                             { $in: ["$assignmentId", "$$assignmentIds"] }
                                                         ]
                                                 }
@@ -199,7 +199,7 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$creatorId",mongoose.Types.ObjectId(student.id)] },
+                                                            { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
                                                             { $in: ["$lessonId", "$$lessonIds"] }
                                                         ]
                                                 }
@@ -278,6 +278,7 @@ const CourseController = {
                         image: '$doc.image',
                         courseId: "$doc.courseId",
                         exams: '$doc.exams',
+                        students: '$doc.students',
                         description: '$doc.description',
                         count: 1,
                         total: 1,
@@ -287,6 +288,10 @@ const CourseController = {
 
             ]);
             if (course.length > 0) {
+                if (course[0].total === 0)
+                    return res.status(200).json({
+                        message: "Học sinh/ Sinh viên Không thuộc khoá học!",
+                    })
                 console.log(course[0])
                 const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg } = course[0]
                 return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg })
@@ -675,7 +680,7 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$userId",mongoose.Types.ObjectId(student.id)] },
+                                                            { $eq: ["$userId", mongoose.Types.ObjectId(student.id)] },
                                                             { $in: ["$examId", "$$examIds"] }
                                                         ]
                                                 }
@@ -698,8 +703,8 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$creatorId",mongoose.Types.ObjectId(student.id)] },
-                                                            { $in: ["$assignmentId", {$ifNull:["$$assignmentIds",[]]}] }
+                                                            { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
+                                                            { $in: ["$assignmentId", { $ifNull: ["$$assignmentIds", []] }] }
                                                         ]
                                                 }
                                             }
@@ -721,8 +726,8 @@ const CourseController = {
                                                 {
                                                     $and:
                                                         [
-                                                            { $eq: ["$creatorId",mongoose.Types.ObjectId(student.id)] },
-                                                            { $in: ["$lessonId", {$ifNull:["$$lessonIds",[]]}] }
+                                                            { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
+                                                            { $in: ["$lessonId", { $ifNull: ["$$lessonIds", []] }] }
                                                         ]
                                                 }
                                             }
@@ -981,7 +986,30 @@ const CourseController = {
             console.log(error)
             res.status(500).json({ message: "Lỗi xóa bài kiểm tra!" })
         }
-    }
+    },
+    GetListCoursePublic: async (req, res) => {
+        try {
+
+            let courses = await Course.find({ status: STATUS.PUBLIC })
+            let results = courses.map(item => {
+                let { exams, students, lessons, assignments, ...data } = item._doc
+                return {
+                    ...data,
+                }
+            })
+
+            if (courses) {
+                return res.status(200).json(results)
+            }
+            return res.status(400).json({
+                message: "Không tìm thấy khoá học nào",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi hiển thị khoá học!" })
+        }
+    },
 }
 
 module.exports = { CourseController }

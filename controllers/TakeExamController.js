@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course");
 const User = require("../models/User");
 const TakeExam = require("../models/TakeExam");
-const { STATUS, VIEWPOINT } = require("../utils/enum");
+const { STATUS, VIEWPOINT, QUESTIONTYPE, ANSWERTYPE } = require("../utils/enum");
 const moment = require("moment/moment");
 const ExamLog = require("../models/ExamLog");
 const TakeExamController = {
@@ -81,7 +81,7 @@ const TakeExamController = {
         (new Date(toDay)) > (new Date(exam.endTime))) {
         console.log(toDay)
         return res.status(400).json({
-          message: "Thời gian thực hiện bài thi không hợp lệ"
+          message: "Thời gian thực hiện bài thi không hợp lệ!"
         })
       }
 
@@ -248,42 +248,65 @@ const TakeExamController = {
 
       let points = 0
       questions.forEach(question => {
-        let pointOfQuestion = 0
-        let noAnswerCorrect = question.answers.filter(e => e.isCorrect).length //số đáp án đúng
-        let questionClient = answerSheet.find(e => e.question === question.id.toString())
-        //thay bằng Question result, answer
-        if (!questionClient) {
-          if (noAnswerCorrect === 0)
-            points += question.maxPoints
-          else
-            points += 0
+        if (question.type === QUESTIONTYPE.FILLIN) {
+          let pointOfQuestion = 0
+
+
+          let questionClient = answerSheet.find(e => e.question === question.id.toString())
+          //thay bằng Question result, answer
+          if (questionClient)
+            if (questionClient.answers.length > 0) {
+              let isCorrect = question.answers.some(e => {
+                if (e.type === ANSWERTYPE.EQUAL) {
+                  return (e.content === questionClient.answers[0])
+                }
+                return (e.content.includes(questionClient.answers[0]))
+              })
+              if (isCorrect)
+                points += question.maxPoints
+            }
+
         }
         else {
-          if (noAnswerCorrect === 0) {
-            if (questionClient.answers.length === 0)
+          let pointOfQuestion = 0
+
+          let noAnswerCorrect = question.answers.filter(e => e.isCorrect).length //số đáp án đúng
+          let questionClient = answerSheet.find(e => e.question === question.id.toString())
+          //thay bằng Question result, answer
+          if (!questionClient) {
+            if (noAnswerCorrect === 0)
               points += question.maxPoints
             else
               points += 0
           }
+
           else {
+            if (noAnswerCorrect === 0) {
+              if (questionClient.answers.length === 0)
+                points += question.maxPoints
+              else
+                points += 0
+            }
+            else {
 
-            let pointEachAnswer = question.maxPoints / noAnswerCorrect
-            question.answers.forEach(answer => {
-              if (answer.isCorrect) {//
-                if (questionClient.answers.includes(answer.id.toString()))
-                  pointOfQuestion += pointEachAnswer
-              }
-              else {
-                if (questionClient.answers.includes(answer.id.toString()))
-                  pointOfQuestion -= pointEachAnswer
-              }
+              let pointEachAnswer = question.maxPoints / noAnswerCorrect
+              question.answers.forEach(answer => {
+                if (answer.isCorrect) {//
+                  if (questionClient.answers.includes(answer.id.toString()))
+                    pointOfQuestion += pointEachAnswer
+                }
+                else {
+                  if (questionClient.answers.includes(answer.id.toString()))
+                    pointOfQuestion -= pointEachAnswer
+                }
 
-            })
+              })
 
-            pointOfQuestion = pointOfQuestion > 0 ? pointOfQuestion : 0
-            questionClient.point = pointOfQuestion
+              pointOfQuestion = pointOfQuestion > 0 ? pointOfQuestion : 0
+              questionClient.point = pointOfQuestion
 
-            points += pointOfQuestion
+              points += pointOfQuestion
+            }
           }
         }
       })

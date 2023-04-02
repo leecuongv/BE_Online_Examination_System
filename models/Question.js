@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
 const autoinc = require("mongoose-plugin-autoinc");
 const { formatTimeUTC } = require("../utils/Timezone");
-const { COLLECTION } = require("../utils/enum");
+const { COLLECTION, QUESTIONTYPE } = require("../utils/enum");
 const Answer = require("./Answer");
 
 const questionSchema = mongoose.Schema({
   type: {
     type: String,
     require: true,
-    default: 'single',
+    default: QUESTIONTYPE.SINGLE,
   },
   content: {
     type: String,
@@ -29,7 +29,7 @@ const questionSchema = mongoose.Schema({
   maxPoints: {
     type: Number,
     default: 1,
-  }
+  }, 
 },
   {
     timestamps: true, toObject: {

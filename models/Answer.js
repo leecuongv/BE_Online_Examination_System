@@ -1,7 +1,7 @@
 const mongoose =require("mongoose")
 const autoinc =require("mongoose-plugin-autoinc")
 const { formatTimeUTC } =require("../utils/Timezone")
-const { COLLECTION } =require("../utils/enum")
+const { COLLECTION, ANSWERTYPE } =require("../utils/enum")
 
 const answerSchema = mongoose.Schema({
   content: {
@@ -13,6 +13,10 @@ const answerSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  type:{
+    type: String,
+    default: ANSWERTYPE.EQUAL
+  }
 },
 { timestamps: true ,
   toObject: {

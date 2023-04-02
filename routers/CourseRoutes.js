@@ -19,7 +19,7 @@ router.get('/by-teacher',verifyToken, CourseController.getListCourseTeacher);
 router.get('/search-student',verifyToken, CourseController.searchListStudentToAdd);
 router.get('/get-students',verifyToken, CourseController.getListStudentOfCourse);
 router.get('/get-exams',verifyToken, CourseController.getListExamOfCourse);
-
+router.get('/course-public', CourseController.GetListCoursePublic);
 router.post('/add-student',verifyToken, CourseController.addStudentIntoCourse);
 router.delete('/delete-student',verifyToken, CourseController.deleteStudentInCourse);
 router.post('/update-course',verifyToken, CourseController.UpdateCourse);
