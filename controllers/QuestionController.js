@@ -10,7 +10,7 @@ const Exam = require("../models/Exam")
 const Answer = require("../models/Answer")
 const QuestionBank = require("../models/QuestionBank")
 const TakeExam = require("../models/TakeExam")
-const { STATUS } = require("../utils/enum")
+const { STATUS, ANSWERTYPE, QUESTIONTYPE } = require("../utils/enum")
 
 const QuestionController = {
     CreateQuestion: async (req, res) => {
@@ -286,10 +286,28 @@ const QuestionController = {
                     }
                     else {
                         let pointEachAnswer = maxPoints / noAnswerCorrect
+                        if (cauHoiNguoiDungDaChon.type === QUESTIONTYPE.FILLIN) {
+                            answers.forEach(answer => {
+                                if (answer.type === ANSWERTYPE.EQUAL) {
+                                    if (cauHoiNguoiDungDaChon.answers.content === answer.content) {
+                                        pointOfQuestion += pointEachAnswer
+                                    }
+                                    pointOfQuestion -= pointEachAnswer
+                                }
+                                if (answer.type === ANSWERTYPE.INCLUDE) {
+                                    if (cauHoiNguoiDungDaChon.answers.content.includes(answer.content)) {
+                                        pointOfQuestion += pointEachAnswer
+                                    }
+                                    pointOfQuestion -= pointEachAnswer
+                                }
+                            })
+                        }
+
                         answers.forEach(answer => {
                             if (answer.isCorrect) {//
                                 if (cauHoiNguoiDungDaChon.answers.includes(answer.id.toString()))
                                     pointOfQuestion += pointEachAnswer
+
                             }
                             else {
                                 if (cauHoiNguoiDungDaChon.answers.includes(answer.id.toString()))
