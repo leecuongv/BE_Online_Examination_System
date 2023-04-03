@@ -239,20 +239,18 @@ const TakeExamController = {
         path: "questions.question",
         populate: {
           path: 'answers',
-          select: 'id isCorrect'
+          select: 'id type isCorrect content'
         }
       })
 
       if (!exam) return res.status(400).json({ message: "Không có bài thi!" })
       let questions = exam.questions.map(element => element.question)//câu hỏi và đáp án từ exam
 
-      let points = 0
+      let points = 0 //điểm đạt được của bài làm
       questions.forEach(question => {
+        let pointOfQuestion = 0
+        let questionClient = answerSheet.find(e => e.question === question.id.toString())
         if (question.type === QUESTIONTYPE.FILLIN) {
-          let pointOfQuestion = 0
-
-
-          let questionClient = answerSheet.find(e => e.question === question.id.toString())
           //thay bằng Question result, answer
           if (questionClient)
             if (questionClient.answers.length > 0) {
@@ -263,68 +261,75 @@ const TakeExamController = {
                 return (e.content.includes(questionClient.answers[0]))
               })
               if (isCorrect)
-                points += question.maxPoints
+                pointOfQuestion = question.maxPoints
             }
-
         }
         else {
-          let pointOfQuestion = 0
 
           let noAnswerCorrect = question.answers.filter(e => e.isCorrect).length //số đáp án đúng
-          let questionClient = answerSheet.find(e => e.question === question.id.toString())
+          //let questionClient = answerSheet.find(e => e.question === question.id.toString())
           //thay bằng Question result, answer
           if (!questionClient) {
             if (noAnswerCorrect === 0)
-              points += question.maxPoints
-            else
-              points += 0
+              pointOfQuestion = question.maxPoints
           }
 
           else {
             if (noAnswerCorrect === 0) {
               if (questionClient.answers.length === 0)
-                points += question.maxPoints
-              else
-                points += 0
+                pointOfQuestion = question.maxPoints
             }
             else {
 
               let pointEachAnswer = question.maxPoints / noAnswerCorrect
               question.answers.forEach(answer => {
-                if (answer.isCorrect) {//
-                  if (questionClient.answers.includes(answer.id.toString()))
+                if (questionClient.answers.includes(answer.id.toString()))
+                  if (answer.isCorrect)
                     pointOfQuestion += pointEachAnswer
-                }
-                else {
-                  if (questionClient.answers.includes(answer.id.toString()))
+                  else
                     pointOfQuestion -= pointEachAnswer
-                }
 
               })
-
-              pointOfQuestion = pointOfQuestion > 0 ? pointOfQuestion : 0
-              questionClient.point = pointOfQuestion
-
-              points += pointOfQuestion
             }
           }
         }
+        pointOfQuestion = pointOfQuestion > 0 ? pointOfQuestion : 0
+        questionClient.point = pointOfQuestion
+
+        points += pointOfQuestion
       })
 
       takeExam.points = points
       takeExam.status = STATUS.SUBMITTED
       takeExam.submitTime = new Date()
+      // let result = answerSheet.map(item => {
+      //   try {
+      //     let answers = item.answers.map(e => {
+      //       try {
+      //         return mongoose.Types.ObjectId(e)
+      //       }
+      //       catch {
+      //         return null
+      //       }
+      //     })
+      //     answers = answers.filter(e => e !== null)
+      //     return {
+      //       point: item.point,
+      //       question: mongoose.Types.ObjectId(item.question),
+      //       answers
+      //     }
+      //   }
+      //   catch {
+      //     return null
+      //   }
+      // })
       let result = answerSheet.map(item => {
         try {
-          let answers = item.answers.map(e => {
-            try {
-              return mongoose.Types.ObjectId(e)
-            }
-            catch {
-              return null
-            }
-          })
-          answers = answers.filter(e => e !== null)
+          let answers = []
+          if (Array.isArray(item.answers)) {
+            answers = item.answers
+          }
+
           return {
             point: item.point,
             question: mongoose.Types.ObjectId(item.question),
@@ -406,7 +411,7 @@ const TakeExamController = {
           path: "questions.question",
           populate: {
             path: "answers",
-            select: "id content isCorrect",
+            select: "id content isCorrect type",
           },
         }).lean()
 

@@ -562,7 +562,7 @@ const LessonController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const course = await Course.find({ students: { $in: [user.id] } })
+            const courses = await Course.find({ students: { $in: [user.id] } })
                 .populate({
                     path: 'lessons'
                 })
@@ -574,35 +574,35 @@ const LessonController = {
                     path: 'assignments',
                     select: 'name startTime endTime _id slug'
                 })
-            if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
-            console.log(course)
+            if (!courses) return res.status(400).json({ message: "Thông tin không hợp lệ" })
+            console.log(courses)
 
 
-            if (course) {
+            if (courses) {
                 let calendar = {}
-                course.forEach(item => {
-                    item.exams?.forEach(exam => {
+                courses.forEach(course => {
+                    course.exams?.forEach(exam => {
                         let dateMark = new Date(exam.startTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push(exam)
+                        calendar[dateMark].push({nameCourse:course.name,type:'exam',...exam._doc})
 
                         dateMark = new Date(exam.endTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push(exam)
+                        calendar[dateMark].push({nameCourse:course.name,type:'exam',...exam._doc})
                     })
 
-                    item.assignments?.forEach(assignment => {
+                    course.assignments?.forEach(assignment => {
                         let dateMark = new Date(assignment.startTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push(assignment)
+                        calendar[dateMark].push({nameCourse:course.name,type:'assignment',...assignment._doc})
 
                         dateMark = new Date(assignment.endTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push(assignment)
+                        calendar[dateMark].push({nameCourse:course.name,type:'assignment',...assignment._doc})
                     })
                 })
                 calendar = Object.keys(calendar).sort().reduce(
