@@ -43,7 +43,8 @@ const QuestionController = {
             await Promise.all(answers.map(async (element) => {
                 const answer = new Answer({
                     content: element.content || "",
-                    isCorrect: element.isCorrect || false
+                    isCorrect: element.isCorrect || false,
+                    type: element.type
                 })
                 await answer.save()
                 newQuestion.answers.push(answer.id)
@@ -240,7 +241,8 @@ const QuestionController = {
                     newAnswers.push(element.id)
                     return Answer.findByIdAndUpdate(element.id, {
                         content: element.content || "",
-                        isCorrect: element.isCorrect || false
+                        isCorrect: element.isCorrect || false,
+                        type: element.type
                     }, { upsert: true })
 
                 }
@@ -273,55 +275,47 @@ const QuestionController = {
                 //thay bằng Question result, answer
                 if (!result) {
                     if (noAnswerCorrect === 0)
-                        points += maxPoints
-                    else
-                        points += 0
+                        pointOfQuestion = maxPoints
                 }
                 else {
-                    if (noAnswerCorrect === 0) {
-                        if (cauHoiNguoiDungDaChon.answers.length === 0)
-                            points += maxPoints
-                        else
-                            points += 0
+                    if (newData.type === QUESTIONTYPE.FILLIN) {
+                        let isCorrect = answers.some(answer => {
+                            if (cauHoiNguoiDungDaChon.answers.length !== 0) {
+                                if (answer.type === ANSWERTYPE.EQUAL) {
+                                    return cauHoiNguoiDungDaChon.answers[0] === answer.content
+                                }
+                                else {
+                                    return answer.content.includes(cauHoiNguoiDungDaChon.answers[0])
+                                }
+                            }
+                            return false
+                        })
+                        pointOfQuestion = isCorrect ? maxPoints : 0
                     }
                     else {
-                        let pointEachAnswer = maxPoints / noAnswerCorrect
-                        if (cauHoiNguoiDungDaChon.type === QUESTIONTYPE.FILLIN) {
+                        if (noAnswerCorrect === 0) {
+                            if (cauHoiNguoiDungDaChon.answers.length === 0)
+                                pointOfQuestion = maxPoints
+                        }
+                        else {
+                            let pointEachAnswer = maxPoints / noAnswerCorrect
+
                             answers.forEach(answer => {
-                                if (answer.type === ANSWERTYPE.EQUAL) {
-                                    if (cauHoiNguoiDungDaChon.answers.content === answer.content) {
+                                if (cauHoiNguoiDungDaChon.answers.includes(answer.id.toString()))
+                                    if (answer.isCorrect) {//
                                         pointOfQuestion += pointEachAnswer
                                     }
-                                    pointOfQuestion -= pointEachAnswer
-                                }
-                                if (answer.type === ANSWERTYPE.INCLUDE) {
-                                    if (cauHoiNguoiDungDaChon.answers.content.includes(answer.content)) {
-                                        pointOfQuestion += pointEachAnswer
+                                    else {
+                                        pointOfQuestion -= pointEachAnswer
                                     }
-                                    pointOfQuestion -= pointEachAnswer
-                                }
                             })
                         }
-
-                        answers.forEach(answer => {
-                            if (answer.isCorrect) {//
-                                if (cauHoiNguoiDungDaChon.answers.includes(answer.id.toString()))
-                                    pointOfQuestion += pointEachAnswer
-
-                            }
-                            else {
-                                if (cauHoiNguoiDungDaChon.answers.includes(answer.id.toString()))
-                                    pointOfQuestion -= pointEachAnswer
-                            }
-
-                        })
-
-                        pointOfQuestion = pointOfQuestion > 0 ? pointOfQuestion : 0
-                        takeExam.points = takeExam.points - cauHoiNguoiDungDaChon.point + pointOfQuestion
-                        cauHoiNguoiDungDaChon.point = pointOfQuestion
-
                     }
+
                 }
+                pointOfQuestion = pointOfQuestion > 0 ? pointOfQuestion : 0
+                takeExam.points = takeExam.points - cauHoiNguoiDungDaChon.point + pointOfQuestion
+                cauHoiNguoiDungDaChon.point = pointOfQuestion
                 return {
                     updateOne:
                     {

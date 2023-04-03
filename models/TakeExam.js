@@ -38,10 +38,16 @@ const takeExamSchema = mongoose.Schema({
             type: mongoose.SchemaTypes.ObjectId,
             ref: COLLECTION.QUESTION
         },
+        // answers: [
+        //     {
+        //         type: mongoose.SchemaTypes.ObjectId,
+        //         ref: COLLECTION.ANSWER
+        //     }
+        // ],
         answers: [
             {
-                type: mongoose.SchemaTypes.ObjectId,
-                ref: COLLECTION.ANSWER
+                type: mongoose.SchemaTypes.String,
+                default:''
             }
         ],
         point: {
