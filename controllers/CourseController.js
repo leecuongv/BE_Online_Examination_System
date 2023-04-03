@@ -234,7 +234,8 @@ const CourseController = {
                         ],
                         'main': [
                             {
-                                $match: { students: { $in: [mongoose.Types.ObjectId(student.id)] } }
+                               // $match: { students: { $in: [mongoose.Types.ObjectId(student.id)] } }
+                                $match: { courseId: Number(courseId) }
                             },
                             {
                                 $project: {
@@ -288,11 +289,10 @@ const CourseController = {
 
             ]);
             if (course.length > 0) {
-                if (course[0].total === 0)
-                    return res.status(200).json({
-                        message: "Học sinh/ Sinh viên Không thuộc khoá học!",
+                if (!course[0].students.find(e=>e.toString() === student.id.toString()))
+                    return res.status(400).json({
+                        message: "Học viên Không thuộc khoá học!",
                     })
-                console.log(course[0])
                 const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg } = course[0]
                 return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg })
             }
@@ -303,7 +303,7 @@ const CourseController = {
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Lỗi tạo khoá học" })
+            res.status(500).json({ message: "Lỗi tìm khoá học" })
         }
     },
     getCourseByCourseIdOfTeacher: async (req, res) => {
