@@ -279,7 +279,11 @@ const LessonController = {
                             {
                                 $match: {
                                     $expr: {
-                                        $in: ['$_id', '$$lessonIds']
+                                        $and:[
+                                            {$in: ['$_id', '$$lessonIds']},
+                                            {$eq:['$status',STATUS.PUBLIC]}
+                                        ]
+                                        
                                     }
                                 }
                             },
