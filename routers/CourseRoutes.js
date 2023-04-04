@@ -19,6 +19,8 @@ router.get('/search-student',verifyToken, CourseController.searchListStudentToAd
 router.get('/get-students',verifyToken, CourseController.getListStudentOfCourse);
 router.get('/get-exams',verifyToken, CourseController.getListExamOfCourse);
 
+router.get('/course-public', CourseController.GetListCoursePublic);
+
 router.post('/add-student',verifyToken, CourseController.addStudentIntoCourse);
 router.delete('/delete-student',verifyToken, CourseController.deleteStudentInCourse);
 router.post('/update-course',verifyToken, CourseController.UpdateCourse);
@@ -28,4 +30,6 @@ router.get('/info-to-enroll', verifyToken, CourseController.getCourseInfoToEnrol
 router.post('/enroll-in-course', verifyToken, CourseController.enrollInCourse)
 router.post('/exit-course', verifyToken, CourseController.exitCourse)
 router.delete('/delete-exam',verifyToken, CourseController.deleteExam);
+
+router.get("/a", CourseController.Search)
 module.exports = router;
