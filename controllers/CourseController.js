@@ -306,165 +306,15 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tìm khoá học" })
         }
     },
+
+
     getCourseByCourseIdOfTeacher: async (req, res) => {
         try {
             const { courseId } = req.query
             const username = req.user?.sub
             const student = await User.findOne({ username })
             const course = await Course.findOne({ courseId: Number(courseId) });
-                        { courseId: Number(courseId) }
-
-                },
-                {
-                    $facet: {
-                        'temp': [
-                            {
-                                $lookup: {
-                                    from: "take_exams",
-                                    let: { examIds: "$exams" },
-                                    pipeline: [
-                                        {
-                                            $match:
-                                            {
-                                                $expr:
-                                                {
-                                                    $and:
-                                                        [
-                                                            { $eq: ["$userId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $in: ["$examId", "$$examIds"] }
-                                                        ]
-                                                }
-                                            }
-                                        },
-                                        { $project: { _id: 0, countId: "$examId" } },
-                                    ],
-                                    as: "takeExams"
-                                }
-                            },
-                            {
-                                $lookup: {
-                                    from: "submit_assignments",
-                                    let: { assignmentIds: "$assignments" },
-                                    pipeline: [
-                                        {
-                                            $match:
-                                            {
-                                                $expr:
-                                                {
-                                                    $and:
-                                                        [
-                                                            { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $in: ["$assignmentId", "$$assignmentIds"] }
-                                                        ]
-                                                }
-                                            }
-                                        },
-                                        { $project: { _id: 0, countId: "$assignmentId" } },
-                                    ],
-                                    as: "assigns"
-                                }
-                            },
-                            {
-                                $lookup: {
-                                    from: "seen_lessons",
-                                    let: { lessonIds: "$lessons" },
-                                    pipeline: [
-                                        {
-                                            $match:
-                                            {
-                                                $expr:
-                                                {
-                                                    $and:
-                                                        [
-                                                            { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $in: ["$lessonId", "$$lessonIds"] }
-                                                        ]
-                                                }
-                                            }
-                                        },
-                                        { $project: { _id: 0, countId: "$lessonId" } },
-                                    ],
-                                    as: "seenLessons"
-                                }
-                            },
-                            {
-                                $project: {
-                                    'counts': { $concatArrays: ['$assigns', '$takeExams', '$seenLessons'] }
-                                }
-                            },
-                            {
-                                $unwind: {
-                                    path: "$counts",
-                                    preserveNullAndEmptyArrays: true
-                                }
-                            },
-                            {
-                                $group: {
-                                    _id: '$counts.countId', "doc": { "$first": "$_id" }
-                                }
-                            },
-                            {
-                                $group: {
-                                    _id: '$doc', count: { $sum: 1 }
-                                }
-                            }
-                        ],
-                        'main': [
-                            {
-                                // $match: { students: { $in: [mongoose.Types.ObjectId(student.id)] } }
-                                $match: { courseId: Number(courseId) }
-                            },
-                            {
-                                $project: {
-                                    'doc': '$$ROOT',
-                                    'total': {
-                                        $size:
-                                        {
-                                            $concatArrays: [
-                                                '$exams', { $ifNull: ['$assignments', []] }, { $ifNull: ['$lessons', []] }]
-                                        }
-                                    }
-                                }
-                            },
-
-                        ]
-                    }
-                },
-                {
-                    $project: {
-                        all: {
-                            $concatArrays: ["$temp", "$main"]
-                        }
-                    }
-                },
-                {
-                    $unwind: "$all"
-                },
-                {
-                    $group: {
-                        _id: "$all._id",
-                        doc: { '$last': '$all.doc' },
-                        count: { $sum: "$all.count" },
-                        total: { $sum: "$all.total" },
-
-                    }
-                },
-                {
-                    $project: {
-                        _id: 1,
-                        name: '$doc.name',
-                        image: '$doc.image',
-                        courseId: "$doc.courseId",
-                        exams: '$doc.exams',
-                        students: '$doc.students',
-                        description: '$doc.description',
-                        count: 1,
-                        total: 1,
-                        avg: { $cond: [{ $eq: ["$total", 0] }, "0", { "$divide": ["$count", "$total"] }] }
-                    }
-                }
-
-            ]);
+                
             if (course.length > 0) {
                 if (!course[0].students.find(e => e.toString() === student.id.toString()))
                     return res.status(400).json({
@@ -483,6 +333,8 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tìm khoá học" })
         }
     },
+
+
     getCourseByCourseIdOfTeacher: async (req, res) => {
         try {
             const { courseId } = req.query
