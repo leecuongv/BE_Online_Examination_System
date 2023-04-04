@@ -30,5 +30,5 @@ router.post('/enroll-in-course', verifyToken, CourseController.enrollInCourse)
 router.post('/exit-course', verifyToken, CourseController.exitCourse)
 router.delete('/delete-exam',verifyToken, CourseController.deleteExam);
 
-router.get("/a", CourseController.Search)
+router.get("/s", CourseController.Search)
 module.exports = router;
