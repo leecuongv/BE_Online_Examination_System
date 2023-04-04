@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 const autoinc = require("mongoose-plugin-autoinc")
-const { COLLECTION, DEFAULT_VALUES } = require("../utils/enum")
+const { COLLECTION, DEFAULT_VALUES, STATUS } = require("../utils/enum")
 
 const courseSchema = mongoose.Schema({
   courseId: {
@@ -55,9 +55,15 @@ const courseSchema = mongoose.Schema({
       ref: COLLECTION.USER
     }
   ],
+  lessons: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: COLLECTION.LESSON
+    }
+  ],
   status: {
     type: String,
-    default: "public",
+    default: STATUS.PROTECTED,
   },
 
   image:
@@ -65,7 +71,7 @@ const courseSchema = mongoose.Schema({
     type: String,
     default: DEFAULT_VALUES.IMAGE_COURSE,
   },
-  pin:{
+  pin: {
     type: String,
     default: ''
   },

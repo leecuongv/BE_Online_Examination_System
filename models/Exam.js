@@ -85,7 +85,7 @@ const examSchema = mongoose.Schema(
     },
     shuffle: {
       type: Boolean,
-      default: true
+      default: false
     },
     status: {
       type: String,

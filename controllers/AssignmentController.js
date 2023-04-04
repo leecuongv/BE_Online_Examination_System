@@ -27,10 +27,6 @@ const AssignmentController = {
                 return res.status(400).json({ message: "Thời gian của bài tập không hợp lệ" })
 
             }
-
-            // if ((new Date(startTime)) < (new Date(course.startTime)) || (new Date(endTime)) > (new Date(course.endTime)))
-            //     return res.status(400).json({ message: "Thời gian của bài tập không hợp lệ" })
-
             const newAssignment = await new Assignment({
                 courseId,
                 name,
@@ -114,8 +110,6 @@ const AssignmentController = {
 
             }
 
-            // if ((new Date(startTime)) < (new Date(course.startTime)) || (new Date(endTime)) > (new Date(course.endTime)))
-            //     return res.status(400).json({ message: "Thời gian của bài tập không hợp lệ" })
 
             let newData = {
                 courseId,
@@ -216,11 +210,13 @@ const AssignmentController = {
             if (!exitsAssignment) return res.status(400).json({ message: "Không có bài tập" })
 
             let course = await Course.findById(exitsAssignment.courseId)
-            course.assignments = course.assignments.filter(item=>item.toString() !== id)
+            course.assignments = course.assignments.filter(item => item.toString() !== id)
             await course.save()
             console.log(exitsAssignment)
 
             exitsAssignment = await Assignment.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
+            
+            await SubmitAssignment.deleteMany({assignmentId: id})
 
             return res.status(200).json({
                 message: "Xóa bài tập thành công",
@@ -233,7 +229,6 @@ const AssignmentController = {
     },
     getAssignmentByCourseOfTeacher: async (req, res) => {
         try {
-            //Lấy cái parameter
             const username = req.user?.sub
             const courseId = req.query.courseId
             const start = new Date().getTime()
@@ -267,27 +262,46 @@ const AssignmentController = {
             //Lấy cái parameter
             const username = req.user?.sub
             const courseId = req.query.courseId
+            const course = await Course.findOne({ courseId })
             const start = new Date().getTime()
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const course = await Course.findOne({ courseId, student: { $in: user.id } })
-                .populate({
-                    path: 'assignments',
-                    match: { status: STATUS.PUBLIC }
-                })
-            if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
-            console.log(course)
+            let listAssignment = await Assignment.aggregate([
+                {
+                    $match: {
+                        courseId: course._id,
+                        status: STATUS.PUBLIC
+                    }
+                },
+                {
+                    $lookup:
+                    {
+                        from: "submit_assignments",
+                        localField: "_id",
+                        foreignField: "assignmentId",
+                        as: "submit"
+                    }
+                },
+            ])
 
 
-            if (course) {
-                // const result = listExam.map(item => {
-                return res.status(200).json(course._doc.assignments)
-            }
-            return res.status(400).json({
-                message: "Không tìm thấy bài tập",
+
+            listAssignment = listAssignment.map(item => {
+
+                let tmp = item.submit.find(element => element.creatorId.toString() === user.id.toString())
+
+                delete item.submit
+                if (tmp)
+                    return { ...item, isSubmit: true }
+                return { ...item, isSubmit: false }
             })
+
+
+
+            return res.status(200).json(listAssignment)
+
 
         } catch (error) {
             console.log(error)
@@ -308,7 +322,7 @@ const AssignmentController = {
             const assignment = await Assignment.findOne({ slug: slug })
             console.log(assignment)
 
-            const submitAssignment = await SubmitAssignment.findOne({ assignmentId: assignment.id })
+            const submitAssignment = await SubmitAssignment.findOne({ assignmentId: assignment.id, creatorId: user.id })
             console.log(submitAssignment)
 
             if (assignment) {

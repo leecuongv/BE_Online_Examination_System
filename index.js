@@ -19,6 +19,8 @@ const {
   AssignmentRoutes,
   SubmitAssignmentRoutes,
   AdminRoutes,
+  LessonRoutes,
+  TickRouters
  } = require('./routers');
 
  const { notFound, errorHandler } = require("./routers/errorMiddleware");
@@ -134,6 +136,8 @@ app.use("/api/upload", UploadRoutes)
 app.use("/api/assignment", AssignmentRoutes)
 app.use("/api/submitassignment", SubmitAssignmentRoutes)
 app.use("/api/admin", AdminRoutes)
+app.use("/api/lesson", LessonRoutes)
+app.use("/api/tick", TickRouters)
 
 app.use(notFound);
 app.use(errorHandler);

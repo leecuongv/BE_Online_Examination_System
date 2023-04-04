@@ -7,6 +7,12 @@ const DEFAULT_VALUES = {
   AVATAR: 'https://1.bp.blogspot.com/-CV8fOXMMw60/YZ-UJ4X9sAI/AAAAAAAACMc/2Svet97exjgNdJ9CeTKUU3OuA-mnCQEzwCLcBGAsYHQ/s595/3a.jpg',
   IMAGE_COURSE: ""
 };
+const QUESTIONTYPE = {
+  SINGLE: "single",
+  MULTI: "multi",
+  FILLIN: "fillin"
+};
+
 
 const COLLECTION = {
   ANSWER: "Answer",
@@ -22,6 +28,9 @@ const COLLECTION = {
   ASSIGNMENT: "Assignment",
   SUBMITASSIGNMENT: "Submit_assignment",
   PIN: "Pin",
+  LESSON: "Lesson",
+  TICK: "Tick",
+  SEENLESSON: 'Seen_lesson'
 };
 
 const TYPEOFPOINT = {
@@ -56,7 +65,9 @@ const STATUS = {
   PRIVATE: 'private',
   CLOSE: 'close',
   ALLOW: 'allow',
-  NOTALLOW: 'not allow'
+  NOTALLOW: 'not allow',
+  PROTECTED: "protected" //Chỉ những sinh viên thuộc khóa học mới có thể xem được
+
 };
 
 const ROLES = {
@@ -69,5 +80,9 @@ const TYPE_ACCOUNT = {
   GOOGLE: "GOOGLE",
   FACEBOOK: "FACEBOOK",
 };
+const ANSWERTYPE = {
+  EQUAL:"equal",
+  INCLUDE: "include"
+}
 
-module.exports = { STATUS, TYPE_ACCOUNT, ROLES, COLLECTION, DEFAULT_VALUES, ACCOUNT_TYPES, TYPEOFPOINT, VIEWPOINT, VIEWANSWER }
+module.exports = { STATUS, TYPE_ACCOUNT, ROLES, COLLECTION, DEFAULT_VALUES, ACCOUNT_TYPES, TYPEOFPOINT, VIEWPOINT, VIEWANSWER, QUESTIONTYPE, ANSWERTYPE }

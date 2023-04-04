@@ -3,13 +3,15 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
 const QuestionBank = require("../models/QuestionBank");
+const Question = require("../models/Question")
 const { STATUS } = require("../utils/enum");
+const TakeExam = require("../models/TakeExam");
 
 const ExamController = {
     CreateExam: async (req, res) => {
         try {
             const username = req.user.sub
-            const { name, description, courseId, numberofQuestions, viewPoint, viewAnswer,
+            const { name, description,pin, courseId, numberofQuestions, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -36,6 +38,7 @@ const ExamController = {
 
                 name,
                 description,
+                pin,
                 creatorId: user.id,
                 numberofQuestions: 0,
                 viewPoint,
@@ -137,7 +140,7 @@ const ExamController = {
     UpdateExam: async (req, res) => {
         try {
             const username = req.user.sub
-            const { id, name, description, courseId, numberofQuestions, viewPoint, viewAnswer,
+            const { id, name, description,pin, courseId, numberofQuestions, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -158,6 +161,7 @@ const ExamController = {
             let data = {
                 name,
                 description,
+                pin,
                 creatorId: user.id,
                 numberofQuestions,
                 viewPoint,
@@ -240,7 +244,7 @@ const ExamController = {
                 .populate({
                     path: 'questions',
                     populate: {
-                        path: 'questions.answers'
+                        path: 'answers'
                     }
                 })
             if (!questionBank)
@@ -257,6 +261,7 @@ const ExamController = {
                         noneExistQuestion.push(questionInQB.id)
                     }
                 });
+                console.log(noneExistQuestion)
                 if (noneExistQuestion.length === 0) {
                     return res.status(400).json({ message: "Tất cả các câu hỏi đã tồn tại trong hệ thống" })
                 }
@@ -309,6 +314,8 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi tạo!" })
         }
     },
+
+    
     PublicExam: async (req, res) => {
         try {
             const username = req.user.sub
@@ -380,6 +387,7 @@ const ExamController = {
 
             console.log(exitsExam)
             exitsExam = await Exam.deleteOne(id)
+            await TakeExam.deleteMany({examId: id})
             return res.status(200).json({
                 message: "Xuất bản bài thi thành công",
 

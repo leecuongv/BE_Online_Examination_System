@@ -7,6 +7,8 @@ const passport = require('passport')
 router.post('/register', AuthController.RegisterUser);
 
 router.post('/login', AuthController.LoginUser);
+router.post('/login-admin', AuthController.LoginAdmin);
+
 
 router.post('/refreshtoken', AuthController.RefreshToken);
 

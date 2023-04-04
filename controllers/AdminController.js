@@ -127,6 +127,14 @@ const AdminController = {
             res.status(500).json({ message: "Lỗi lấy danh sách khóa học!" })
         }
     },
+    HappyNewYear: async(req, res)=>{
+        try {
+            return res.status(201).json({message:"Chúc bạn một năm mới tràn đầy sức khỏe, vạn sự thăng hoa, tiền đồ rộng mở , gia đình hạnh phúc nha ☆*: .｡. o(≧▽≦)o .｡.:*☆!"})
+        } catch (error) {
+            
+        }
+    }
+
 
 }
 

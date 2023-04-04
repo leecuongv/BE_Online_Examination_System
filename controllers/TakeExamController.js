@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course");
 const User = require("../models/User");
 const TakeExam = require("../models/TakeExam");
-const { STATUS, VIEWPOINT } = require("../utils/enum");
+const { STATUS, VIEWPOINT, QUESTIONTYPE, ANSWERTYPE } = require("../utils/enum");
 const moment = require("moment/moment");
 const ExamLog = require("../models/ExamLog");
 const TakeExamController = {
@@ -43,15 +43,22 @@ const TakeExamController = {
           },
         })
         .select({
-          startTime:1,
-          endTime:1,
+          startTime: 1,
+          endTime: 1,
           slug: 1,
           name: 1,
           questions: 1,
           maxTimes: 1,
           tracking: 1,
           attemptsAllowed: 1,
+          shuffle: 1
         });
+      if (exam.shuffle === true) {
+
+        console.log("Chưa random \n " + exam)
+        let randomArray = [...exam.questions].sort(() => Math.random() - 0.5)
+        exam.questions = await randomArray
+      }
       let { questions, startTime, maxTimes, ...data } = exam._doc;
       questions = questions.map((item) => ({ ...item.question._doc, id: item.question._id, index: item.index }));
 
@@ -74,7 +81,7 @@ const TakeExamController = {
         (new Date(toDay)) > (new Date(exam.endTime))) {
         console.log(toDay)
         return res.status(400).json({
-          message: "Thời gian thực hiện bài thi không hợp lệ"
+          message: "Thời gian thực hiện bài thi không hợp lệ!"
         })
       }
 
@@ -232,69 +239,97 @@ const TakeExamController = {
         path: "questions.question",
         populate: {
           path: 'answers',
-          select: 'id isCorrect'
+          select: 'id type isCorrect content'
         }
       })
 
       if (!exam) return res.status(400).json({ message: "Không có bài thi!" })
       let questions = exam.questions.map(element => element.question)//câu hỏi và đáp án từ exam
 
-      let points = 0
+      let points = 0 //điểm đạt được của bài làm
       questions.forEach(question => {
         let pointOfQuestion = 0
-        let noAnswerCorrect = question.answers.filter(e => e.isCorrect).length //số đáp án đúng
         let questionClient = answerSheet.find(e => e.question === question.id.toString())
-        //thay bằng Question result, answer
-        if (!questionClient) {
-          if (noAnswerCorrect === 0)
-            points += question.maxPoints
-          else
-            points += 0
+        if (question.type === QUESTIONTYPE.FILLIN) {
+          //thay bằng Question result, answer
+          if (questionClient)
+            if (questionClient.answers.length > 0) {
+              let isCorrect = question.answers.some(e => {
+                if (e.type === ANSWERTYPE.EQUAL) {
+                  return (e.content === questionClient.answers[0])
+                }
+                return (e.content.includes(questionClient.answers[0]))
+              })
+              if (isCorrect)
+                pointOfQuestion = question.maxPoints
+            }
         }
         else {
-          if (noAnswerCorrect === 0) {
-            if (questionClient.answers.length === 0)
-              points += question.maxPoints
-            else
-              points += 0
+
+          let noAnswerCorrect = question.answers.filter(e => e.isCorrect).length //số đáp án đúng
+          //let questionClient = answerSheet.find(e => e.question === question.id.toString())
+          //thay bằng Question result, answer
+          if (!questionClient) {
+            if (noAnswerCorrect === 0)
+              pointOfQuestion = question.maxPoints
           }
+
           else {
+            if (noAnswerCorrect === 0) {
+              if (questionClient.answers.length === 0)
+                pointOfQuestion = question.maxPoints
+            }
+            else {
 
-            let pointEachAnswer = question.maxPoints / noAnswerCorrect
-            question.answers.forEach(answer => {
-              if (answer.isCorrect) {//
+              let pointEachAnswer = question.maxPoints / noAnswerCorrect
+              question.answers.forEach(answer => {
                 if (questionClient.answers.includes(answer.id.toString()))
-                  pointOfQuestion += pointEachAnswer
-              }
-              else {
-                if (questionClient.answers.includes(answer.id.toString()))
-                  pointOfQuestion -= pointEachAnswer
-              }
+                  if (answer.isCorrect)
+                    pointOfQuestion += pointEachAnswer
+                  else
+                    pointOfQuestion -= pointEachAnswer
 
-            })
-
-            pointOfQuestion = pointOfQuestion > 0 ? pointOfQuestion : 0
-            questionClient.point = pointOfQuestion
-
-            points += pointOfQuestion
+              })
+            }
           }
         }
+        pointOfQuestion = pointOfQuestion > 0 ? pointOfQuestion : 0
+        questionClient.point = pointOfQuestion
+
+        points += pointOfQuestion
       })
 
       takeExam.points = points
       takeExam.status = STATUS.SUBMITTED
       takeExam.submitTime = new Date()
+      // let result = answerSheet.map(item => {
+      //   try {
+      //     let answers = item.answers.map(e => {
+      //       try {
+      //         return mongoose.Types.ObjectId(e)
+      //       }
+      //       catch {
+      //         return null
+      //       }
+      //     })
+      //     answers = answers.filter(e => e !== null)
+      //     return {
+      //       point: item.point,
+      //       question: mongoose.Types.ObjectId(item.question),
+      //       answers
+      //     }
+      //   }
+      //   catch {
+      //     return null
+      //   }
+      // })
       let result = answerSheet.map(item => {
         try {
-          let answers = item.answers.map(e => {
-            try {
-              return mongoose.Types.ObjectId(e)
-            }
-            catch {
-              return null
-            }
-          })
-          answers = answers.filter(e => e !== null)
+          let answers = []
+          if (Array.isArray(item.answers)) {
+            answers = item.answers
+          }
+
           return {
             point: item.point,
             question: mongoose.Types.ObjectId(item.question),
@@ -320,9 +355,7 @@ const TakeExamController = {
   },
 
   getResultTakeExam: async (req, res) => {
-    // query:{takeExamId},
-    // trả về thông tin của TakeExam như số điểm/điểm tối đa, lần thi thứ mấy, tên bài kiểm tra
-    // dựa vào thông tin cho phép xem điểm hay không để quyết định có trả về điểm hay ko, nếu ko trả điểm thì trả thêm mục viewPoints: 'no' hoặc 'alldone'
+
     try {
       const { takeExamId } = req.query;
       const username = req.user.sub;
@@ -332,19 +365,29 @@ const TakeExamController = {
 
       const takeExam = await TakeExam.findById(takeExamId).populate('examId')
       const takeExams = await TakeExam.find({ examId: takeExam.examId.id, userId: user.id })
+
+      const course = await Course.findOne({ exams: { $in: [takeExam.examId.id] } })
+      console.log("Course finding: \n" + course.id)
+
       const index = takeExams.findIndex(item => item.id.toString() === takeExamId)
       if (!takeExam) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
       if (takeExam.examId.viewPoint === 'no')
         return res.status(200).json({
           name: takeExam.examId.name,
           lanThi: index + 1,
-
+          courseId: course.courseId,
+          viewAnswer: takeExam.examId.viewAnswer,
+          slug: takeExam.examId.slug,
         })
       return res.status(200).json({
         name: takeExam.examId.name,
+        slug: takeExam.examId.slug,
         lanThi: index + 1,
         points: takeExam.points,
-        maxPoints: takeExam.examId.maxPoints
+        maxPoints: takeExam.examId.maxPoints,
+        courseId: course.courseId,
+        viewAnswer: takeExam.examId.viewAnswer,
+
       })
     }
     catch (error) {
@@ -368,7 +411,7 @@ const TakeExamController = {
           path: "questions.question",
           populate: {
             path: "answers",
-            select: "id content isCorrect",
+            select: "id content isCorrect type",
           },
         }).lean()
 
