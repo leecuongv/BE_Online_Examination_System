@@ -125,7 +125,7 @@ const CourseController = {
             console.log(course2)
             if (course) {
                 const { name, description, image, status, creatorId, startTime, endTime } = course._doc
-                return res.status(200).json({ name, description, image, status, creatorId, startTime, endTime })
+                return res.status(200).json(course2)
                 //return res.status(200).json(course._doc)
             }
 
