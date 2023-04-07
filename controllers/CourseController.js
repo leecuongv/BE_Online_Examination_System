@@ -351,6 +351,8 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tìm khoá học" })
         }
     },
+
+
     getCourseByCourseIdOfTeacher: async (req, res) => {
         try {
             const { courseId } = req.query
@@ -376,6 +378,8 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tìm khoá học" })
         }
     },
+
+
     getCourseByCourseIdOfTeacher: async (req, res) => {
         try {
             const { courseId } = req.query
