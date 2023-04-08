@@ -1,16 +1,18 @@
-const crypto =require('crypto')
-const https =require('https')
+const crypto = require('crypto')
+const https = require('https')
 const moment = require('moment')
-const  User  =require('../models/User')
+const User = require('../models/User')
 const dotenv = require('dotenv')
-const  Bill  = require('../models/Bill')
-const mongoose  = require('mongoose')
-const { STATUS } = require('../utils/enum')
+const Bill = require('../models/Bill')
+const mongoose = require('mongoose')
+const { STATUS, BANK } = require('../utils/enum')
 dotenv.config()
 // const frontendUrl = 'http://localhost:3006/'
 // const backendUrl = 'http://localhost:5000/'
 const frontendUrl = 'https://oes.vercel.app/'
 const backendUrl = 'https://be-oes.vercel.app/'
+const bcrypt = require("bcrypt");
+const fee = 10
 const BillController = {
     createPaymentMomo: async (req, res) => {
         try {
@@ -42,7 +44,7 @@ const BillController = {
             let ipnUrl = backendUrl + "api/payment/upgrade-momo";
             //let ipnUrl ='https://playerhostedapitest.herokuapp.com/api/myorders';
             // let ipnUrl = redirectUrl = "https://webhook.site/454e7b77-f177-4ece-8236-ddf1c26ba7f8";
-            
+
             let requestType = "captureWallet"
             let extraData = Buffer.from(JSON.stringify(
                 {
@@ -132,14 +134,14 @@ const BillController = {
             let transId = req.body.transId;
             let extraData = req.body.extraData
             let statusPayment = resultCode === 0 ? "Thành công" : "Thất bại"
-            console.log("resultCode: ",resultCode)
+            console.log("resultCode: ", resultCode)
             if (resultCode === 0) {
-                
+
                 let data = JSON.parse(Buffer.from(extraData, 'base64').toString('ascii'));
                 let username = data.username
                 let billId = data.billId
                 const bill = await Bill.findOneAndUpdate({ _id: mongoose.Types.ObjectId(billId) }
-                    , { status: STATUS.SUCCESS, transactionId: transId}
+                    , { status: STATUS.SUCCESS, transactionId: transId }
                     , { new: true })
                 console.log("billId: ", billId)
                 const newUser = await User.findOneAndUpdate({ username }, { premium: true }, { new: true })
@@ -150,29 +152,29 @@ const BillController = {
             return res.status(500).json({ error: "Lỗi tạo hoá đơn thanh toán. Vui lòng thực hiện lại thanh toán" });
         }
     },
-    
+
     CreatePaymentVNPay: async (req, res, next) => {
-        try{
+        try {
 
             let ipAddr = req.headers['x-forwarded-for'] ||
                 req.connection.remoteAddress ||
                 req.socket.remoteAddress ||
                 req.connection.socket.remoteAddress;
-            if(ipAddr ==='::1')
-                ipAddr ='127.0.0.1'
+            if (ipAddr === '::1')
+                ipAddr = '127.0.0.1'
             let tmnCode = process.env.vnp_TmnCode;
             let secretKey = process.env.vnp_HashSecret;
             let vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
-            let returnUrl = backendUrl+"api/payment/vnpay-return"
+            let returnUrl = backendUrl + "api/payment/vnpay-return"
             let date = new Date();
-    
-            let createDate =moment().format('YYYYMMDDHHmmss'); 
+
+            let createDate = moment().format('YYYYMMDDHHmmss');
             let orderId = date.getTime()
             let username = req.user.sub
             let amount = 50000;
             let bankCode = req.body.bankCode;
-    
-            let orderInfo = req.body.orderDescription || "Nang cap tai khoan "+username;
+
+            let orderInfo = req.body.orderDescription || "Nang cap tai khoan " + username;
             let orderType = req.body.orderType || 'billpayment';
             let locale = req.body.language;
             if (locale === null || locale === '') {
@@ -195,22 +197,22 @@ const BillController = {
             if (bankCode !== null && bankCode !== '') {
                 vnp_Params['vnp_BankCode'] = bankCode;
             }
-    
+
             //Tạo bill
-            const user = await User.findOne({username})
-            if(!user){
-                return res.status(400).json({message:"Không tồn tại tài khoản"})
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Không tồn tại tài khoản" })
             }
             const newBill = await new Bill({
-                creatorId:user.id,
-                description:"Nâng cấp tài khoản bằng VNPay",
+                creatorId: user.id,
+                description: "Nâng cấp tài khoản bằng VNPay",
                 amount,
-                method:"VNPay"
+                method: "VNPay"
             })
             await newBill.save()//lưu bill vào db
             vnp_Params['vnp_TxnRef'] = newBill.id.toString()
             vnp_Params = sortObject(vnp_Params);
-    
+
             let querystring = require('qs');
             let signData = querystring.stringify(vnp_Params, { encode: false });
             let crypto = require("crypto");
@@ -219,70 +221,70 @@ const BillController = {
             vnp_Params['vnp_SecureHash'] = signed;
             vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
             console.log(vnpUrl)
-            res.status(200).json({payUrl:vnpUrl})
+            res.status(200).json({ payUrl: vnpUrl })
         }
-        catch(err){
-            res.status(400).json({message:"Tạo hoá đơn không thành công. Vui lòng thử lại"})
+        catch (err) {
+            res.status(400).json({ message: "Tạo hoá đơn không thành công. Vui lòng thử lại" })
         }
     },
-    VNPayReturn:async(req, res, next)=>{
-        try{
+    VNPayReturn: async (req, res, next) => {
+        try {
 
             let vnp_Params = req.query;
-        
+
             let secureHash = vnp_Params['vnp_SecureHash'];
-        
+
             delete vnp_Params['vnp_SecureHash'];
             delete vnp_Params['vnp_SecureHashType'];
-        
+
             vnp_Params = sortObject(vnp_Params);
-        
+
             let tmnCode = process.env.vnp_TmnCode;
             let secretKey = process.env.vnp_HashSecret;
-        
+
             let querystring = require('qs');
             let signData = querystring.stringify(vnp_Params, { encode: false });
-            let crypto = require("crypto");     
+            let crypto = require("crypto");
             let hmac = crypto.createHmac("sha512", secretKey);
-            let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");     
-        
-            if(secureHash === signed){
+            let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
+
+            if (secureHash === signed) {
                 //Kiem tra xem du lieu trong db co hop le hay khong va thong bao ket qua
-                res.render('success', {code: vnp_Params['vnp_ResponseCode']})
-            } else{
-                res.render('success', {code: '97'})
+                res.render('success', { code: vnp_Params['vnp_ResponseCode'] })
+            } else {
+                res.render('success', { code: '97' })
             }
         }
-        catch(err){
+        catch (err) {
 
         }
     },
-    VNPayIPN:async(req, res, next)=>{
-        try{
+    VNPayIPN: async (req, res, next) => {
+        try {
             let vnp_Params = req.query;
             let secureHash = vnp_Params['vnp_SecureHash'];
-        
+
             delete vnp_Params['vnp_SecureHash'];
             delete vnp_Params['vnp_SecureHashType'];
-        
+
             vnp_Params = sortObject(vnp_Params);
             let secretKey = process.env.vnp_HashSecret;
             let querystring = require('qs');
             let signData = querystring.stringify(vnp_Params, { encode: false });
-            let crypto = require("crypto");     
+            let crypto = require("crypto");
             let hmac = crypto.createHmac("sha512", secretKey);
-            let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");     
-             
-            if(secureHash === signed){
+            let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
+
+            if (secureHash === signed) {
                 let orderId = vnp_Params['vnp_TxnRef'];
                 let rspCode = vnp_Params['vnp_ResponseCode'];
                 console.log(rspCode);
-                if(rspCode==='00')//giao dich thanh cong
+                if (rspCode === '00')//giao dich thanh cong
                 {
-                    const bill = await Bill.findOneAndUpdate({_id:mongoose.Types.ObjectId(orderId)}
-                    ,{status:STATUS.SUCCESS,transactionId:vnp_Params['vnp_TransactionNo']}
-                    ,{new:true})
-                    const user = await User.findByIdAndUpdate(bill.creatorId,{premium:true})
+                    const bill = await Bill.findOneAndUpdate({ _id: mongoose.Types.ObjectId(orderId) }
+                        , { status: STATUS.SUCCESS, transactionId: vnp_Params['vnp_TransactionNo'] }
+                        , { new: true })
+                    const user = await User.findByIdAndUpdate(bill.creatorId, { premium: true })
                     return res.redirect(`${frontendUrl}result-payment?message=Giao dịch thành công`)
                 }
                 //Kiem tra du lieu co hop le khong, cap nhat trang thai don hang va gui ket qua cho VNPAY theo dinh dang duoi
@@ -292,27 +294,63 @@ const BillController = {
                 return res.redirect(`${frontendUrl}result-payment?message=Giao dịch không thành công`)
             }
         }
-        catch(err){
+        catch (err) {
             return res.redirect(`${frontendUrl}result-payment?message=Xác nhận giao dịch không thành công`)
         }
+    },
+    WithdrawMoney: async (req, res) => {
+        const loginUsername = req.user.sub
+        if (!loginUsername)
+            return res.status(400).json({ message: "Vui lòng đăng nhập!" })
+        const loginUser = await User.findOne({ username: loginUsername })
+        if (!loginUser)
+            return res.status(400).json({ message: "Không có người dùng!" })
+        const { bank, creditNumber, amount, password, feeIn } = req.body
+        let flag = false
+        for (key in BANK) {
+            if (bank === BANK.key) {
+                flag = true
+            }
+        }
+        if (!bank || bank === "" || flag === false) {
+            return res.status(400).json({ message: "Ngân hàng không hợp lệ hoặc không được hỗ trợ!" })
+        }
+        if (!creditNumber || creditNumber === "") {
+            return res.status(400).json({ message: "Vui lòng nhập số tài khoản ngân hàng hợp lệ!" })
+        }
+        if (!amount || amount < 50000) {
+            return res.status(400).json({ message: "Số tiền rút phải lớn hơn 50000!" })
+        }
+        const auth = await bcrypt.compare(password, loginUser.password)
+        if (!auth) {
+            return res.status(400).json({ message: "Sai mật khẩu!" })
+        }
+        let phiRut = amount*(fee/100)
+        let tongTienRut = amount - phiRut
+        if(feeIn = false){
+            tongTien = amount 
+            
+        }
+        
+
     }
 
 }
 
 function sortObject(obj) {
-	let sorted = {};
-	let str = [];
-	let key;
-	for (key in obj){
-		if (obj.hasOwnProperty(key)) {
-		str.push(encodeURIComponent(key));
-		}
-	}
-	str.sort();
+    let sorted = {};
+    let str = [];
+    let key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            str.push(encodeURIComponent(key));
+        }
+    }
+    str.sort();
     for (key = 0; key < str.length; key++) {
         sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, "+");
     }
     return sorted;
 }
 
-module.exports = {BillController}
+module.exports = { BillController }

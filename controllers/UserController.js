@@ -2,6 +2,7 @@ const jwt_decode = require('jwt-decode')
 const User = require('../models/User.js')
 const cloudinary = require('cloudinary').v2
 const dotenv = require('dotenv')
+
 dotenv.config()
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -222,6 +223,7 @@ const UserController = {
     }
 
    },
+   
 
 }
 module.exports = { UserController }
