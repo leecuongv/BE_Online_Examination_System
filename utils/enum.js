@@ -30,7 +30,8 @@ const COLLECTION = {
   PIN: "Pin",
   LESSON: "Lesson",
   TICK: "Tick",
-  SEENLESSON: 'Seen_lesson'
+  SEENLESSON: 'Seen_lesson',
+  TRANSACTIONHISTORY: "Transaction_history",
 };
 
 const TYPEOFPOINT = {
@@ -66,8 +67,8 @@ const STATUS = {
   CLOSE: 'close',
   ALLOW: 'allow',
   NOTALLOW: 'not allow',
-  PROTECTED: "protected" //Chỉ những sinh viên thuộc khóa học mới có thể xem được
-
+  PROTECTED: "protected", //Chỉ những sinh viên thuộc khóa học mới có thể xem được
+  PAID: "paid",
 };
 
 const ROLES = {
