@@ -2,6 +2,7 @@ const crypto = require('crypto')
 const https = require('https')
 const moment = require('moment')
 const User = require('../models/User')
+const TransactionHistory = require("../models/TransactionHistory")
 const dotenv = require('dotenv')
 const Bill = require('../models/Bill')
 const mongoose = require('mongoose')
@@ -127,6 +128,7 @@ const BillController = {
             return res.status(500).json({ error: "Lỗi tạo hoá đơn thanh toán. Vui lòng thực hiện lại thanh toán" });
         }
     },
+
     upgradeAccountWithMomo: async (req, res) => {
         try {
             console.log(req.body)
@@ -299,41 +301,281 @@ const BillController = {
         }
     },
     WithdrawMoney: async (req, res) => {
-        const loginUsername = req.user.sub
-        if (!loginUsername)
-            return res.status(400).json({ message: "Vui lòng đăng nhập!" })
-        const loginUser = await User.findOne({ username: loginUsername })
-        if (!loginUser)
-            return res.status(400).json({ message: "Không có người dùng!" })
-        const { bank, creditNumber, amount, password, feeIn } = req.body
-        let flag = false
-        for (key in BANK) {
-            if (bank === BANK.key) {
-                flag = true
+        try {
+            const loginUsername = req.user.sub
+            if (!loginUsername)
+                return res.status(400).json({ message: "Vui lòng đăng nhập!" })
+            const loginUser = await User.findOne({ username: loginUsername })
+            if (!loginUser)
+                return res.status(400).json({ message: "Không có người dùng!" })
+            const { bank, creditNumber, amount, password, feeIn } = req.body
+            let flag = false
+            for (key in BANK) {
+                if (bank === BANK.key) {
+                    flag = true
+                }
             }
-        }
-        if (!bank || bank === "" || flag === false) {
-            return res.status(400).json({ message: "Ngân hàng không hợp lệ hoặc không được hỗ trợ!" })
-        }
-        if (!creditNumber || creditNumber === "") {
-            return res.status(400).json({ message: "Vui lòng nhập số tài khoản ngân hàng hợp lệ!" })
-        }
-        if (!amount || amount < 50000) {
-            return res.status(400).json({ message: "Số tiền rút phải lớn hơn 50000!" })
-        }
-        const auth = await bcrypt.compare(password, loginUser.password)
-        if (!auth) {
-            return res.status(400).json({ message: "Sai mật khẩu!" })
-        }
-        let phiRut = amount*(fee/100)
-        let tongTienRut = amount - phiRut
-        if(feeIn = false){
-            tongTien = amount 
-            
-        }
-        
 
-    }
+            if (!bank || bank === "" || flag === false) {
+                return res.status(400).json({ message: "Ngân hàng không hợp lệ hoặc không được hỗ trợ!" })
+            }
+            if (!creditNumber || creditNumber === "") {
+                return res.status(400).json({ message: "Vui lòng nhập số tài khoản ngân hàng hợp lệ!" })
+            }
+            if (!amount || amount < 50000) {
+                return res.status(400).json({ message: "Số tiền rút phải lớn hơn 50000!" })
+            }
+            const auth = bcrypt.compare(password, loginUser.password)
+            if (!auth) {
+                return res.status(400).json({ message: "Sai mật khẩu!" })
+            }
+            let balance = loginUser.balance
+
+
+            let phiRut = amount * (fee / 100)
+            let soTienNhanDuoc = amount - phiRut
+
+            if (feeIn = false) {
+                soTienNhanDuoc = amount
+            }
+            let total = phiRut + soTienNhanDuoc
+            if (balance < total) {
+                return res.status(400).json({ message: "Số tiền giao dịch phải nhỏ hơn số dư của tài khoản!" })
+            }
+            const newTransactionHistory = new TransactionHistory({
+                creatorId: loginUser._id,
+                bank,
+                creditNumber,
+                feeIn,
+                amount,
+                status: STATUS.SUCCESS,
+                description: "Rút tiền",
+            })
+
+            let error = newTransactionHistory.validateSync();
+            if (error) {
+                return res.status(400).json({
+                    message: "Tạo giao dịch rút tiền không thành công"
+                })
+            }
+            let newBalance = balance-total
+            const transactionHistory = await newTransactionHistory.save()
+            await User.findByIdAndUpdate({ username: loginUsername }, {
+                balance: newBalance
+            }, { new: true })
+
+            return res.status(200).json({
+                message: "Tạo giao dịch rút tiền thành công, số tiền rút sẽ được chuyển vào tài khoản của quý khách trong 5 - 10 ngày làm việc(không kể Thứ 7, Chủ nhật và ngày lễ)",
+                amount: amount,
+                fee: phiRut,
+                feeIn: feeIn,
+                soTienNhanDuoc: soTienNhanDuoc
+            })
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi tạo giao dịch" })
+        }
+
+
+    },
+    PayInVNPay: async (req, res, next) => {
+        try {
+
+            let ipAddr = req.headers['x-forwarded-for'] ||
+                req.connection.remoteAddress ||
+                req.socket.remoteAddress ||
+                req.connection.socket.remoteAddress;
+            if (ipAddr === '::1')
+                ipAddr = '127.0.0.1'
+            let tmnCode = process.env.vnp_TmnCode;
+            let secretKey = process.env.vnp_HashSecret;
+            let vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+            let returnUrl = backendUrl + "api/payment/vnpay-return"
+            let date = new Date();
+
+            let createDate = moment().format('YYYYMMDDHHmmss');
+            let orderId = date.getTime()
+            let username = req.user.sub
+            let {amount} = req.body;
+            let bankCode = req.body.bankCode;
+
+            let orderInfo = req.body.orderDescription || "Nang cap tai khoan " + username;
+            let orderType = req.body.orderType || 'billpayment';
+            let locale = req.body.language;
+            if (locale === null || locale === '') {
+                locale = 'vn';
+            }
+            let currCode = 'VND';
+            let vnp_Params = {};
+            vnp_Params['vnp_Version'] = '2.1.0';
+            vnp_Params['vnp_Command'] = 'pay';
+            vnp_Params['vnp_TmnCode'] = tmnCode;
+            // vnp_Params['vnp_Merchant'] = ''
+            vnp_Params['vnp_Locale'] = locale;
+            vnp_Params['vnp_CurrCode'] = currCode;
+            vnp_Params['vnp_OrderInfo'] = orderInfo;
+            vnp_Params['vnp_OrderType'] = orderType;
+            vnp_Params['vnp_Amount'] = amount * 100;
+            vnp_Params['vnp_ReturnUrl'] = returnUrl;
+            vnp_Params['vnp_IpAddr'] = ipAddr;
+            vnp_Params['vnp_CreateDate'] = createDate;
+            if (bankCode !== null && bankCode !== '') {
+                vnp_Params['vnp_BankCode'] = bankCode;
+            }
+
+            //Tạo bill
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Không tồn tại tài khoản" })
+            }
+            const newBill = await new Bill({
+                creatorId: user.id,
+                description: "Nâng cấp tài khoản bằng VNPay",
+                amount,
+                method: "VNPay"
+            })
+            await newBill.save()//lưu bill vào db
+            vnp_Params['vnp_TxnRef'] = newBill.id.toString()
+            vnp_Params = sortObject(vnp_Params);
+
+            let querystring = require('qs');
+            let signData = querystring.stringify(vnp_Params, { encode: false });
+            let crypto = require("crypto");
+            let hmac = crypto.createHmac("sha512", secretKey);
+            let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
+            vnp_Params['vnp_SecureHash'] = signed;
+            vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+            console.log(vnpUrl)
+            let balance = user.balance
+            let newBalance = balance+amount
+            await User.findByIdAndUpdate({ username }, {
+                balance: newBalance
+            }, { new: true })
+            res.status(200).json({ payUrl: vnpUrl })
+        }
+        catch (err) {
+            res.status(400).json({ message: "Tạo hoá đơn không thành công. Vui lòng thử lại" })
+        }
+    },
+
+    PayInMomo: async (req, res) => {
+        try {
+
+            //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
+            //parameters
+            const username = req.user.sub
+            let {amount} = req.body;
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Không tồn tại tài khoản" })
+            }
+            const newBill = new Bill({
+                creatorId: user.id,
+                description: "Nâng cấp tài khoản bằng Momo",
+                amount,
+                method: "Momo"
+
+            })
+
+            await newBill.save()//lưu bill vào db
+            let partnerCode = "MOMOALSN20220816";
+            let accessKey = "u9nAcZb9iznbA05s";
+            let secretkey = "A6pa8FuUSdrbg73MhT37DGKiHbCov12g";
+            let requestId = partnerCode + new Date().getTime();
+            let orderId = new Date().getTime();
+            let orderInfo = "Thanh toán đơn hàng #" + orderId;
+            let redirectUrl = frontendUrl + "result-payment";
+            let ipnUrl = backendUrl + "api/payment/upgrade-momo";
+            //let ipnUrl ='https://playerhostedapitest.herokuapp.com/api/myorders';
+            // let ipnUrl = redirectUrl = "https://webhook.site/454e7b77-f177-4ece-8236-ddf1c26ba7f8";
+
+            let requestType = "captureWallet"
+            let extraData = Buffer.from(JSON.stringify(
+                {
+                    username,
+                    billId: newBill.id.toString()
+                })).toString('base64');; //pass empty value if your merchant does not have stores
+
+            //before sign HMAC SHA256 with format
+            //accessKey=$accessKey&amount=$amount&extraData=$extraData&ipnUrl=$ipnUrl&orderId=$orderId&orderInfo=$orderInfo&partnerCode=$partnerCode&redirectUrl=$redirectUrl&requestId=$requestId&requestType=$requestType
+            let rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + extraData + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl + "&requestId=" + requestId + "&requestType=" + requestType
+            //puts raw signature
+            console.log("--------------------RAW SIGNATURE----------------")
+            console.log(rawSignature)
+            //signature
+
+            let signature = crypto.createHmac('sha256', secretkey)
+                .update(rawSignature)
+                .digest('hex');
+            console.log("--------------------SIGNATURE----------------")
+            console.log(signature)
+
+            //json object send to MoMo endpoint
+            const requestBody = JSON.stringify({
+                partnerCode: partnerCode,
+                accessKey: accessKey,
+                requestId: requestId,
+                amount: amount,
+                orderId: orderId,
+                orderInfo: orderInfo,
+                redirectUrl: redirectUrl,
+                ipnUrl: ipnUrl,
+                extraData: extraData,
+                requestType: requestType,
+                signature: signature,
+                lang: 'vi'
+            });
+            //Create the HTTPS objects
+            const options = {
+                hostname: 'test-payment.momo.vn',
+                port: 443,
+                path: '/v2/gateway/api/create',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(requestBody)
+                }
+            }
+
+
+            let payUrl = ""
+            //Send the request and get the response
+            let balance = user.balance
+            let newBalance = balance+amount
+            await User.findByIdAndUpdate({ username }, {
+                balance: newBalance
+            }, { new: true })
+            const reqPayment = https.request(options, response => {
+                console.log(`Status: ${response.statusCode}`);
+                console.log(`Headers: ${JSON.stringify(response.headers)}`);
+                response.setEncoding('utf8');
+                response.on('data', (body) => {
+                    console.log('Body: ');
+                    console.log(body);
+                    console.log('payUrl: ');
+                    console.log(JSON.parse(body).payUrl);
+                    payUrl = JSON.parse(body).payUrl;
+                });
+                response.on('end', () => {
+                    console.log('No more data in response.');
+                    return res.status(200).json({ payUrl })
+                });
+            })
+
+            reqPayment.on('error', (e) => {
+                console.log(`problem with request: ${e.message}`);
+            });
+            // write data to request body
+            console.log("Sending....")
+            reqPayment.write(requestBody);
+            reqPayment.end();
+
+        }
+        catch (e) {
+            console.log(e)
+            return res.status(500).json({ error: "Lỗi tạo hoá đơn thanh toán. Vui lòng thực hiện lại thanh toán" });
+        }
+    },
 
 }
 

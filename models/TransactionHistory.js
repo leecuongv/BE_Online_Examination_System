@@ -15,7 +15,7 @@ const transactionHistorySchema = mongoose.Schema({
     creditNumber: {
         type: String
     },
-    feeIn:{
+    feeIn: {
         type: Boolean,
         default: true,
     },
@@ -32,10 +32,6 @@ const transactionHistorySchema = mongoose.Schema({
         require: true,
         default: ""
     },
-    method: {
-        type: String,
-        require: true,
-    },
     transactionId: {
         type: String,
         require: true,
@@ -45,7 +41,13 @@ const transactionHistorySchema = mongoose.Schema({
 },
     { timestamps: true });
 
-
+transactionHistorySchema.plugin(
+    autoinc.autoIncrement,
+    {
+        model: COLLECTION.TRANSACTIONHISTORY,
+        field: "transactionId"
+    }
+);
 transactionHistorySchema.method("toJSON", function () {
     const { __v, ...object } = this.toObject();
     const { _id: id, ...result } = object;
