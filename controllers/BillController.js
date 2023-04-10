@@ -358,7 +358,7 @@ const BillController = {
                     message: "Tạo giao dịch rút tiền không thành công"
                 })
             }
-            let newBalance = balance-total
+            let newBalance = balance - total
             const transactionHistory = await newTransactionHistory.save()
             await User.findByIdAndUpdate({ username: loginUsername }, {
                 balance: newBalance
@@ -396,7 +396,7 @@ const BillController = {
             let createDate = moment().format('YYYYMMDDHHmmss');
             let orderId = date.getTime()
             let username = req.user.sub
-            let {amount} = req.body;
+            let { amount } = req.body;
             let bankCode = req.body.bankCode;
 
             let orderInfo = req.body.orderDescription || "Nang cap tai khoan " + username;
@@ -447,7 +447,7 @@ const BillController = {
             vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
             console.log(vnpUrl)
             let balance = user.balance
-            let newBalance = balance+amount
+            let newBalance = balance + amount
             await User.findByIdAndUpdate({ username }, {
                 balance: newBalance
             }, { new: true })
@@ -464,7 +464,7 @@ const BillController = {
             //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
             //parameters
             const username = req.user.sub
-            let {amount} = req.body;
+            let { amount } = req.body;
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Không tồn tại tài khoản" })
@@ -541,7 +541,7 @@ const BillController = {
             let payUrl = ""
             //Send the request and get the response
             let balance = user.balance
-            let newBalance = balance+amount
+            let newBalance = balance + amount
             await User.findByIdAndUpdate({ username }, {
                 balance: newBalance
             }, { new: true })

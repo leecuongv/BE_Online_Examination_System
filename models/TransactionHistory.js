@@ -53,5 +53,5 @@ transactionHistorySchema.method("toJSON", function () {
     const { _id: id, ...result } = object;
     return { ...result, id };
 });
-const TransactionHistory = mongoose.model(COLLECTION.BILL, transactionHistorySchema);
+const TransactionHistory = mongoose.model(COLLECTION.TRANSACTIONHISTORY, transactionHistorySchema);
 module.exports = TransactionHistory
