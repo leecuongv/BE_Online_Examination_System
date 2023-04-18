@@ -449,7 +449,7 @@ const BillController = {
             console.log(vnpUrl)
             let balance = user.balance
             let newBalance = balance + amount
-            await User.findByIdAndUpdate({ username }, {
+            await User.findOneAndUpdate({ username }, {
                 balance: newBalance
             }, { new: true })
             res.status(200).json({ payUrl: vnpUrl })
@@ -543,7 +543,7 @@ const BillController = {
             //Send the request and get the response
             let balance = user.balance
             let newBalance = balance + amount
-            await User.findByIdAndUpdate({ username }, {
+            await User.findOneAndUpdate({ username }, {
                 balance: newBalance
             }, { new: true })
             const reqPayment = https.request(options, response => {
@@ -582,7 +582,7 @@ const BillController = {
             const username = req.user?.sub
             const { courseId } = req.body
 
-            const user = await User.findOne({ username })
+            const user = await User.findOne({ username: username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
             }
@@ -605,7 +605,7 @@ const BillController = {
                 course.students.push(user.id)
 
                 let newBalance = balance - coursePrice
-                await User.findByIdAndUpdate({ username }, {
+                await User.findOneAndUpdate({ username }, {
                     balance: newBalance
                 }, { new: true })
                 let description = "Mua khoá học" + course._id
