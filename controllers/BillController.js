@@ -2,6 +2,7 @@ const crypto = require('crypto')
 const https = require('https')
 const moment = require('moment')
 const User = require('../models/User')
+const Course = require("../models/Course")
 const TransactionHistory = require("../models/TransactionHistory")
 const dotenv = require('dotenv')
 const Bill = require('../models/Bill')
@@ -576,6 +577,59 @@ const BillController = {
             return res.status(500).json({ error: "Lỗi tạo hoá đơn thanh toán. Vui lòng thực hiện lại thanh toán" });
         }
     },
+    PuchaseCourse: async (req, res) => {
+        try {
+            const username = req.user?.sub
+            const { courseId } = req.body
+
+            const user = await User.findOne({ username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại!" })
+            }
+            const course = await Course.findOne({ courseId })
+            if (!course)
+                return res.status(400).json({ message: "Không tồn tại khóa học!" })
+
+            if (course.status !== STATUS.PUBLIC) {
+                return res.status(400).json({ message: "Khóa học này chưa được phát hành!" })
+            }
+
+            let coursePrice = course.price
+            let balance = user.balance
+
+            if (balance < coursePrice) {
+                return res.status(400).json({ message: "Không đủ số dư tài khoản, vui lòng nạp thêm!" })
+            }
+
+            if (!course.students.find(item => item.toString() === user.id.toString())) {
+                course.students.push(user.id)
+
+                let newBalance = balance - coursePrice
+                await User.findByIdAndUpdate({ username }, {
+                    balance: newBalance
+                }, { new: true })
+                let description = "Mua khoá học" + course._id
+                const newBill = new Bill({
+                    creatorId: user.id,
+                    description: description,
+                    amount: coursePrice,
+                    method: "User balance"
+                })
+                await newBill.save()
+            }
+            else {
+                return res.status(400).json({ message: "Học viên đã thuộc lớp học!" })
+            }
+            await course.save()
+            return res.status(200).json({
+                message: "Đăng ký khóa học thành công!",
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi đăng ký khoá học!" })
+        }
+    }
 
 }
 
