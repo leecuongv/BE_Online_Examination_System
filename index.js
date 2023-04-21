@@ -62,7 +62,7 @@ const loginLimiter = rateLimit({
 //app.use("/auth/login", loginLimiter);
 
 
-//app.use(cors({ credentials: true, origin:"https://febaomatweb.vercel.app"}));//fix lỗi cross-domain
+//app.use(cors({ credentials: true, origin:"https://be-oes.vercel.app"}));//fix lỗi cross-domain
 app.use(cors({ credentials: true, origin: true }));
 app.use(cookieParser());
 app.disable('x-powered-by');//fix lỗi leak info from x-powered-by
