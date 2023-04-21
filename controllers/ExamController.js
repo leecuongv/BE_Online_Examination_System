@@ -6,12 +6,13 @@ const QuestionBank = require("../models/QuestionBank");
 const Question = require("../models/Question")
 const { STATUS } = require("../utils/enum");
 const TakeExam = require("../models/TakeExam");
+const lodash = require('lodash');
 
 const ExamController = {
     CreateExam: async (req, res) => {
         try {
             const username = req.user.sub
-            const { name, description,pin, courseId, numberofQuestions, viewPoint, viewAnswer,
+            const { name, description, pin, courseId, numberofQuestions, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -140,7 +141,7 @@ const ExamController = {
     UpdateExam: async (req, res) => {
         try {
             const username = req.user.sub
-            const { id, name, description,pin, courseId, numberofQuestions, viewPoint, viewAnswer,
+            const { id, name, description, pin, courseId, numberofQuestions, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -315,7 +316,7 @@ const ExamController = {
         }
     },
 
-    
+
     PublicExam: async (req, res) => {
         try {
             const username = req.user.sub
@@ -383,11 +384,11 @@ const ExamController = {
 
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             let exitsExam = await Exam.findById(id)
-            
+
 
             console.log(exitsExam)
             exitsExam = await Exam.deleteOne(id)
-            await TakeExam.deleteMany({examId: id})
+            await TakeExam.deleteMany({ examId: id })
             return res.status(200).json({
                 message: "Xuất bản bài thi thành công",
 
@@ -400,7 +401,88 @@ const ExamController = {
         }
     },
 
-};
+    ViewExamResult: async (req, res) => {
+        try {
+            const username = req.user.sub
+            const { id } = req.body
 
+            if (!username) return res.status(400).json({ message: "Không có người dùng" })
+            const user = await User.findOne({ username })
+
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+            let examResult = await TakeExam.aggregate([
+                {
+                    $match: { examId: { $in: [mongoose.Types.ObjectId(id)] } }
+                },
+                // // {
+                // //     $group: { _id: '$_id', count: { $sum: 1 } }
+                // // }
+                // { $unwind: "$result" },
+                // {
+                //     $group: {
+                //         _id: {
+                //             result: "$result.question",
+                //             //point: "$result"
+                //         },
+                //         //totalPoint: { $sum: "$result.point" },
+                //         point: { $push: "$result.point" },
+
+                //         countResult: { $sum: 1 },
+                        
+                //     },
+
+                // },
+                // { $count: "totalCount" }
+                { $group : { 
+                    _id :  { 
+                      category: "$category",
+                      term: "$result",
+                    },
+                    total: { $sum : 1 } 
+                 }
+               },
+                { $group : { 
+                    _id :  "$_id",
+                    terms: { 
+                        $push: { 
+                            term:"$_id.question",
+                            total:"$total"
+                        }
+                    }
+                 }
+               }
+
+            ])
+
+            // Lấy kết quả bài thi từ API 
+            const examResult2 = examResult; // Gom nhóm các câu hỏi theo thuộc tính "question" 
+            const questionGroups = lodash.groupBy(examResult2[0].result, 'question'); // Tính tổng số điểm cho mỗi câu hỏi 
+
+            //console.log(questionGroups)
+
+            const questionScores = lodash.map(questionGroups, (group) => {
+                const questionId = group[0].question;
+                const pointSum = lodash.groupBy(group, 'question');
+                return { questionId, pointSum };
+            });
+            //console.log(questionScores)
+
+
+            //console.log(examResult2)
+
+
+            return res.status(200).json({
+                message: "Xuất bản bài thi thành công",
+
+                examResult
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi xuất bản bài thi" })
+        }
+    }
+
+};
 
 module.exports = { ExamController }
