@@ -16,7 +16,7 @@ cloudinary.config({
 const CourseController = {
     CreateCourse: async (req, res) => {
         try {
-            const { slug, name, description, username, startTime, endTime } = req.body
+            const { slug, name, description, username, startTime, endTime, price } = req.body
             const image = req.files?.file
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -27,6 +27,8 @@ const CourseController = {
                 || new Date(endTime).toLocaleString() === "Invalid Date") {
                 return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
             }
+            if (price < 0)
+                return res.status(400).json({ message: "Giá tiền của khoá học phải lớn hơn hoặc bằng 0!" })
 
             const newCourse = await new Course({
                 name,
@@ -35,7 +37,8 @@ const CourseController = {
                 image,
                 creatorId: user.id,
                 startTime,
-                endTime
+                endTime,
+                price
             });
             if (image) {
                 if (image.data.size > 2000000) {
@@ -114,7 +117,7 @@ const CourseController = {
                         status: 1,
                         startTime: 1,
                         endTime: 1,
-                        creatorId:1,
+                        creatorId: 1,
                         numberOfExams: { $cond: { if: { $isArray: "$exams" }, then: { $size: "$exams" }, else: "NA" } },
                         numberOfAssignments: { $cond: { if: { $isArray: "$assignments" }, then: { $size: "$assignments" }, else: "NA" } },
                         numberOfLessons: { $cond: { if: { $isArray: "$lessons" }, then: { $size: "$lessons" }, else: "NA" } },
@@ -387,8 +390,8 @@ const CourseController = {
             const student = await User.findOne({ username })
             const course = await Course.findOne({ courseId: Number(courseId) });
             if (course) {
-                const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg } = course._doc
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg })
+                const { _id, courseId, name, description, exams, image, status, startTime, endTime, price, avg } = course._doc
+                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, price, avg })
             }
 
             return res.status(400).json({
@@ -672,7 +675,7 @@ const CourseController = {
     UpdateCourse: async (req, res) => {//nhớ sửa
         try {
             const username = req.user?.sub
-            const { slug, name, description, startTime, endTime, courseId } = req.body
+            const { slug, name, description, startTime, endTime, courseId, price } = req.body
             const image = req.files?.file
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -685,8 +688,16 @@ const CourseController = {
             }
             const course = await Course.findOne({ courseId })
 
+            if (price < 0)
+                return res.status(400).json({ message: "Giá tiền của khoá học phải lớn hơn hoặc bằng 0!" })
+
             let data = {//dữ liệu cần update
-                slug, name, description, startTime, endTime
+                slug,
+                name,
+                description,
+                startTime,
+                endTime,
+                price
             }
 
             if (image) {
