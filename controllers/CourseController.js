@@ -1096,6 +1096,31 @@ const CourseController = {
         }
     },
 
+    GetListCourseSell: async (req, res) => {
+        try {
+
+            let courses = await Course.find({ status: STATUS.PUBLIC, price: { $gt: 0 } })
+            let results = courses.map(item => {
+                let { exams, students, lessons, assignments, pin, ...data } = item._doc
+
+                return {
+                    ...data,
+                }
+            })
+
+            if (courses) {
+                return res.status(200).json(results)
+            }
+            return res.status(400).json({
+                message: "Không tìm thấy khoá học nào",
+            })
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Lỗi hiển thị khoá học!" })
+        }
+    },
+
     Search: async (req, res) => {
         try {
             // const loginUsername = req.user.sub
