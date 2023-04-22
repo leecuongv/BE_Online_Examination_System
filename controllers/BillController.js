@@ -16,7 +16,7 @@ const backendUrl = 'https://be-oes.vercel.app/'
 const bcrypt = require("bcrypt");
 const fee = 10
 const BillController = {
-    
+
     createPaymentMomo: async (req, res) => {
         try {
 
@@ -143,12 +143,20 @@ const BillController = {
 
                 let data = JSON.parse(Buffer.from(extraData, 'base64').toString('ascii'));
                 let username = data.username
+                const user = await User.findOne({ username })
+                let balance = user.balance
+
+
+
                 let billId = data.billId
-                const bill = await Bill.findOneAndUpdate({ _id: mongoose.Types.ObjectId(billId) }
+                const newBill = await Bill.findOneAndUpdate({ _id: mongoose.Types.ObjectId(billId) }
                     , { status: STATUS.SUCCESS, transactionId: transId }
                     , { new: true })
                 console.log("billId: ", billId)
-                const newUser = await User.findOneAndUpdate({ username }, { premium: true }, { new: true })
+                const cost = newBill.amount
+                let newBalance = balance + cost
+
+                const newUser = await User.findOneAndUpdate({ username }, { balance: newBalance }, { new: true })
             }
             return res.status(204).json({});
         }
@@ -285,10 +293,21 @@ const BillController = {
                 console.log(rspCode);
                 if (rspCode === '00')//giao dich thanh cong
                 {
-                    const bill = await Bill.findOneAndUpdate({ _id: mongoose.Types.ObjectId(orderId) }
+
+
+                    const user = await User.findOne({ username })
+                    let balance = user.balance
+
+
+                    const newBill = await Bill.findOneAndUpdate({ _id: mongoose.Types.ObjectId(orderId) }
                         , { status: STATUS.SUCCESS, transactionId: vnp_Params['vnp_TransactionNo'] }
                         , { new: true })
-                    const user = await User.findByIdAndUpdate(bill.creatorId, { premium: true })
+                    const cost = newBill.amount
+                    let newBalance = balance + cost
+
+                    const newUser = await User.findByIdAndUpdate(newBill.creatorId, { balance: newBalance }, { new: true })
+
+
                     return res.redirect(`${frontendUrl}result-payment?message=Giao dịch thành công`)
                 }
                 //Kiem tra du lieu co hop le khong, cap nhat trang thai don hang va gui ket qua cho VNPAY theo dinh dang duoi
@@ -302,6 +321,7 @@ const BillController = {
             return res.redirect(`${frontendUrl}result-payment?message=Xác nhận giao dịch không thành công`)
         }
     },
+
     WithdrawMoney: async (req, res) => {
         try {
             const loginUsername = req.user.sub
@@ -448,11 +468,6 @@ const BillController = {
             vnp_Params['vnp_SecureHash'] = signed;
             vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
             console.log(vnpUrl)
-            let balance = user.balance
-            let newBalance = balance + amount
-            await User.findOneAndUpdate({ username }, {
-                balance: newBalance
-            }, { new: true })
             res.status(200).json({ payUrl: vnpUrl })
         }
         catch (err) {
@@ -542,11 +557,6 @@ const BillController = {
 
             let payUrl = ""
             //Send the request and get the response
-            let balance = user.balance
-            let newBalance = balance + amount
-            await User.findOneAndUpdate({ username }, {
-                balance: newBalance
-            }, { new: true })
             const reqPayment = https.request(options, response => {
                 console.log(`Status: ${response.statusCode}`);
                 console.log(`Headers: ${JSON.stringify(response.headers)}`);
@@ -579,7 +589,7 @@ const BillController = {
         }
     },
 
-    PuchaseCourse: async (req, res) => {
+    PurchaseCourse: async (req, res) => {
         try {
             const username = req.user?.sub
             const { courseId } = req.body
