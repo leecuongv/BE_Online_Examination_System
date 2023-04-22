@@ -13,6 +13,7 @@ router.post("/withdraw-money", verifyToken, BillController.WithdrawMoney)
 router.post("/pay-in/vnpay", verifyToken, BillController.PayInVNPay)
 router.post("/pay-in/momo", verifyToken, BillController.PayInMomo)
 router.post("/purchase-course", verifyToken, BillController.PuchaseCourse)
+router.post("/upgrade-account", verifyToken, BillController.UpgradeAccount)
 
 
 module.exports = router;

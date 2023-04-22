@@ -417,41 +417,25 @@ const ExamController = {
                 // // {
                 // //     $group: { _id: '$_id', count: { $sum: 1 } }
                 // // }
-                // { $unwind: "$result" },
-                // {
-                //     $group: {
-                //         _id: {
-                //             result: "$result.question",
-                //             //point: "$result"
-                //         },
-                //         //totalPoint: { $sum: "$result.point" },
-                //         point: { $push: "$result.point" },
+                { $unwind: "$result" },
+                {
+                    $group: {
+                        _id:"$_id",
+                        question: {
+                            
+                            result: "$result.question",
+                            //point: "$result"
+                        },
+                        //totalPoint: { $sum: "$result.point" },
+                        point: { $push: "$result.point" },
 
-                //         countResult: { $sum: 1 },
-                        
-                //     },
+                        countResult: { $sum: 1 },
 
-                // },
-                // { $count: "totalCount" }
-                { $group : { 
-                    _id :  { 
-                      category: "$category",
-                      term: "$result",
                     },
-                    total: { $sum : 1 } 
-                 }
-               },
-                { $group : { 
-                    _id :  "$_id",
-                    terms: { 
-                        $push: { 
-                            term:"$_id.question",
-                            total:"$total"
-                        }
-                    }
-                 }
-               }
 
+                },
+                // { $count: "totalCount" }
+                
             ])
 
             // Lấy kết quả bài thi từ API 

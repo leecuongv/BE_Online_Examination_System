@@ -16,6 +16,7 @@ const backendUrl = 'https://be-oes.vercel.app/'
 const bcrypt = require("bcrypt");
 const fee = 10
 const BillController = {
+    
     createPaymentMomo: async (req, res) => {
         try {
 
@@ -577,6 +578,7 @@ const BillController = {
             return res.status(500).json({ error: "Lỗi tạo hoá đơn thanh toán. Vui lòng thực hiện lại thanh toán" });
         }
     },
+
     PuchaseCourse: async (req, res) => {
         try {
             const username = req.user?.sub
@@ -600,6 +602,7 @@ const BillController = {
             if (balance < coursePrice) {
                 return res.status(400).json({ message: "Không đủ số dư tài khoản, vui lòng nạp thêm!" })
             }
+
 
             if (!course.students.find(item => item.toString() === user.id.toString())) {
                 course.students.push(user.id)
@@ -629,9 +632,49 @@ const BillController = {
             console.log(error)
             res.status(400).json({ message: "Lỗi đăng ký khoá học!" })
         }
-    }
+    },
 
+    UpgradeAccount: async (req, res) => {
+        try {
+            const username = req.user?.sub
+            const price = 50000
+            const user = await User.findOne({ username: username })
+            if (!user) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại!" })
+            }
+
+            let balance = user.balance
+
+            if (balance < price) {
+                return res.status(400).json({ message: "Không đủ số dư tài khoản, vui lòng nạp thêm!" })
+            }
+
+            let newBalance = balance - price
+            await User.findOneAndUpdate({ username }, {
+                balance: newBalance, isPremium: true
+            }, { new: true })
+            let description = "Upgrade Account"
+            const newBill = new Bill({
+                creatorId: user.id,
+                description: description,
+                amount: price,
+                method: "User balance"
+            })
+            await newBill.save()
+            return res.status(200).json({
+                message: "Nâng cấp tài khoản thành công!",
+            })
+        }
+
+        catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi nâng cấp tài khoản!" })
+        }
+    }
 }
+
+
+
 
 function sortObject(obj) {
     let sorted = {};
