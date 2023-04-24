@@ -410,10 +410,16 @@ const ExamController = {
             const user = await User.findOne({ username })
 
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
+            let creatorId = user.id
+            console.log(creatorId)
+            const exam = await Exam.findOne({
+
+                _id: mongoose.Types.ObjectId(id), creatorId
+            })
             
-            let exam = await Exam.findOne({_id: mongoose.Types.ObjectId(id), creatorId: user.id})
-            if(!exam){
-                res.status(400).json({ message: "Không tồn tại bài thi!" })
+            if (!exam) {
+                return res.status(400).json({ message: "Không tồn tại bài thi!" })
+                console.log(exam)
             }
 
             let examResult = await TakeExam.aggregate([
@@ -423,7 +429,7 @@ const ExamController = {
 
             ])
 
-            
+
             let listQuestion = []
             examResult.forEach(item => {
                 item.result.forEach(question => {
@@ -437,7 +443,7 @@ const ExamController = {
                 let jo = {};
                 let tempStringi = jsonArray[i].question;
                 let ja = new Array();
-                
+
                 if (test[i] === 0) {
                     jo.question = tempStringi;
                     ja.push(jsonArray[i]);
@@ -451,12 +457,12 @@ const ExamController = {
                         }
                     }
 
-                    jo.questions = ja;
+                    //jo.questions = ja;
                     jo["tongSoHVDaLamCauHoi"] = ja.length;
                     jo["soHVDaLamDung"] = ja.filter(element => element.point > 0).length
                     jo["soHVDaLamSai"] = ja.filter(element => element.point === 0).length
                     //jo["soHVChuaLam"] =
-                        result.push(jo);
+                    result.push(jo);
                 }
             }
 
