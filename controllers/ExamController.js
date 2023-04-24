@@ -410,60 +410,64 @@ const ExamController = {
             const user = await User.findOne({ username })
 
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
+            
+            let exam = await Exam.findOne({_id: mongoose.Types.ObjectId(id), creatorId: user.id})
+            if(!exam){
+                res.status(400).json({ message: "Không tồn tại bài thi!" })
+            }
+
             let examResult = await TakeExam.aggregate([
                 {
                     $match: { examId: { $in: [mongoose.Types.ObjectId(id)] } }
                 },
-                // // {
-                // //     $group: { _id: '$_id', count: { $sum: 1 } }
-                // // }
-                { $unwind: "$result" },
-                {
-                    $group: {
-                        _id:"$_id",
-                        question: {
-                            
-                            result: "$result.question",
-                            //point: "$result"
-                        },
-                        //totalPoint: { $sum: "$result.point" },
-                        point: { $push: "$result.point" },
 
-                        countResult: { $sum: 1 },
-
-                    },
-
-                },
-                // { $count: "totalCount" }
-                
             ])
 
-            // Lấy kết quả bài thi từ API 
-            const examResult2 = examResult; // Gom nhóm các câu hỏi theo thuộc tính "question" 
-            const questionGroups = lodash.groupBy(examResult2[0].result, 'question'); // Tính tổng số điểm cho mỗi câu hỏi 
+            
+            let listQuestion = []
+            examResult.forEach(item => {
+                item.result.forEach(question => {
+                    listQuestion.push(question)
+                })
+            })
+            let jsonArray = listQuestion
+            let test = new Array(jsonArray.length).fill(0);
+            let result = new Array();
+            for (let i = 0; i < jsonArray.length; i++) {
+                let jo = {};
+                let tempStringi = jsonArray[i].question;
+                let ja = new Array();
+                
+                if (test[i] === 0) {
+                    jo.question = tempStringi;
+                    ja.push(jsonArray[i]);
+                    test[i] = 1;
+                    for (let j = i + 1; j < jsonArray.length; j++) {
+                        let tempStringj = jsonArray[j].question
+                        if ((tempStringi.toString().localeCompare(tempStringj.toString())) === 0 && (test[j] === 0)) {
+                            // jsonArray.get(j).getAsJsonObject().remove(question); 
+                            ja.push(jsonArray[j]);
+                            test[j] = 1;
+                        }
+                    }
 
-            //console.log(questionGroups)
-
-            const questionScores = lodash.map(questionGroups, (group) => {
-                const questionId = group[0].question;
-                const pointSum = lodash.groupBy(group, 'question');
-                return { questionId, pointSum };
-            });
-            //console.log(questionScores)
-
-
-            //console.log(examResult2)
-
+                    jo.questions = ja;
+                    jo["tongSoHVDaLamCauHoi"] = ja.length;
+                    jo["soHVDaLamDung"] = ja.filter(element => element.point > 0).length
+                    jo["soHVDaLamSai"] = ja.filter(element => element.point === 0).length
+                    //jo["soHVChuaLam"] =
+                        result.push(jo);
+                }
+            }
 
             return res.status(200).json({
-                message: "Xuất bản bài thi thành công",
-
-                examResult
+                //listQuestion,
+                result
             })
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi xuất bản bài thi" })
+            res.status(400).json({ message: "Lỗi xem kết quả bài thi!" })
         }
     }
 
