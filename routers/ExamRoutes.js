@@ -19,8 +19,6 @@ router.put('/close-exam', verifyToken, ExamController.CloseExam)
 
 router.post("/create-question-with-questionbank", verifyToken, ExamController.createQuestionWithQuestionBank)
 
-router.get('/view-exam-result', verifyToken, ExamController.ViewExamResult)
-
 
 
 module.exports = router;

@@ -12,5 +12,7 @@ router.get('/get-result-takeexam', verifyToken, TakeExamController.getResultTake
 router.post("/create-log", verifyToken, TakeExamController.createLogs)
 router.get("/get-logs", verifyToken, TakeExamController.getLogs)
 router.get("/all-take-exam", verifyToken, TakeExamController.getAllTakeExam)
+router.get("/view-accuracy-rate-of-exam-questions", verifyToken, TakeExamController.ViewAccuracyRateOfExamQuestions)
+router.get("/view-exam-score-distribution", verifyToken, TakeExamController.ViewExamScoreDistribution)
 module.exports = router;
 //đã sửa
