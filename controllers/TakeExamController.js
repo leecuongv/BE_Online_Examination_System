@@ -531,6 +531,152 @@ const TakeExamController = {
       return res.status(500).json({ message: "Không xác định" })
     }
   },
+  ViewAccuracyRateOfExamQuestions: async (req, res) => {
+    try {
+      const username = req.user.sub
+      const { id } = req.body
+
+      if (!username) return res.status(400).json({ message: "Không có người dùng" })
+      const user = await User.findOne({ username })
+
+      if (!user) return res.status(400).json({ message: "Không có người dùng" })
+      let creatorId = user.id
+      console.log(creatorId)
+      const exam = await Exam.findOne({
+        _id: mongoose.Types.ObjectId(id),
+        //  creatorId
+      })
+
+      if (!exam) {
+        return res.status(400).json({ message: "Không tồn tại bài thi!" })
+        console.log(exam)
+      }
+
+      // let examResult = await TakeExam.aggregate([
+      //     {
+      //         $match: { examId: { $in: [mongoose.Types.ObjectId(id)] } }
+      //     },
+
+      // ])
+
+      let examResult = await TakeExam.find({ examId: mongoose.Types.ObjectId(id) }).populate({
+        path: "result.question",
+        populate: {
+          path: "answers",
+          select: "id content",
+        },
+        select: "id content answers",
+
+      })
+
+
+      let listQuestion = []
+      examResult.forEach(item => {
+        item.result.forEach(question => {
+          listQuestion.push(question)
+        })
+      })
+
+      let jsonArray = listQuestion
+      let test = new Array(jsonArray.length).fill(0);
+      let result = new Array();
+      for (let i = 0; i < jsonArray.length; i++) {
+        let jo = {};
+        let tempStringi = jsonArray[i].question;
+        let ja = new Array();
+
+        if (test[i] === 0) {
+          jo.question = tempStringi;
+          ja.push(jsonArray[i]);
+          test[i] = 1;
+          for (let j = i + 1; j < jsonArray.length; j++) {
+            let tempStringj = jsonArray[j].question
+            if ((tempStringi.toString().localeCompare(tempStringj.toString())) === 0 && (test[j] === 0)) {
+              // jsonArray.get(j).getAsJsonObject().remove(question); 
+              ja.push(jsonArray[j]);
+              test[j] = 1;
+            }
+          }
+
+          //jo.questions = ja;
+          jo["tongSoHVDaLamCauHoi"] = ja.length;
+          jo["soHVDaLamDung"] = ja.filter(element => element.point > 0).length
+          jo["soHVDaLamSai"] = ja.filter(element => element.point === 0).length
+          //jo["soHVChuaLam"] =
+          result.push(jo);
+        }
+      }
+
+      return res.status(200).json({
+        //listQuestion,
+        result,
+        //examResult
+      })
+
+    } catch (error) {
+      console.log(error)
+      res.status(400).json({ message: "Lỗi xem kết quả bài thi!" })
+    }
+  },
+
+  ViewExamScoreDistribution: async (req, res) => {
+    try {
+      const username = req.user.sub
+      const { id } = req.body
+
+      if (!username) return res.status(400).json({ message: "Không có người dùng" })
+      const user = await User.findOne({ username })
+
+      if (!user) return res.status(400).json({ message: "Không có người dùng" })
+      let creatorId = user.id
+      console.log(creatorId)
+      const exam = await Exam.findOne({
+        _id: mongoose.Types.ObjectId(id),
+        //  creatorId
+      })
+
+      if (!exam) {
+        return res.status(400).json({ message: "Không tồn tại bài thi!" })
+        console.log(exam)
+      }
+
+      // let examResult = await TakeExam.aggregate([
+      //     {
+      //         $match: { examId: { $in: [mongoose.Types.ObjectId(id)] } }
+      //     },
+
+      // ])
+
+      let examResult = await TakeExam.find({ examId: mongoose.Types.ObjectId(id), status: STATUS.SUBMITTED }).select({ examId: 1, userId: 1, points: 1, id: 1 })
+      const dataset = []; 
+      const labels = [];
+
+      const freq = examResult.reduce(function (prev, cur) {
+        prev[cur.points] = (prev[cur.points] || 0) + 1;
+        return prev;
+      }, {})
+      for (const key in freq) {
+        if (freq.hasOwnProperty(key)) {
+          let obj = {points: key, freq: freq[key]}
+          labels.push(obj);
+        }
+      }
+
+
+
+
+      return res.status(200).json({
+        //listQuestion,
+        //examResult,
+        labels
+        //examResult
+      })
+
+    } catch (error) {
+      console.log(error)
+      res.status(400).json({ message: "Lỗi xem kết quả bài thi!" })
+    }
+  }
 };
 
 module.exports = { TakeExamController };
