@@ -544,7 +544,7 @@ const TakeExamController = {
       console.log(creatorId)
       const exam = await Exam.findOne({
         _id: mongoose.Types.ObjectId(id),
-        //  creatorId
+          creatorId
       })
 
       if (!exam) {
@@ -632,7 +632,7 @@ const TakeExamController = {
       console.log(creatorId)
       const exam = await Exam.findOne({
         _id: mongoose.Types.ObjectId(id),
-        //  creatorId
+          creatorId
       })
 
       if (!exam) {
