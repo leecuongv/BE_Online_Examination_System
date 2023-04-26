@@ -1075,6 +1075,10 @@ const CourseController = {
         try {
 
             let courses = await Course.find({ status: STATUS.PUBLIC })
+            .populate({
+                path:"creatorId",
+                select:"fullname"
+            })
             let results = courses.map(item => {
                 let { exams, students, lessons, assignments, pin, ...data } = item._doc
 
@@ -1099,7 +1103,10 @@ const CourseController = {
     GetListCourseSell: async (req, res) => {
         try {
 
-            let courses = await Course.find({ status: STATUS.PUBLIC, price: { $gt: 0 } })
+            let courses = await Course.find({ status: STATUS.PUBLIC, price: { $gt: 0 } }).populate({
+                path:"creatorId",
+                select:"fullname"
+            })
             let results = courses.map(item => {
                 let { exams, students, lessons, assignments, pin, ...data } = item._doc
 
