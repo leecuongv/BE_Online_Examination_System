@@ -295,13 +295,14 @@ const BillController = {
                 {
 
 
-                    const user = await User.findOne({ username })
-                    let balance = user.balance
+
 
 
                     const newBill = await Bill.findOneAndUpdate({ _id: mongoose.Types.ObjectId(orderId) }
                         , { status: STATUS.SUCCESS, transactionId: vnp_Params['vnp_TransactionNo'] }
                         , { new: true })
+                    const user = await User.findOne({ _id: mongoose.Types.ObjectId(newBill.creatorId) })
+                    let balance = user.balance
                     const cost = newBill.amount
                     let newBalance = balance + cost
 
