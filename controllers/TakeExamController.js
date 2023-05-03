@@ -534,7 +534,7 @@ const TakeExamController = {
   ViewAccuracyRateOfExamQuestions: async (req, res) => {
     try {
       const username = req.user.sub
-      const { id } = req.body
+      const { id } = req.query
 
       if (!username) return res.status(400).json({ message: "Không có người dùng" })
       const user = await User.findOne({ username })
