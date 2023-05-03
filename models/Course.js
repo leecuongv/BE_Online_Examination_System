@@ -78,6 +78,10 @@ const courseSchema = mongoose.Schema({
   price:{
     type: Number,
     default: 0
+  },
+  isSell:{
+    type: Boolean,
+    default: false
   }
 
 },
