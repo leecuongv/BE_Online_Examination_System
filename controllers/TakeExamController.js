@@ -534,7 +534,7 @@ const TakeExamController = {
   ViewAccuracyRateOfExamQuestions: async (req, res) => {
     try {
       const username = req.user.sub
-      const { id } = req.query
+      const { slug } = req.query
 
       if (!username) return res.status(400).json({ message: "Không có người dùng" })
       const user = await User.findOne({ username })
@@ -543,7 +543,7 @@ const TakeExamController = {
       let creatorId = user.id
       console.log(creatorId)
       const exam = await Exam.findOne({
-        _id: mongoose.Types.ObjectId(id),
+        slug,
           creatorId
       })
 
@@ -559,7 +559,7 @@ const TakeExamController = {
 
       // ])
 
-      let examResult = await TakeExam.find({ examId: mongoose.Types.ObjectId(id) }).populate({
+      let examResult = await TakeExam.find({ examId: mongoose.Types.ObjectId(exam.id) }).populate({
         path: "result.question",
         populate: {
           path: "answers",
@@ -577,6 +577,7 @@ const TakeExamController = {
         })
       })
 
+      console.log(listQuestion)
       let jsonArray = listQuestion
       let test = new Array(jsonArray.length).fill(0);
       let result = new Array();
