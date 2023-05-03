@@ -1151,7 +1151,7 @@ const CourseController = {
 
                 return res.status(400).json({ message: "Không tìm thấy khóa học!" })
             let results = courses.map(item => {
-                let { exams, students, lessons, assignments, pin, ...data } = item._doc
+                let { exams, students, lessons, assignments, pin,price ,isSell,  ...data } = item._doc
                 return {
                     ...data,
                 }
