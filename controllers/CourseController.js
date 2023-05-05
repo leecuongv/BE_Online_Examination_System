@@ -7,6 +7,7 @@ const cloudinary = require('cloudinary').v2
 const dotenv = require('dotenv')
 const TakeExam = require("../models/TakeExam")
 const Exam = require("../models/Exam")
+const jwt = require("jsonwebtoken");
 dotenv.config()
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -1075,10 +1076,10 @@ const CourseController = {
         try {
 
             let courses = await Course.find({ status: STATUS.PUBLIC })
-            .populate({
-                path:"creatorId",
-                select:"fullname"
-            })
+                .populate({
+                    path: "creatorId",
+                    select: "fullname"
+                })
             let results = courses.map(item => {
                 let { exams, students, lessons, assignments, pin, ...data } = item._doc
 
@@ -1104,8 +1105,8 @@ const CourseController = {
         try {
 
             let courses = await Course.find({ status: STATUS.PUBLIC, price: { $gt: 0 } }).populate({
-                path:"creatorId",
-                select:"fullname"
+                path: "creatorId",
+                select: "fullname"
             })
             let results = courses.map(item => {
                 let { exams, students, lessons, assignments, pin, ...data } = item._doc
@@ -1130,10 +1131,22 @@ const CourseController = {
 
     Search: async (req, res) => {
         try {
-            // const loginUsername = req.user.sub
+            let loginUsername
+            const token = req.headers.authorization;
+            if (token) {
+                const accessToken = token.split(" ")[1];
+                jwt.verify(accessToken, process.env.JWT_ACCESS_KEY, (err, user) => {
+                    if (err) {
+                        return res.status(403).json({ message: "Token không hợp lệ" });
+                    }
+                    loginUsername = user?.sub;
+                    //next();
+                })
+            }
+            
             // if (!loginUsername)
             //     return res.status(400).json({ message: "Vui lòng đăng nhập!" })
-            // const loginUser = await User.findOne({ username: loginUsername })
+            const loginUser = await User.findOne({ username: loginUsername })
             // if (!loginUser)
             //     return res.status(400).json({ message: "Không có người dùng!" })
 
@@ -1151,9 +1164,16 @@ const CourseController = {
 
                 return res.status(400).json({ message: "Không tìm thấy khóa học!" })
             let results = courses.map(item => {
-                let { exams, students, lessons, assignments, pin,price ,isSell,  ...data } = item._doc
+                let isInCourse = false
+                if (loginUser)
+                    if (item.students.find(e => e.toString() === loginUser.id.toString())) {
+                        isInCourse = true
+                    }
+
+                let { exams, students, lessons, assignments, pin, ...data } = item._doc
                 return {
                     ...data,
+                    isInCourse
                 }
             })
             return res.status(200).json(results);
