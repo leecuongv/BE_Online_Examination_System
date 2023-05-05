@@ -623,7 +623,7 @@ const TakeExamController = {
   ViewExamScoreDistribution: async (req, res) => {
     try {
       const username = req.user.sub
-      const { id } = req.body
+      const { slug } = req.query
 
       if (!username) return res.status(400).json({ message: "Không có người dùng" })
       const user = await User.findOne({ username })
@@ -632,7 +632,7 @@ const TakeExamController = {
       let creatorId = user.id
       console.log(creatorId)
       const exam = await Exam.findOne({
-        _id: mongoose.Types.ObjectId(id),
+        slug,
           creatorId
       })
 
@@ -648,7 +648,7 @@ const TakeExamController = {
 
       // ])
 
-      let examResult = await TakeExam.find({ examId: mongoose.Types.ObjectId(id), status: STATUS.SUBMITTED }).select({ examId: 1, userId: 1, points: 1, id: 1 })
+      let examResult = await TakeExam.find({ examId: mongoose.Types.ObjectId(exam.id), status: STATUS.SUBMITTED }).select({ examId: 1, userId: 1, points: 1, id: 1 })
       const dataset = []; 
       const labels = [];
 
