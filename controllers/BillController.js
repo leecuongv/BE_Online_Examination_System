@@ -662,7 +662,7 @@ const BillController = {
 
             let newBalance = balance - price
             await User.findOneAndUpdate({ username }, {
-                balance: newBalance, isPremium: true
+                balance: newBalance, premium: true
             }, { new: true })
             let description = "Upgrade Account"
             const newBill = new Bill({
