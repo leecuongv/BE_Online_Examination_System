@@ -544,7 +544,7 @@ const TakeExamController = {
       console.log(creatorId)
       const exam = await Exam.findOne({
         slug,
-          creatorId
+        creatorId
       })
 
       if (!exam) {
@@ -633,7 +633,7 @@ const TakeExamController = {
       console.log(creatorId)
       const exam = await Exam.findOne({
         slug,
-          creatorId
+        creatorId
       })
 
       if (!exam) {
@@ -649,7 +649,7 @@ const TakeExamController = {
       // ])
 
       let examResult = await TakeExam.find({ examId: mongoose.Types.ObjectId(exam.id), status: STATUS.SUBMITTED }).select({ examId: 1, userId: 1, points: 1, id: 1 })
-      const dataset = []; 
+      const dataset = [];
       const labels = [];
 
       const freq = examResult.reduce(function (prev, cur) {
@@ -658,7 +658,7 @@ const TakeExamController = {
       }, {})
       for (const key in freq) {
         if (freq.hasOwnProperty(key)) {
-          let obj = {points: key, freq: freq[key]}
+          let obj = { points: key, freq: freq[key] }
           labels.push(obj);
         }
       }
@@ -669,7 +669,8 @@ const TakeExamController = {
       return res.status(200).json({
         //listQuestion,
         //examResult,
-        labels
+        labels,
+        maxPoints: exam.maxPoints
         //examResult
       })
 
