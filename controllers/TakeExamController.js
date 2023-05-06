@@ -662,10 +662,6 @@ const TakeExamController = {
           labels.push(obj);
         }
       }
-
-
-
-
       return res.status(200).json({
         //listQuestion,
         //examResult,
