@@ -17,7 +17,8 @@ cloudinary.config({
 const CourseController = {
     CreateCourse: async (req, res) => {
         try {
-            const { slug, name, description, username, startTime, endTime, price } = req.body
+            let isSell = false
+            const { slug, name, description, username, startTime, endTime, price, pin } = req.body
             const image = req.files?.file
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -30,6 +31,8 @@ const CourseController = {
             }
             if (price < 0)
                 return res.status(400).json({ message: "Giá tiền của khoá học phải lớn hơn hoặc bằng 0!" })
+            if (price > 0)
+                isSell = true
 
             const newCourse = await new Course({
                 name,
@@ -39,7 +42,9 @@ const CourseController = {
                 creatorId: user.id,
                 startTime,
                 endTime,
-                price
+                price,
+                isSell,
+                pin
             });
             if (image) {
                 if (image.data.size > 2000000) {
@@ -675,6 +680,7 @@ const CourseController = {
 
     UpdateCourse: async (req, res) => {//nhớ sửa
         try {
+            let isSell = false
             const username = req.user?.sub
             const { slug, name, description, startTime, endTime, courseId, price } = req.body
             const image = req.files?.file
@@ -691,14 +697,16 @@ const CourseController = {
 
             if (price < 0)
                 return res.status(400).json({ message: "Giá tiền của khoá học phải lớn hơn hoặc bằng 0!" })
-
+            if (price > 0)
+                isSell = true
             let data = {//dữ liệu cần update
                 slug,
                 name,
                 description,
                 startTime,
                 endTime,
-                price
+                price,
+                isSell
             }
 
             if (image) {
@@ -1143,7 +1151,7 @@ const CourseController = {
                     //next();
                 })
             }
-            
+
             // if (!loginUsername)
             //     return res.status(400).json({ message: "Vui lòng đăng nhập!" })
             const loginUser = await User.findOne({ username: loginUsername })
