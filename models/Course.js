@@ -63,7 +63,7 @@ const courseSchema = mongoose.Schema({
   ],
   status: {
     type: String,
-    default: STATUS.PROTECTED,
+    default: STATUS.PUBLIC,
   },
 
   image:
