@@ -11,7 +11,7 @@ const capitalize = (str, lower = false) =>
 
 const generatePDF = async (name, course, location, date) => {
   //const { PDFDocument, rgb, degrees } = PDFLib;
-  const existingPdfBytes = await fetch("./cert/cert.pdf").then((res) =>
+  const existingPdfBytes = await fetch("cert.pdf").then((res) =>
     res.arrayBuffer()
   );
 
