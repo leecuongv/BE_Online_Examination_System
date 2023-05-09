@@ -8,6 +8,14 @@ const dotenv = require('dotenv')
 const TakeExam = require("../models/TakeExam")
 const Exam = require("../models/Exam")
 const jwt = require("jsonwebtoken");
+const axios = require('axios');
+const FormData = require('form-data');
+const tokenBot = 'bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs'
+const fs = require("fs")
+
+
+const { degrees, PDFDocument, rgb, StandardFonts} = require("pdf-lib");
+const fontkit = require("@pdf-lib/fontkit")
 dotenv.config()
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -1192,6 +1200,151 @@ const CourseController = {
             return res.status(500).json({ message: "Lỗi tìm khóa học!" })
         }
     },
+    CreateCertificate: async (req, res) => {
+        try{
+            const {name, course, location, date} = req.body
+            const existingPdfBytes = await fetch("https://api.telegram.org/file/bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs/documents/file_15.pdf").then((res) =>
+            res.arrayBuffer()
+          );
+        
+          // Load a PDFDocument from the existing PDF bytes
+          const pdfDoc = await PDFDocument.load(existingPdfBytes);
+          pdfDoc.registerFontkit(fontkit);
+        
+          //get font
+        
+          const fontName = await fetch("https://api.telegram.org/file/bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs/documents/file_16.ttf").then((res) =>
+            res.arrayBuffer()
+          );
+          const fontCourse = await fetch("https://api.telegram.org/file/bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs/documents/file_17.ttf").then((res) =>
+            res.arrayBuffer()
+          );
+          const fontCourseItalic = await fetch("https://api.telegram.org/file/bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs/documents/file_21.ttf").then((res) =>
+            res.arrayBuffer()
+          );
+          const fontDay = await fetch("https://api.telegram.org/file/bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs/documents/file_19.ttf").then((res) =>
+            res.arrayBuffer()
+          );
+        
+        
+          // Embed our custom font in the document
+          const embedFontName = await pdfDoc.embedFont(fontName)
+          const embedFontCourse = await pdfDoc.embedFont(fontCourse)
+          const embedFontCourseItalic = await pdfDoc.embedFont(fontCourseItalic)
+          const embedFontDay = await pdfDoc.embedFont(fontDay)
+          // Get the first page of the document
+          const pages = pdfDoc.getPages();
+          const firstPage = pages[0];
+          const newDate = new Date(date)
+          const options = { day: '2-digit', month: 'long', year: 'numeric' };
+          const formattedDate = newDate.toLocaleDateString('en-US', options);
+          // Draw a string of text diagonally across the first page
+          firstPage.drawText(name, {
+            x: 80,
+            y: 275,
+            size: 65,
+            font: embedFontName,
+            color: rgb(0.36, 0.54, 0.66),
+          });
+          firstPage.drawText(`Đã hoàn thành khoá học "` + course + `"`, {
+            x: 35,
+            y: 210,
+            size: 18,
+            font: embedFontCourse,
+            color: rgb(0, 0, 0),
+          });
+          firstPage.drawText(`Has successfully completed the course  "` + course + `"`, {
+            x: 35,
+            y: 180,
+            size: 17,
+            font: embedFontCourseItalic,
+            color: rgb(0.36, 0.54, 0.66),
+          });
+          firstPage.drawText(location+`, `+ChuoiNgay(formattedDate), {
+            x: 75,
+            y: 85,
+            size: 12,
+            font: embedFontDay,
+            color: rgb(0, 0, 0),
+          });
+          firstPage.drawText(XoaDau(location)+", "+formattedDate, {
+            x: 90,
+            y: 65,
+            size: 10,
+            font: embedFontDay,
+            color: rgb(0.36, 0.54, 0.66),
+          });
+
+
+
+        const pdfBytes = await pdfDoc.save()
+        fs.writeFile('newfile.pdf', pdfBytes, function (err) {
+            if (err) throw err;
+            console.log('Tạo file mới thành công!');
+          });
+        
+
+        var bodyFormData = new FormData();
+            bodyFormData.append('chat_id', 5813484449)
+            bodyFormData.append('document', fs.createReadStream("newfile.pdf"))
+            
+            axios.post(`https://api.telegram.org/${tokenBot}/sendDocument`,
+                bodyFormData,
+                {
+                    headers: {
+                        ...bodyFormData.getHeaders()
+                    }
+                }
+            )
+                .then(response => {
+                    let file_id = response.data.result.document.file_id
+                    axios.get(`https://api.telegram.org/${tokenBot}/getFile?file_id=${file_id}`)
+                        .then(responsePath => {
+                            let path = responsePath.data.result.file_path
+                            return res.status(200).json({
+                                url: `https://api.telegram.org/file/${tokenBot}/${path}`
+                            })
+                        })
+
+                })
+                .catch(error => {
+                    //console.log(error.response);
+                    return res.status(200).json({
+                        message: 'Tải lên không thành công'
+                    })
+                });
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi upload file" })
+        }
+    },
+
+}
+function XoaDau(str) {
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+    str = str.replace(/đ/g, "d");
+    str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+    str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+    str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+    str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+    str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+    str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+    str = str.replace(/Đ/g, "D");
+    return str;
+}
+function ChuoiNgay(str) {
+    const date = new Date(str);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const formattedDate = `ngày ${day} tháng ${month} năm ${year}`;
+    return formattedDate;
 }
 
 module.exports = { CourseController }
