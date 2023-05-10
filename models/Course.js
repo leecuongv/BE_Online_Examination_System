@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 const autoinc = require("mongoose-plugin-autoinc")
-const { COLLECTION, DEFAULT_VALUES, STATUS } = require("../utils/enum")
+const { COLLECTION, DEFAULT_VALUES, STATUS, CERTIFICATION } = require("../utils/enum")
 
 const courseSchema = mongoose.Schema({
   courseId: {
@@ -86,7 +86,11 @@ const courseSchema = mongoose.Schema({
   isSell:{
     type: Boolean,
     default: false
-  }
+  },
+  certification:{
+    type: String,
+    default: CERTIFICATION.NOTALLOW
+  },
 
 },
   {
