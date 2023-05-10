@@ -9,7 +9,7 @@ const capitalize = (str, lower = false) =>
     match.toUpperCase()
   );
 
-const generatePDF = async (name, course, location, date) => {
+const generatePDF = async (name, course, location, date, url) => {
   //const { PDFDocument, rgb, degrees } = PDFLib;
   const existingPdfBytes = await fetch("cert.pdf").then((res) =>
     res.arrayBuffer()
@@ -82,6 +82,13 @@ const generatePDF = async (name, course, location, date) => {
     font: embedFontDay,
     color: rgb(0.36, 0.54, 0.66),
   });
+  firstPage.drawText("Xác nhận tại: oes.vercel.app/certification/"+url, {
+    x: 30,
+    y: 30,
+    size: 10,
+    font: embedFontCourseItalic,
+    color: rgb(0.36, 0.54, 0.66),
+  });
   // Serialize the PDFDocument to bytes (a Uint8Array)
   // const pdfBytes = await pdfDoc.save();
   // console.log("Done creating");
@@ -128,5 +135,5 @@ function ChuoiNgay(str) {
   return formattedDate;
 }
 
-generatePDF("Lê Văn Cường", "Lập trình web", "Hồ Chí Minh", "09/5/2023")
+generatePDF("Lê Văn Cường", "Lập trình web", "Hồ Chí Minh", "09/5/2023", "blabla")
 // init();

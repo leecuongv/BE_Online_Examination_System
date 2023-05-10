@@ -14,6 +14,7 @@ const SubmitAssignmentRoutes = require("./SubmitAssignmentRoutes")
 const AdminRoutes = require("./AdminRoutes")
 const LessonRoutes = require("./LessonRouters")
 const TickRouters = require("./TickRouters")
+const CertificateRoutes = require("./CertificateRoutes")
 
 module.exports = { 
     AuthRoute, 
@@ -32,4 +33,5 @@ module.exports = {
     AdminRoutes,
     LessonRoutes,
     TickRouters,
+    CertificateRoutes,
  }

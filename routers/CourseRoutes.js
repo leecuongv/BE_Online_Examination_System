@@ -34,5 +34,4 @@ router.delete('/delete-exam',verifyToken, CourseController.deleteExam);
 router.get("/info", CourseController.GetCourseInfoByCourseId)
 router.get("/s", CourseController.Search)
 
-router.post("/certification", CourseController.CreateCertificate)
 module.exports = router;
