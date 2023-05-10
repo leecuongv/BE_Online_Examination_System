@@ -31,6 +31,10 @@ const courseSchema = mongoose.Schema({
     require: true,
     ref: COLLECTION.USER,
   },
+  certificate: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: COLLECTION.CERTIFICATE,
+  },
   slug: {
     type: String,
     unique: true,

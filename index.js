@@ -20,7 +20,8 @@ const {
   SubmitAssignmentRoutes,
   AdminRoutes,
   LessonRoutes,
-  TickRouters
+  TickRouters,
+  CertificateRoutes
  } = require('./routers');
 
  const { notFound, errorHandler } = require("./routers/errorMiddleware");
@@ -138,6 +139,7 @@ app.use("/api/submitassignment", SubmitAssignmentRoutes)
 app.use("/api/admin", AdminRoutes)
 app.use("/api/lesson", LessonRoutes)
 app.use("/api/tick", TickRouters)
+app.use("/api/certificate", CertificateRoutes)
 
 app.use(notFound);
 app.use(errorHandler);

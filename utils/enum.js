@@ -32,6 +32,8 @@ const COLLECTION = {
   TICK: "Tick",
   SEENLESSON: 'Seen_lesson',
   TRANSACTIONHISTORY: "Transaction_history",
+  CERTIFICATE:"Certificate",
+  
 };
 
 const TYPEOFPOINT = {
