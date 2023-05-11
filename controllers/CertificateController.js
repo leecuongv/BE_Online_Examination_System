@@ -5,7 +5,6 @@ const dotenv = require('dotenv')
 const axios = require('axios');
 const FormData = require('form-data');
 const tokenBot = 'bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs'
-const telegramURL = "https://api.telegram.org/file/" + tokenBot + "/documents/"
 const fs = require("fs")
 const { degrees, PDFDocument, rgb, StandardFonts } = require("pdf-lib");
 const fontkit = require("@pdf-lib/fontkit");
@@ -183,6 +182,9 @@ const CertificateController = {
 
             ]);
             const courseCert = course[0].certification
+            // const url1 = GenerateURL(loginUser.fullname + " " + course[0].name)
+            // console.log(url1)
+            
             if (!course) {
                 return res.status(400).json({ message: "Khoá học không tồn tại!" })
             }
@@ -204,9 +206,8 @@ const CertificateController = {
             }
 
             const location = "Hồ Chí Minh"
-            const existingPdfBytes = await fetch("https://tg-cloud-file-small-file.ajz.workers.dev/documents/file_6908.pdf?file_name=cert.pdf&expire=1683795361&signature=1TZqKfgOz2mqM%2FavhF1CETpBFNwH7QjYwhTClrF9%2BUo%3D").then((res) =>
-                res.arrayBuffer()
-            );
+            const existingPdfBytes = fs.readFileSync("./controllers/cert/cert.pdf")
+            
 
             // Load a PDFDocument from the existing PDF bytes
             const pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -214,18 +215,11 @@ const CertificateController = {
 
             //get font
 
-            const fontName = await fetch("https://tg-cloud-file-small-file.ajz.workers.dev/documents/file_6910.ttf?file_name=utm-french-vanilla.ttf&expire=1683795580&signature=y7FVBpKThzOZuY1QudbP%2BfXwkBfFjo7wTr9Zg0Kkd7Y%3D").then((res) =>
-                res.arrayBuffer()
-            );
-            const fontCourse = await fetch("https://tg-cloud-file-small-file.ajz.workers.dev/documents/file_6914.ttf?file_name=utm-neo-sans-intelbold.ttf&expire=1683795856&signature=d7Ivg7YBiuk13oado4%2BlYTGS2bRdYRKsl%2FEcx8PNTbk%3D").then((res) =>
-                res.arrayBuffer()
-            );
-            const fontCourseItalic = await fetch("https://tg-cloud-file-small-file.ajz.workers.dev/documents/file_6913.ttf?file_name=utm-neo-sans-intel-italic.ttf&expire=1683795791&signature=btRnAkw%2FY1xhH7RrYuAOaeJq2ilns9u8ihv3VvKC9fY%3D").then((res) =>
-                res.arrayBuffer()
-            );
-            const fontDay = await fetch("https://tg-cloud-file-small-file.ajz.workers.dev/documents/file_6912.ttf?file_name=utm-neo-sans-intel.ttf&expire=1683795678&signature=G6S%2BuLGetrawNsji1vW45%2FzmVwbZp7e%2BjIHQ68D9XMA%3D").then((res) =>
-                res.arrayBuffer()
-            );
+
+            const fontName = fs.readFileSync("./controllers/cert/font/UTM French Vanilla.ttf")
+            const fontCourse = fs.readFileSync("./controllers/cert/font/UTM Neo Sans IntelBold.ttf")
+            const fontCourseItalic = fs.readFileSync("./controllers/cert/font/UTM Neo Sans Intel_Italic.ttf")
+            const fontDay = fs.readFileSync("./controllers/cert/font/UTM Neo Sans Intel.ttf")
 
 
             // Embed our custom font in the document
@@ -240,7 +234,7 @@ const CertificateController = {
             const options = { day: '2-digit', month: 'long', year: 'numeric' };
             const formattedDate = newDate.toLocaleDateString('en-US', options);
             // Draw a string of text diagonally across the first page
-            const url = GenerateURL(loginUser.name + " " + course[0].name)
+            const url = GenerateURL(loginUser.fullname + " " + course[0].name)
 
             firstPage.drawText(loginUser.fullname, {
                 x: 80,
@@ -336,11 +330,6 @@ const CertificateController = {
                                 link: newCert.file
                             })
 
-
-                            // return res.status(200).json({
-                            //     url: `https://api.telegram.org/file/${tokenBot}/${path}`
-
-                            // })
                         })
 
                 })
@@ -407,13 +396,13 @@ function ChuoiNgay(str) {
 }
 function GenerateURL(str) {
 
-    XoaDau(str.toLowerCase());
+    XoaDau(str);
 
     const words = str.split(' ');
 
     const firstLetters = words.map(word => word.charAt(0));
 
-    return firstLetters.join('');
+    return firstLetters.join('').toLowerCase();
 }
 
 module.exports = { CertificateController }
