@@ -183,8 +183,6 @@ const CertificateController = {
 
             ]);
             const courseCert = course[0].certification
-            console.log(courseCert)
-            console.log(course[0].certification === CERTIFICATION.NOTALLOW)
             if (!course) {
                 return res.status(400).json({ message: "Khoá học không tồn tại!" })
             }
@@ -194,14 +192,11 @@ const CertificateController = {
             if (course[0].certification === CERTIFICATION.NOTALLOW)
                 return res.status(400).json({ message: "Khoá học không hỗ trợ cấp chứng chỉ!" })
             //TODO: điều kiện cấp chứng chỉ 
-            if (course[0].certification === CERTIFICATION.WHENDONE && course[0].avg < 0.8)
-                return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
-            if (course[0].certification === CERTIFICATION.WHENCOURSEDONE)
-                if ((new Date(course[0].endTime)) > (new Date()) || course[0].avg < 0.8)
-                    return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
-
-
-
+            // if (course[0].certification === CERTIFICATION.WHENDONE && course[0].avg < 0.8)
+            //     return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
+            // if (course[0].certification === CERTIFICATION.WHENCOURSEDONE)
+            //     if ((new Date(course[0].endTime)) > (new Date()) || course[0].avg < 0.8)
+            //         return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
 
             const certificate = await Certificate.findOne({ user: loginUser.id, course: course.id })
             if (certificate) {
@@ -209,8 +204,7 @@ const CertificateController = {
             }
 
             const location = "Hồ Chí Minh"
-            //const { name, course, location, date, url } = req.body
-            const existingPdfBytes = await fetch(telegramURL + "file_15.pdf").then((res) =>
+            const existingPdfBytes = await fetch("https://tg-cloud-file-small-file.ajz.workers.dev/documents/file_6908.pdf?file_name=cert.pdf&expire=1683795361&signature=1TZqKfgOz2mqM%2FavhF1CETpBFNwH7QjYwhTClrF9%2BUo%3D").then((res) =>
                 res.arrayBuffer()
             );
 
@@ -220,16 +214,16 @@ const CertificateController = {
 
             //get font
 
-            const fontName = await fetch(telegramURL + "file_16.ttf").then((res) =>
+            const fontName = await fetch("https://tg-cloud-file-small-file.ajz.workers.dev/documents/file_6910.ttf?file_name=utm-french-vanilla.ttf&expire=1683795580&signature=y7FVBpKThzOZuY1QudbP%2BfXwkBfFjo7wTr9Zg0Kkd7Y%3D").then((res) =>
                 res.arrayBuffer()
             );
-            const fontCourse = await fetch(telegramURL + "file_17.ttf").then((res) =>
+            const fontCourse = await fetch("https://tg-cloud-file-small-file.ajz.workers.dev/documents/file_6914.ttf?file_name=utm-neo-sans-intelbold.ttf&expire=1683795856&signature=d7Ivg7YBiuk13oado4%2BlYTGS2bRdYRKsl%2FEcx8PNTbk%3D").then((res) =>
                 res.arrayBuffer()
             );
-            const fontCourseItalic = await fetch(telegramURL + "file_21.ttf").then((res) =>
+            const fontCourseItalic = await fetch("https://tg-cloud-file-small-file.ajz.workers.dev/documents/file_6913.ttf?file_name=utm-neo-sans-intel-italic.ttf&expire=1683795791&signature=btRnAkw%2FY1xhH7RrYuAOaeJq2ilns9u8ihv3VvKC9fY%3D").then((res) =>
                 res.arrayBuffer()
             );
-            const fontDay = await fetch(telegramURL + "file_19.ttf").then((res) =>
+            const fontDay = await fetch("https://tg-cloud-file-small-file.ajz.workers.dev/documents/file_6912.ttf?file_name=utm-neo-sans-intel.ttf&expire=1683795678&signature=G6S%2BuLGetrawNsji1vW45%2FzmVwbZp7e%2BjIHQ68D9XMA%3D").then((res) =>
                 res.arrayBuffer()
             );
 
@@ -413,13 +407,11 @@ function ChuoiNgay(str) {
 }
 function GenerateURL(str) {
 
-    XoaDau(str);
+    XoaDau(str.toLowerCase());
 
     const words = str.split(' ');
 
-
     const firstLetters = words.map(word => word.charAt(0));
-
 
     return firstLetters.join('');
 }
