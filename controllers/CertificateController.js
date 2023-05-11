@@ -191,12 +191,12 @@ const CertificateController = {
             }
             if (course[0].certification === CERTIFICATION.NOTALLOW)
                 return res.status(400).json({ message: "Khoá học không hỗ trợ cấp chứng chỉ!" })
-            //TODO: điều kiện cấp chứng chỉ 
-            // if (course[0].certification === CERTIFICATION.WHENDONE && course[0].avg < 0.8)
-            //     return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
-            // if (course[0].certification === CERTIFICATION.WHENCOURSEDONE)
-            //     if ((new Date(course[0].endTime)) > (new Date()) || course[0].avg < 0.8)
-            //         return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
+            // TODO: điều kiện cấp chứng chỉ 
+            if (course[0].certification === CERTIFICATION.WHENDONE && course[0].avg < 0.8)
+                return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
+            if (course[0].certification === CERTIFICATION.WHENCOURSEDONE)
+                if ((new Date(course[0].endTime)) > (new Date()) || course[0].avg < 0.8)
+                    return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
 
             const certificate = await Certificate.findOne({ user: loginUser.id, course: course.id })
             if (certificate) {
