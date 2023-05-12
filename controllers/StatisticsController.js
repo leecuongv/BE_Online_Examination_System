@@ -371,9 +371,13 @@ const StatisticController = {
 
     GetListBills: async (req, res) => {
         try {
-            let listPayments = await Bill.find().populate('creatorId')
+            let listPayments = await Bill.find({ status: STATUS.SUCCESS }).populate('creatorId')
             console.log(listPayments)
             listPayments = listPayments.map(item => {
+                if (item.description.includes("Mua")) {
+                    let amount = item.amount * FEE.FEE / 100
+                    item.amount = amount
+                }
                 return {
                     name: item.creatorId.fullname,
                     amount: item.amount,
