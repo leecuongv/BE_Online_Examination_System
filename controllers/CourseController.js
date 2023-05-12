@@ -660,7 +660,11 @@ const CourseController = {
                 return res.status(400).json({
                     message: "Không tìm thấy khoá học",
                 })
-
+            if(course.isSell===true){
+                return res.status(400).json({
+                    message: "Không thể xoá sinh viên đã mua khoá học!",
+                })
+            }
             if (course.students.find(item => item.toString() === student.id.toString())) {//nếu chưa có sinh viên trên
                 course.students = course.students.filter(item => item.toString() !== student.id.toString())
             }
