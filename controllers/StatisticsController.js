@@ -5,7 +5,7 @@ const Course = require("../models/Course")
 const User = require("../models/User")
 const TakeExam = require("../models/TakeExam");
 const SubmitAssignment = require("../models/SubmitAssignment")
-const { STATUS, VIEWPOINT, ROLES } = require("../utils/enum");
+const { STATUS, VIEWPOINT, ROLES, FEE } = require("../utils/enum");
 const moment = require("moment/moment");
 const Bill = require('../models/Bill');
 const Assignment = require("../models/Assignment");
@@ -24,9 +24,9 @@ const StatisticController = {
             if (!exam) return res.status(200).json({ message: "Không tìm thấy bài thi!" })
             let takeExams = await TakeExam.find({ examId: exam.id, userId: user.id }).populate('userId')
             takeExams = takeExams.map(item => {
-                let {name, examId, __v,result, points, userId, ...data } = item._doc
+                let { name, examId, __v, result, points, userId, ...data } = item._doc
 
-                
+
                 points = result.reduce((total, current) => {
 
                     total += current.point
@@ -35,7 +35,7 @@ const StatisticController = {
                     0
                 )
                 return {
-                    ...data, 
+                    ...data,
 
                     //name: userId?.fullname,   
                     //maxPoints: exam.maxPoints,
@@ -76,7 +76,7 @@ const StatisticController = {
             }
             let takeExams = await TakeExam.find({ examId: exam.id }).populate('userId')
             takeExams = takeExams.map(item => {
-                let {examId, __v,result, points, userId, ...data } = item._doc
+                let { examId, __v, result, points, userId, ...data } = item._doc
 
                 points = result.reduce((total, current) => {
 
@@ -86,9 +86,9 @@ const StatisticController = {
                     0
                 )
                 return {
-                    ...data,  
-                    name: userId?.fullname, 
-                    userAvatar: userId.avatar,  
+                    ...data,
+                    name: userId?.fullname,
+                    userAvatar: userId.avatar,
                     maxPoints: exam.maxPoints,
 
                     points
@@ -100,9 +100,9 @@ const StatisticController = {
                 examName: exam.name,
                 examId: exam.id,
                 maxPoints: exam.maxPoints,
-                typeofPoint: exam.typeofPoint,    
+                typeofPoint: exam.typeofPoint,
                 takeExams
-                })
+            })
 
         }
         catch (err) {
@@ -125,7 +125,7 @@ const StatisticController = {
                     path: "examId",
                     match: { creatorId: user.id }
                 })
-                console.log("takeExams"+takeExams)
+            console.log("takeExams" + takeExams)
             takeExams = takeExams.map(item => {
                 let { examId, result, points, userId, ...data } = item._doc
                 points = result.reduce((total, current) => {
@@ -165,9 +165,9 @@ const StatisticController = {
                 .populate('userId')
                 .populate({
                     path: "examId",
-                    
+
                 })
-                console.log("takeExams"+takeExams)
+            console.log("takeExams" + takeExams)
             takeExams = takeExams.map(item => {
                 let { examId, result, points, userId, ...data } = item._doc
                 points = result.reduce((total, current) => {
@@ -419,16 +419,28 @@ const StatisticController = {
 
     GetSumRevenue: async (req, res) => {
         try {
-            let listPayments = await Bill.find()
+            let updateAccountAmount = 0
+            let purchaseCourseAmount = 0
+            let listPayments = await Bill.find({ status: STATUS.SUCCESS })
             var tempTotalRevenue = 0
+            let listpc = []
             listPayments.forEach((item, index) => {
-                tempTotalRevenue += item.amount
+                if (item.description.includes("Mua")) {
+                    purchaseCourseAmount += item.amount * FEE.FEE / 100
+                    listpc.push(item.id)
+                }
+                if (item.description.includes("Nâng")) {
+                    updateAccountAmount += item.amount
+                }
+
             })
-            return res.status(200).json({ totalRevenue: tempTotalRevenue })
+            return res.status(200).json({ totalRevenue: updateAccountAmount + purchaseCourseAmount, updateAccountAmount, purchaseCourseAmount })
         } catch (error) {
             console.log(error)
             return res.status(500).json({ message: "Không xác định" })
         }
+
+
     },
 
     GetTotalRevenueByDay: async (req, res) => {
@@ -449,9 +461,14 @@ const StatisticController = {
             //     res[value.dateAdd].amount += value.item.amount;
             //     return res;
             // }, {});
-            let listBills = await Bill.aggregate([
+            let listBillUpgradeAccount = await Bill.aggregate([
                 {
-                    $match: { status: "success" }
+                    $match: {
+                        status: "success",
+                        "description": {
+                            "$regex": "Nâng"
+                        }
+                    },
                 },
                 {
                     $addFields: {
@@ -470,7 +487,7 @@ const StatisticController = {
                             }
                         },
                         revenue: {
-                            $sum: 50000
+                            $sum: "$amount"
                         }
                     }
                 },
@@ -478,12 +495,62 @@ const StatisticController = {
                 {
                     $project: {
                         revenue: 1,
+
                         date: "$_id",
-                        _id: 0
+                        _id: 0,
+
                     }
                 }
             ])
-            return res.status(200).json(listBills)
+
+            let listBillUPurchaseCourse = await Bill.aggregate([
+                {
+                    $match: {
+                        status: "success",
+                        "description": {
+                            "$regex": "Mua"
+                        }
+                    },
+                },
+                {
+                    $addFields: {
+                        createdAtDate: {
+                            $toDate: "$createdAt"
+                        },
+
+                    }
+                },
+                {
+                    $group: {
+                        _id: {
+                            $dateToString: {
+                                format: "%Y-%m-%d",
+                                date: "$createdAtDate"
+                            }
+                        },
+                        revenue: {
+                            $sum: { "$multiply": ["$amount", FEE.FEE / 100] }
+                        }
+                    }
+                },
+
+                {
+                    $project: {
+                        revenue: 1,
+
+                        date: "$_id",
+                        _id: 0,
+
+                    }
+                }
+            ])
+
+            const combinedArrays = listBillUpgradeAccount.concat(listBillUPurchaseCourse);
+
+            // Sort the combined array by date
+            combinedArrays.sort((a, b) => a.date - b.date);
+
+            return res.status(200).json(combinedArrays)
             //return res.status(200).json(result)
         } catch (error) {
             console.log(error)
@@ -649,10 +716,10 @@ const StatisticController = {
             const numberOfAssignmentsSubmitted = await SubmitAssignment.countDocuments({ userId: user.id })
 
             return res.status(201).json({
-                    numberOfCoursesJoined,
-                    numberOfExamsTaken,
-                    numberOfAssignmentsSubmitted
-                })
+                numberOfCoursesJoined,
+                numberOfExamsTaken,
+                numberOfAssignmentsSubmitted
+            })
 
         } catch (error) {
             console.log(error)
@@ -667,15 +734,15 @@ const StatisticController = {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
 
-            const numberOfCoursesCreated = await Course.countDocuments({creatorId: user.id})
-            const numberOfExamCreated = await Exam.countDocuments({creatorId: user.id})
-            const numberOfAssignmentsCreated = await SubmitAssignment.countDocuments({creatorId: user.id})
+            const numberOfCoursesCreated = await Course.countDocuments({ creatorId: user.id })
+            const numberOfExamCreated = await Exam.countDocuments({ creatorId: user.id })
+            const numberOfAssignmentsCreated = await SubmitAssignment.countDocuments({ creatorId: user.id })
 
             return res.status(201).json({
-                    numberOfCoursesCreated,
-                    numberOfExamCreated,
-                    numberOfAssignmentsCreated
-                })
+                numberOfCoursesCreated,
+                numberOfExamCreated,
+                numberOfAssignmentsCreated
+            })
 
         } catch (error) {
             console.log(error)

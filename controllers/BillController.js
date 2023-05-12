@@ -7,14 +7,13 @@ const TransactionHistory = require("../models/TransactionHistory")
 const dotenv = require('dotenv')
 const Bill = require('../models/Bill')
 const mongoose = require('mongoose')
-const { STATUS, BANK } = require('../utils/enum')
+const { STATUS, BANK, FEE } = require('../utils/enum')
 dotenv.config()
 // const frontendUrl = 'http://localhost:3006/'
 // const backendUrl = 'http://localhost:5000/'
 const frontendUrl = 'https://oes.vercel.app/'
 const backendUrl = 'https://be-oes.vercel.app/'
 const bcrypt = require("bcrypt");
-const fee = 10
 const BillController = {
 
     createPaymentMomo: async (req, res) => {
@@ -355,7 +354,7 @@ const BillController = {
             let balance = loginUser.balance
 
 
-            let phiRut = amount * (fee / 100)
+            let phiRut = amount * (FEE.FEE / 100)
             let soTienNhanDuoc = amount - phiRut
 
             if (feeIn = false) {
@@ -608,9 +607,9 @@ const BillController = {
             }
 
             let coursePrice = course.price
-            let balance = user.balance
+            let customerBalance = user.balance
 
-            if (balance < coursePrice) {
+            if (customerBalance < coursePrice) {
                 return res.status(400).json({ message: "Không đủ số dư tài khoản, vui lòng nạp thêm!" })
             }
 
@@ -618,7 +617,7 @@ const BillController = {
             if (!course.students.find(item => item.toString() === user.id.toString())) {
                 course.students.push(user.id)
 
-                let newBalance = balance - coursePrice
+                let newBalance = customerBalance - coursePrice
                 await User.findOneAndUpdate({ username }, {
                     balance: newBalance
                 }, { new: true })
@@ -627,9 +626,14 @@ const BillController = {
                     creatorId: user.id,
                     description: description,
                     amount: coursePrice,
-                    method: "User balance"
+                    method: "User balance",
+                    status: STATUS.SUCCESS
                 })
                 await newBill.save()
+                let seller = await User.findById(course.creatorId)
+                let sellerBalance = seller.balance
+                let newSellerBalance = sellerBalance + coursePrice - coursePrice * (FEE.FEE / 100)
+                await User.findByIdAndUpdate(course.creatorId, { balance: newSellerBalance }, { new: true })
             }
             else {
                 return res.status(400).json({ message: "Học viên đã thuộc lớp học!" })
