@@ -184,7 +184,7 @@ const CertificateController = {
             const courseCert = course[0].certification
             // const url1 = GenerateURL(loginUser.fullname + " " + course[0].name)
             // console.log(url1)
-            
+
             if (!course) {
                 return res.status(400).json({ message: "Khoá học không tồn tại!" })
             }
@@ -202,12 +202,13 @@ const CertificateController = {
 
             const certificate = await Certificate.findOne({ user: loginUser.id, course: course.id })
             if (certificate) {
-                return res.status(200).json({ link: certificate.file })
+
+                return res.status(200).json({ message: "Đã tồn tại chứng chỉ", link: certificate.file })
             }
 
             const location = "Hồ Chí Minh"
             const existingPdfBytes = fs.readFileSync("./controllers/cert/cert.pdf")
-            
+
 
             // Load a PDFDocument from the existing PDF bytes
             const pdfDoc = await PDFDocument.load(existingPdfBytes);
