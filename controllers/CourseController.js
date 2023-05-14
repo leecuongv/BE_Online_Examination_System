@@ -468,15 +468,18 @@ const CourseController = {
         try {
             //Lấy cái parameter
             const username = req.user?.sub
-            const courseId = req.query.courseId
+            const courseId = req.query?.courseId
             const start = new Date().getTime()
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
             const course = await Course.findOne({ courseId })
-                .populate({ path: 'students', select: { id: 1, fullname: 1, avatar: 1, email: 1 } })
-
+                .populate({ path: 'students', select: { id: 1, fullname: 1, avatar: 1, email: 1, gender: 1 } })
+            if (!course)
+                return res.status(400).json({
+                    message: "Không tìm thấy khoá học",
+                })
             let listStudent = course.students
             let listExam = course.exams
             const countExam = await TakeExam.aggregate([
@@ -660,7 +663,7 @@ const CourseController = {
                 return res.status(400).json({
                     message: "Không tìm thấy khoá học",
                 })
-            if(course.isSell===true){
+            if (course.isSell === true) {
                 return res.status(400).json({
                     message: "Không thể xoá sinh viên đã mua khoá học!",
                 })
