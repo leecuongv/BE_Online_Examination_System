@@ -444,6 +444,10 @@ const CourseController = {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
             const course = await Course.findById(courseId)
+            if (!course)
+                return res.status(400).json({
+                    message: "Không tìm thấy khoá học",
+                })
             let students = course.students
             students.push(user.id)
             console.log(students)
