@@ -3,8 +3,10 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
 const TakeExam = require("../models/TakeExam");
+const TransactionHistory = require("../models/TransactionHistory")
 const { STATUS, VIEWPOINT, ROLES } = require("../utils/enum");
 const moment = require("moment/moment");
+const { response } = require("express");
 
 const AdminController = {
 
@@ -127,11 +129,26 @@ const AdminController = {
             res.status(500).json({ message: "Lỗi lấy danh sách khóa học!" })
         }
     },
-    HappyNewYear: async(req, res)=>{
+    HappyNewYear: async (req, res) => {
         try {
-            return res.status(201).json({message:"Chúc bạn một năm mới tràn đầy sức khỏe, vạn sự thăng hoa, tiền đồ rộng mở , gia đình hạnh phúc nha ☆*: .｡. o(≧▽≦)o .｡.:*☆!"})
+            return res.status(201).json({ message: "Chúc bạn một năm mới tràn đầy sức khỏe, vạn sự thăng hoa, tiền đồ rộng mở , gia đình hạnh phúc nha ☆*: .｡. o(≧▽≦)o .｡.:*☆!" })
         } catch (error) {
-            
+
+        }
+    },
+
+    UpdateTransactionStatus: async (req, res) => {
+        try {
+            const { transactionId, isTransferred } = req.body
+
+            const transactionHistory = await TransactionHistory.findOneAndUpdate({ transactionId: transactionId }, { isTransferred }, { new: true })
+
+            if (!transactionHistory)
+                return res.status(400).json({ message: "Không tồn tại giao dịch!" })
+
+            return res.status(200).json({ message: "Cập nhật trạng thái giao dịch thành công!" })
+        } catch (error) {
+
         }
     }
 
