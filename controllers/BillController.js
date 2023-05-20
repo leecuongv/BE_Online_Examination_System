@@ -332,8 +332,10 @@ const BillController = {
                 return res.status(400).json({ message: "Không có người dùng!" })
             const { bank, creditNumber, amount, password, feeIn } = req.body
             let flag = false
-            for (key in BANK) {
-                if (bank === BANK.key) {
+            for (var key in BANK) {
+                console.log(key)
+                if (bank === key) {
+                    console.log(key)
                     flag = true
                 }
             }
@@ -357,7 +359,7 @@ const BillController = {
             let phiRut = amount * (FEE.FEE / 100)
             let soTienNhanDuoc = amount - phiRut
 
-            if (feeIn = false) {
+            if (feeIn === false) {
                 soTienNhanDuoc = amount
             }
             let total = phiRut + soTienNhanDuoc
@@ -368,10 +370,12 @@ const BillController = {
                 creatorId: loginUser._id,
                 bank,
                 creditNumber,
+                fee: phiRut,
                 feeIn,
                 amount,
                 status: STATUS.SUCCESS,
                 description: "Rút tiền",
+                isTransferred: false
             })
 
             let error = newTransactionHistory.validateSync();
@@ -382,9 +386,24 @@ const BillController = {
             }
             let newBalance = balance - total
             const transactionHistory = await newTransactionHistory.save()
-            await User.findByIdAndUpdate({ username: loginUsername }, {
+            await User.findOneAndUpdate({ username: loginUsername }, {
                 balance: newBalance
             }, { new: true })
+
+            const newBill = new Bill({
+                creatorId: loginUser._id,
+                description: "Rút tiền về tài khoản: " + bank + " STK: " + creditNumber + " STR: " + soTienNhanDuoc + " PHI: " + phiRut,
+                amount: phiRut,
+                method: "User balance",
+                status: STATUS.SUCCESS
+            })
+            let error2 = newBill.validateSync()
+            if (error2)
+                return res.status(400).json({
+                    message: "Tạo hóa đơn mới thất bại!"
+                })
+            await newBill.save()
+
 
             return res.status(200).json({
                 message: "Tạo giao dịch rút tiền thành công, số tiền rút sẽ được chuyển vào tài khoản của quý khách trong 5 - 10 ngày làm việc(không kể Thứ 7, Chủ nhật và ngày lễ)",
@@ -400,6 +419,8 @@ const BillController = {
 
 
     },
+
+
     PayInVNPay: async (req, res, next) => {
         try {
 

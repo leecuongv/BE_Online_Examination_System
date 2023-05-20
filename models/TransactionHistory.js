@@ -23,6 +23,10 @@ const transactionHistorySchema = mongoose.Schema({
         type: Number,
         default: 0,
     },
+    fee: {
+        type: Number,
+        default: 0
+    },
     status: {
         type: String,
         default: STATUS.FAILED
@@ -36,6 +40,12 @@ const transactionHistorySchema = mongoose.Schema({
         type: String,
         require: true,
         default: ""
+    },
+    isTransferred: {
+        type: Boolean,
+        require: true,
+        default: false,
+
     }
     //bank, creditNumber, amount, password, feeIn 
 },
