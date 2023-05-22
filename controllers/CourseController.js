@@ -19,7 +19,7 @@ const CourseController = {
     CreateCourse: async (req, res) => {
         try {
             let isSell = false
-            const { slug, name, description, username, startTime, endTime, price, pin } = req.body
+            const { slug, name, description, username, startTime, endTime, price, pin, certification } = req.body
             const image = req.files?.file
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -45,7 +45,8 @@ const CourseController = {
                 endTime,
                 price,
                 isSell,
-                pin
+                pin,
+                certification
             });
             if (image) {
                 if (image.data.size > 2000000) {
@@ -338,6 +339,7 @@ const CourseController = {
                         description: '$doc.description',
                         count: 1,
                         total: 1,
+                        certification: '$doc.certification',
                         avg: { $cond: [{ $eq: ["$total", 0] }, "0", { "$divide": ["$count", "$total"] }] }
                     }
                 }
@@ -348,8 +350,8 @@ const CourseController = {
                     return res.status(400).json({
                         message: "Học viên Không thuộc khoá học!",
                     })
-                const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg } = course[0]
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg })
+                const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification } = course[0]
+                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification })
             }
 
             return res.status(400).json({
@@ -395,7 +397,10 @@ const CourseController = {
             const { courseId } = req.query
             const username = req.user?.sub
             const student = await User.findOne({ username })
-            const course = await Course.findOne({ courseId: Number(courseId) });
+            if (!student) {
+                return res.status(400).json({ message: "Không tìm thấy người dùng!" })
+            }
+            const course = await Course.findOne({ courseId: Number(courseId), creatorId: student.id });
             if (course) {
                 const { _id, courseId, name, description, exams, image, status, startTime, endTime, price, avg } = course._doc
                 return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, price, avg })
@@ -694,7 +699,7 @@ const CourseController = {
         try {
             let isSell = false
             const username = req.user?.sub
-            const { slug, name, description, startTime, endTime, courseId, price } = req.body
+            const { slug, name, description, startTime, endTime, courseId, price, certification } = req.body
             const image = req.files?.file
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -718,7 +723,8 @@ const CourseController = {
                 startTime,
                 endTime,
                 price,
-                isSell
+                isSell,
+                certification
             }
 
             if (image) {
