@@ -1,7 +1,7 @@
 const Course = require("../models/Course")
 const User = require("../models/User")
 const mongoose = require("mongoose")
-const { ROLES, STATUS } = require("../utils/enum")
+const { ROLES, STATUS, CERTIFICATION } = require("../utils/enum")
 const cloudinary = require('cloudinary').v2
 const dotenv = require('dotenv')
 const TakeExam = require("../models/TakeExam")
@@ -126,6 +126,7 @@ const CourseController = {
                         startTime: 1,
                         endTime: 1,
                         creatorId: 1,
+                        certification: 1,
                         numberOfExams: { $cond: { if: { $isArray: "$exams" }, then: { $size: "$exams" }, else: "NA" } },
                         numberOfAssignments: { $cond: { if: { $isArray: "$assignments" }, then: { $size: "$assignments" }, else: "NA" } },
                         numberOfLessons: { $cond: { if: { $isArray: "$lessons" }, then: { $size: "$lessons" }, else: "NA" } },
@@ -135,7 +136,7 @@ const CourseController = {
             ])
             console.log(course2)
             if (course) {
-                const { name, description, image, status, creatorId, startTime, endTime } = course._doc
+                const { name, description, image, status, creatorId, startTime, endTime, certification } = course._doc
                 return res.status(200).json(course2)
                 //return res.status(200).json(course._doc)
             }
@@ -350,8 +351,24 @@ const CourseController = {
                     return res.status(400).json({
                         message: "Học viên Không thuộc khoá học!",
                     })
+
+
+
+
                 const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification } = course[0]
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification })
+
+                // TODO: điều kiện cấp chứng chỉ 
+                let isQualified = true
+                if (certification === CERTIFICATION.NOTALLOW)
+                    isQualified = false
+
+                if (certification === CERTIFICATION.WHENDONE && avg < 0.8)
+                    isQualified = false
+                if (certification === CERTIFICATION.WHENCOURSEDONE)
+                    if ((new Date(endTime)) > (new Date()) || avg < 0.8)
+                        isQualified = false
+
+                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification, isQualified })
             }
 
             return res.status(400).json({
@@ -377,8 +394,8 @@ const CourseController = {
                     return res.status(400).json({
                         message: "Học viên Không thuộc khoá học!",
                     })
-                const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg } = course[0]
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg })
+                const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification } = course[0]
+                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification })
             }
 
             return res.status(400).json({
@@ -402,8 +419,8 @@ const CourseController = {
             }
             const course = await Course.findOne({ courseId: Number(courseId), creatorId: student.id });
             if (course) {
-                const { _id, courseId, name, description, exams, image, status, startTime, endTime, price, avg } = course._doc
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, price, avg })
+                const { _id, courseId, name, description, exams, image, status, startTime, endTime, price, avg, certification } = course._doc
+                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, price, avg, certification })
             }
 
             return res.status(400).json({
@@ -916,6 +933,7 @@ const CourseController = {
                         courseId: "$doc.courseId",
                         count: 1,
                         total: 1,
+                        certification: "$doc.certification",
                         avg: { $cond: [{ $eq: ["$total", 0] }, "0", { "$divide": ["$count", "$total"] }] }
                     }
                 }

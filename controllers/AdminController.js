@@ -150,6 +150,17 @@ const AdminController = {
         } catch (error) {
 
         }
+    },
+    ViewTransactionHistory: async (req, res) => {
+        try {
+            const transactionHistory = await TransactionHistory.find({ status: STATUS.SUCCESS })
+            if (transactionHistory.length <= 0)
+                return res.status(400).json({ message: "Không tồn tại giao dịch!" })
+
+            return res.status(200).json(transactionHistory)
+        } catch (error) {
+
+        }
     }
 
 
