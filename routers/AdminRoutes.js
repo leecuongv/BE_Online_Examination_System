@@ -11,6 +11,6 @@ router.delete("/delete-course-by-id", verifyTokenAdmin, AdminController.deleteCo
 router.get("/list-course", verifyTokenAdmin, AdminController.GetListCourse)
 router.post("/happy-new-year", AdminController.HappyNewYear)
 router.post("/update-transaction-status", verifyTokenAdmin, AdminController.UpdateTransactionStatus)
-
+router.get("/view-transaction-history", verifyTokenAdmin, AdminController.ViewTransactionHistory)
 
 module.exports = router
