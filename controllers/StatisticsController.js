@@ -9,6 +9,7 @@ const { STATUS, VIEWPOINT, ROLES, FEE } = require("../utils/enum");
 const moment = require("moment/moment");
 const Bill = require('../models/Bill');
 const Assignment = require("../models/Assignment");
+const Lesson = require("../models/Lesson")
 const StatisticController = {
 
     GetTakeExamByStudent: async (req, res) => {
@@ -285,6 +286,23 @@ const StatisticController = {
 
         }
     },
+    GetNumberOfLessons: async (req, res) => {
+        try {
+            const numberOfLesson = await Lesson.countDocuments()
+            if (!numberOfLesson)
+                return res.status(400).json({
+                    message: "Không đếm được số lượng bài kiểm tra!"
+                })
+            return res.status(200).json({
+                numberOfLesson
+            })
+
+        } catch (error) {
+            console.log(error)
+            return res.status(400).json({ message: "Lỗi đếm số lượng bài kiểm tra!" })
+
+        }
+    },
 
     GetNumberOfUsers: async (req, res) => {
         try {
@@ -303,7 +321,7 @@ const StatisticController = {
         }
     },
 
-    getDetailOfUsers: async (req, res) => {
+    GetDetailOfUsers: async (req, res) => {
         try {
             const numberOfUsers = await User.countDocuments()
             const numberOfTeachers = await User.countDocuments({
@@ -421,7 +439,7 @@ const StatisticController = {
         }
     },
 
-    GetSumRevenue: async (req, res) => {
+    GetTotalRevenue: async (req, res) => {
         try {
             let updateAccountAmount = 0
             let purchaseCourseAmount = 0
@@ -562,7 +580,7 @@ const StatisticController = {
         }
     },
 
-    getDetailOfCourse: async (req, res) => {
+    GetDetailOfCourse: async (req, res) => {
         try {
             const courseId = req.query.courseId
 
@@ -705,7 +723,7 @@ const StatisticController = {
             return res.status(500).json({ message: "Không xác định" })
         }
     },
-    DetailOfStudent: async (req, res) => {
+    GetDetailOfStudent: async (req, res) => {
         try {
             const username = req.user?.sub
             const user = await User.findOne({ username })
@@ -730,7 +748,7 @@ const StatisticController = {
             return res.status(400).json({ message: "Lỗi đếm số lượng người dùng!" })
         }
     },
-    DetailOfTeacher: async (req, res) => {
+    GetDetailOfTeacher: async (req, res) => {
         try {
             const username = req.user?.sub
             const user = await User.findOne({ username })
