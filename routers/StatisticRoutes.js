@@ -11,6 +11,7 @@ router.get('/submit-assignment-detail-by-teacher', verifyToken, StatisticControl
 router.get("/number-of-courses", verifyTokenAdmin, StatisticController.GetNumberOfCourses);
 router.get("/number-of-exams", verifyTokenAdmin, StatisticController.GetNumberOfExams)
 router.get("/number-of-assignments", verifyTokenAdmin, StatisticController.GetNumberOfAssignments)
+router.get("/number-of-lessons", verifyTokenAdmin, StatisticController.GetNumberOfLessons)
 router.get("/number-of-users", verifyTokenAdmin, StatisticController.GetNumberOfUsers)
 router.get("/total-new-users-by-day", verifyTokenAdmin, StatisticController.GetTotalNewUsersByDay)
 router.get("/list-bills", verifyTokenAdmin, StatisticController.GetListBills)
