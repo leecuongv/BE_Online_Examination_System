@@ -181,7 +181,7 @@ const CertificateController = {
                 }
 
             ]);
-            const courseCert = course[0].certification
+            //const courseCert = course[0].certification
             // const url1 = GenerateURL(loginUser.fullname + " " + course[0].name)
             // console.log(url1)
 
