@@ -16,7 +16,7 @@ const CertificateController = {
     Create: async (req, res) => {
         try {
             const loginUsername = req.user?.sub
-            const { courseId } = req.query
+            const { courseId } = req.body
             const loginUser = await User.findOne({ username: loginUsername })
             if (!loginUser) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
