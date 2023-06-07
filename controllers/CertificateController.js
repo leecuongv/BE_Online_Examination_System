@@ -185,7 +185,7 @@ const CertificateController = {
             // const url1 = GenerateURL(loginUser.fullname + " " + course[0].name)
             // console.log(url1)
 
-            if (!course) {
+            if (course.length === 0) {
                 return res.status(400).json({ message: "Khoá học không tồn tại!" })
             }
             if (!course[0].students.find(item => item.toString() === loginUser.id.toString())) {//nếu chưa có sinh viên trên
@@ -310,7 +310,7 @@ const CertificateController = {
                             linkFile = "https://api.telegram.org/file/" + tokenBot + "/" + path
                             console.log(linkFile)
 
-                            const newCert = await new Certificate({
+                            const newCert = new Certificate({
                                 user: loginUser.id,
                                 course: course.id,
                                 file: linkFile,
@@ -340,9 +340,6 @@ const CertificateController = {
                         message: 'Tạo file không thành công'
                     })
                 });
-
-
-
 
         } catch (error) {
             console.log(error)
