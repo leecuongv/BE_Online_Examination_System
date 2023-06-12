@@ -94,15 +94,15 @@ const ANSWERTYPE = {
   EQUAL: "equal",
   INCLUDE: "include"
 }
-const FEE={
-  FEE:10
+const FEE = {
+  FEE: 10
 }
 
 const BANK = {
   VIETCOMBANK: "Ngân hàng ngoại thương Việt Nam(VietcomBank)",
   BIDV: "Ngân hàng Đầu tư và Phát triển VN (BIDV)",
   VIETINBANK: "NH Công thương VN (Vietinbank)",
-  AGRIBANK: "NH Nông nghiệp&PT Nông thôn VNAGribank",
+  AGRIBANK: "NH Nông nghiệp &PT Nông thôn VNAGribank",
   PVCOMBANK: "Ngân hàng TMCP Đại A",
   NCB: "Ngân hàng TMCP Quốc Dân",
   VIETABANK: "Ngân hàng TMCP Việt Á",

@@ -275,7 +275,7 @@ const CourseController = {
                             {
                                 $unwind: {
                                     path: "$counts",
-                                    preserveNullAndEmptyArrays: true
+                                    //preserveNullAndEmptyArrays: true
                                 }
                             },
                             {
@@ -934,7 +934,9 @@ const CourseController = {
                         count: 1,
                         total: 1,
                         certification: "$doc.certification",
-                        avg: { $cond: [{ $eq: ["$total", 0] }, "0", { "$divide": ["$count", "$total"] }] }
+                        avg: { $cond: [{ $eq: ["$total", 0] }, "0", { "$divide": ["$count", "$total"] }] },
+                        startTime: "$doc.startTime",
+                        endTime: "$doc.endTime"
                     }
                 }
 
