@@ -5,5 +5,6 @@ const router = express.Router();
 
 router.post("/image",verifyToken,UploadController.UploadImage)
 router.post('/file',verifyToken, UploadController.Upload);
+router.post('/up-file',verifyToken, UploadController.UploadFile);
 router.get('/download-file',verifyToken, UploadController.Download);
 module.exports = router;
