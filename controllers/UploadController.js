@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 const User = require("../models/User")
 const axios = require('axios');
 const FormData = require('form-data');
+
+const { Deta } = require('deta'); // import Deta
+
+// Initialize with a Project Key
+const deta = Deta('project key');
+
+const project_key = 'c0jjeyx4mur_FRm55gZPeEASwLoBFeVmWVu2PWbiQmjy';
 const tokenBot = 'bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs'
 const UploadController = {
     UploadImage: async (req, res) => {
@@ -20,7 +27,7 @@ const UploadController = {
             var bodyFormData = new FormData();
             bodyFormData.append('chat_id', 5813484449)
             bodyFormData.append('document', file.data, { filename: file.name })
-            
+
             axios.post(`https://api.telegram.org/${tokenBot}/sendDocument`,
                 bodyFormData,
                 {
@@ -67,7 +74,7 @@ const UploadController = {
             var bodyFormData = new FormData();
             bodyFormData.append('chat_id', 5813484449)
             bodyFormData.append('document', file.data, { filename: file.name })
-            
+
             axios.post(`https://api.telegram.org/${tokenBot}/sendDocument`,
                 bodyFormData,
                 {
@@ -93,6 +100,45 @@ const UploadController = {
                         message: 'Tải lên không thành công'
                     })
                 });
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi upload file" })
+        }
+    },
+    UploadFile: async (req, res) => {
+        try {
+            const username = req.user.sub
+            const file = req.files.upload
+
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có người dùng" })
+            if (!file) {
+                return res.status(400).json({
+                    message: 'Không có file'
+                })
+            }
+
+            let id = new mongoose.Types.ObjectId();
+            let filename = id.toString() + "__" + file.name;
+            // Initialize with a Project Key
+            const deta = Deta(project_key);
+
+            // You can create as many as you want
+            const FileDrive = deta.Drive('File');
+
+            FileDrive.put(filename, { data: Buffer.from(file.data) })
+                .then(response => {
+                    return res.status(200).json({
+                        url: response
+                    })
+                })
+                .catch(error => {
+                    //console.log(error.response);
+                    return res.status(200).json({
+                        message: 'Tải lên không thành công'
+                    })
+                });
+
         } catch (error) {
             console.log(error)
             res.status(400).json({ message: "Lỗi upload file" })
