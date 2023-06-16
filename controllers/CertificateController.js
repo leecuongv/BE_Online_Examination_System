@@ -12,7 +12,6 @@ const { Deta } = require("deta");
 dotenv.config()
 const backendUrl = 'https://be-oes.vercel.app/'
 const project_key = 'c0jjeyx4mur_FRm55gZPeEASwLoBFeVmWVu2PWbiQmjy';
-
 const CertificateController = {
 
     Create: async (req, res) => {
@@ -209,7 +208,9 @@ const CertificateController = {
             }
 
             const location = "Hồ Chí Minh"
-            const existingPdfBytes = fs.readFileSync("./controllers/cert/cert.pdf")
+            var path = require("path");
+            const configDirectory = path.resolve(process.cwd(), "controllers/cert");
+             const existingPdfBytes = fs.readFileSync(path.join(configDirectory, "cert.pdf"))
 
 
             // Load a PDFDocument from the existing PDF bytes
