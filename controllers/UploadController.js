@@ -189,6 +189,46 @@ const UploadController = {
         }
     },
 
+    DownloadDeta: async (req, res) => {
+        try {
+            const filename = req.query.filename
+
+            // Initialize with a Project Key
+            const deta = Deta(project_key);
+
+            // You can create as many as you want
+            const FileDrive = deta.Drive('File');
+
+            FileDrive.get(filename)
+                .then((data) => {
+                    console.log(data);
+                   
+                    data.arrayBuffer().then(buffer =>{
+                        res.writeHead(200, {
+                            'Content-Disposition': `attachment; filename="${filename}"`,
+                            //'Content-Type': fileType,
+                        })
+    
+                        const download = Buffer.from(buffer);
+                        
+                    res.end(download);
+                    })
+
+                    
+                })
+                .catch(error => {
+                    console.log(error);
+                    return res.status(200).json({
+                        message: 'Tải veef không thành công'
+                    })
+                });
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi tải file" })
+        }
+    },
+
     // Test: async (req, res) => {
     //     try {
     //         const alpha = Array.from(Array(100)).map((e, i) => i);
