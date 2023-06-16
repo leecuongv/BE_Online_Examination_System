@@ -2,15 +2,17 @@ const mongoose = require("mongoose")
 const User = require("../models/User")
 const { ROLES, STATUS, CERTIFICATION } = require("../utils/enum")
 const dotenv = require('dotenv')
-const axios = require('axios');
-const FormData = require('form-data');
 const tokenBot = 'bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs'
 const fs = require("fs")
 const { degrees, PDFDocument, rgb, StandardFonts } = require("pdf-lib");
 const fontkit = require("@pdf-lib/fontkit");
 const Course = require("../models/Course");
 const Certificate = require("../models/Certificate");
+const { Deta } = require("deta");
 dotenv.config()
+const backendUrl = 'https://be-oes.vercel.app/'
+const project_key = 'c0jjeyx4mur_FRm55gZPeEASwLoBFeVmWVu2PWbiQmjy';
+
 const CertificateController = {
 
     Create: async (req, res) => {
@@ -280,59 +282,41 @@ const CertificateController = {
                 color: rgb(0.36, 0.54, 0.66),
             });
 
-
             const pdfBytes = await pdfDoc.save()
-            fs.writeFile('newfile.pdf', pdfBytes, function (err) {
-                if (err) throw err;
-                console.log('Tạo file mới thành công!');
-            });
 
+            let id = new mongoose.Types.ObjectId();
+            let filename = id.toString() + "-certificate.pdf";
 
-            var bodyFormData = new FormData();
-            bodyFormData.append('chat_id', 5813484449)
-            bodyFormData.append('document', fs.createReadStream("newfile.pdf"))
-            console.log("Đọc file")
             let linkFile = ""
+            // Initialize with a Project Key
+            const deta = Deta(project_key);
 
-            axios.post(`https://api.telegram.org/${tokenBot}/sendDocument`,
-                bodyFormData,
-                {
-                    headers: {
-                        ...bodyFormData.getHeaders()
-                    }
-                }
-            )
-                .then(response => {
-                    let file_id = response.data.result.document.file_id
-                    axios.get(`https://api.telegram.org/${tokenBot}/getFile?file_id=${file_id}`)
-                        .then(async responsePath => {
-                            let path = responsePath.data.result.file_path
-                            linkFile = "https://api.telegram.org/file/" + tokenBot + "/" + path
-                            console.log(linkFile)
+            // You can create as many as you want
+            const FileDrive = deta.Drive('File');
 
-                            const newCert = new Certificate({
-                                user: loginUser.id,
-                                course: course.id,
-                                file: linkFile,
-                                slug: url
-                            })
-                            console.log(linkFile)
-                            let error = newCert.validateSync();
-                            if (error) {
-                                console.log(error)
-                                return res.status(400).json({
-                                    message: "Tạo chứng chỉ không thành công!"
-                                })
-                            }
+            FileDrive.put(filename, { data: Buffer.from(pdfBytes) })
+                .then(async(response) => {
+                    linkFile = backendUrl +"api/upload/download-deta?filename="+ filename;
 
-                            const cert = await newCert.save();
-                            return res.status(200).json({
-                                message: "Tạo chứng chỉ thành công!",
-                                link: newCert.file
-                            })
-
+                    const newCert = new Certificate({
+                        user: loginUser.id,
+                        course: course.id,
+                        file: linkFile,
+                        slug: filename
+                    })
+                    let error = newCert.validateSync();
+                    if (error) {
+                        console.log(error)
+                        return res.status(400).json({
+                            message: "Tạo chứng chỉ không thành công!"
                         })
+                    }
 
+                    const cert = await newCert.save();
+                    return res.status(200).json({
+                        message: "Tạo chứng chỉ thành công!",
+                        link: newCert.file
+                    })
                 })
                 .catch(error => {
                     console.log(error.response);
