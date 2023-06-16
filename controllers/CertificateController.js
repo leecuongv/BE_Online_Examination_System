@@ -327,7 +327,7 @@ const CertificateController = {
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi upload file" })
+            res.status(400).json({ message: "Lỗi upload file", error:error})
         }
     },
     View: async (req, res) => {
