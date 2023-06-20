@@ -207,7 +207,9 @@ const CertificateController = {
             }
 
             const location = "Hồ Chí Minh"
-            const existingPdfBytes = fs.readFileSync("./controllers/cert/cert.pdf")
+            var path = require("path");
+            const configDirectory = path.resolve(process.cwd(), "controllers/cert");
+            const existingPdfBytes = fs.readFileSync(path.join(configDirectory, "cert.pdf"))
 
 
             // Load a PDFDocument from the existing PDF bytes
@@ -294,14 +296,28 @@ const CertificateController = {
             console.log("Đọc file")
             let linkFile = ""
 
-            axios.post(`https://api.telegram.org/${tokenBot}/sendDocument`,
-                bodyFormData,
-                {
-                    headers: {
-                        ...bodyFormData.getHeaders()
+            // You can create as many as you want
+            const FileDrive = deta.Drive('File');
+
+            FileDrive.put(filename, { data: Buffer.from(pdfBytes) })
+                .then(async (response) => {
+                    linkFile = backendUrl + "api/upload/download-deta?filename=" + filename;
+
+                    const newCert = new Certificate({
+                        user: loginUser.id,
+                        course: course.id,
+                        file: linkFile,
+                        slug: filename
+                    })
+                    let error = newCert.validateSync();
+                    if (error) {
+                        console.log(error)
+                        return res.status(400).json({
+                            message: "Tạo chứng chỉ không thành công!"
+                        })
                     }
                 }
-            )
+                )
                 .then(response => {
                     let file_id = response.data.result.document.file_id
                     axios.get(`https://api.telegram.org/${tokenBot}/getFile?file_id=${file_id}`)
@@ -343,7 +359,7 @@ const CertificateController = {
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi upload file" })
+            res.status(400).json({ message: "Lỗi upload file", error: error })
         }
     },
     View: async (req, res) => {
