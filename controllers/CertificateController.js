@@ -9,6 +9,7 @@ const fontkit = require("@pdf-lib/fontkit");
 const Course = require("../models/Course");
 const Certificate = require("../models/Certificate");
 const { Deta } = require("deta");
+const translate = require("translate-google")
 dotenv.config()
 const backendUrl = 'https://be-oes.vercel.app/'
 const project_key = 'c0jjeyx4mur_FRm55gZPeEASwLoBFeVmWVu2PWbiQmjy';
@@ -210,7 +211,7 @@ const CertificateController = {
             const location = "Hồ Chí Minh"
             var path = require("path");
             const configDirectory = path.resolve(process.cwd(), "controllers/cert");
-             const existingPdfBytes = fs.readFileSync(path.join(configDirectory, "cert.pdf"))
+            const existingPdfBytes = fs.readFileSync(path.join(configDirectory, "cert.pdf"))
 
 
             // Load a PDFDocument from the existing PDF bytes
@@ -239,7 +240,7 @@ const CertificateController = {
             const formattedDate = newDate.toLocaleDateString('en-US', options);
             // Draw a string of text diagonally across the first page
             const url = GenerateURL(loginUser.fullname + " " + course[0].name)
-
+            let courseName = XoaDau(course[0].name)
             firstPage.drawText(loginUser.fullname, {
                 x: 80,
                 y: 275,
@@ -254,7 +255,7 @@ const CertificateController = {
                 font: embedFontCourse,
                 color: rgb(0, 0, 0),
             });
-            firstPage.drawText(`Has successfully completed the course  "` + course[0].name + `"`, {
+            firstPage.drawText(`Has successfully completed the course  "` + courseName + `"`, {
                 x: 35,
                 y: 180,
                 size: 17,
@@ -286,7 +287,8 @@ const CertificateController = {
             const pdfBytes = await pdfDoc.save()
 
             let id = new mongoose.Types.ObjectId();
-            let filename = id.toString() + "-certificate.pdf";
+            //let filename = id.toString() + "-certificate.pdf";
+            let filename = url + ".pdf"
 
             let linkFile = ""
             // Initialize with a Project Key
@@ -296,8 +298,8 @@ const CertificateController = {
             const FileDrive = deta.Drive('File');
 
             FileDrive.put(filename, { data: Buffer.from(pdfBytes) })
-                .then(async(response) => {
-                    linkFile = backendUrl +"api/upload/download-deta?filename="+ filename;
+                .then(async (response) => {
+                    linkFile = backendUrl + "api/upload/download-deta?filename=" + filename;
 
                     const newCert = new Certificate({
                         user: loginUser.id,
@@ -328,7 +330,7 @@ const CertificateController = {
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi upload file", error:error})
+            res.status(400).json({ message: "Lỗi upload file", error: error })
         }
     },
     View: async (req, res) => {
@@ -387,5 +389,16 @@ function GenerateURL(str) {
 
     return firstLetters.join('').toLowerCase();
 }
+async function translateVietnameseToEnglish(text) {
+    try {
+        const translation = await getData(translate(text, { from: 'vi', to: 'en' }));
+        return translation;
+    } catch (error) {
+        console.error('Translation error:', error);
+        return null;
+    }
+}
+
+
 
 module.exports = { CertificateController }
