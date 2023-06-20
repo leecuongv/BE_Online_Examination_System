@@ -25,6 +25,7 @@
         "express-session": "^1.17.3",
         "firebase": "^9.22.1",
         "generate-password": "^1.7.0",
+        "google-translate-api": "^2.3.0",
         "googleapis": "^101.0.0",
         "helmet": "^5.0.2",
         "jsonwebtoken": "^8.5.1",
@@ -39,6 +40,8 @@
         "passport": "^0.6.0",
         "passport-google-oauth20": "^2.0.0",
         "pdf-lib": "^1.17.1",
-        "qs": "^6.7.0"
+        "qs": "^6.7.0",
+        "translate": "^2.0.2",
+        "translate-google": "^1.5.0"
     }
 }
