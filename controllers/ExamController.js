@@ -7,6 +7,7 @@ const Question = require("../models/Question")
 const { STATUS } = require("../utils/enum");
 const TakeExam = require("../models/TakeExam");
 const lodash = require('lodash');
+const { CompareDate, IsClose, IsOpen } = require("./handler/DateTimeHandler")
 
 const ExamController = {
     CreateExam: async (req, res) => {

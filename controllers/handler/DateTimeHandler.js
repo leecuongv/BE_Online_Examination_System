@@ -25,3 +25,4 @@ function IsClose(dateStr) {
     else
         return false
 }
+module.exports = { CompareDate, IsClose, IsOpen };

@@ -4,6 +4,7 @@ const Course = require("../models/Course")
 const User = require("../models/User")
 const { STATUS } = require("../utils/enum");
 const SeenLesson = require("../models/SeenLesson");
+const { CompareDate, IsClose, IsOpen } = require("./handler/DateTimeHandler")
 
 const LessonController = {
     Create: async (req, res) => {
