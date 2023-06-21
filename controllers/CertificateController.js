@@ -241,6 +241,7 @@ const CertificateController = {
             // Draw a string of text diagonally across the first page
             const url = GenerateURL(loginUser.fullname + " " + course[0].name)
             let courseName = XoaDau(course[0].name)
+            let filename = url + ".pdf"
             firstPage.drawText(loginUser.fullname, {
                 x: 80,
                 y: 275,
@@ -276,10 +277,10 @@ const CertificateController = {
                 font: embedFontDay,
                 color: rgb(0.36, 0.54, 0.66),
             });
-            firstPage.drawText("Xác nhận tại: oes.vercel.app/certification/" + url, {
-                x: 30,
+            firstPage.drawText("Xác nhận tại: " + backendUrl + "api/upload/download-deta?filename=" + filename, {
+                x: 20,
                 y: 30,
-                size: 10,
+                size: 6,
                 font: embedFontCourseItalic,
                 color: rgb(0.36, 0.54, 0.66),
             });
@@ -288,7 +289,7 @@ const CertificateController = {
 
             let id = new mongoose.Types.ObjectId();
             //let filename = id.toString() + "-certificate.pdf";
-            let filename = url + ".pdf"
+
 
             let linkFile = ""
             // Initialize with a Project Key
