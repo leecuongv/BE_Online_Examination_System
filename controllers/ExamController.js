@@ -28,12 +28,12 @@ const ExamController = {
             if (startTime === null || endTime === null
                 || new Date(startTime).toLocaleString() === "Invalid Date"
                 || new Date(endTime).toLocaleString() === "Invalid Date") {
-                return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
+                return res.status(400).json({ message: "Thời gian của bài thi không hợp lệ" })
 
             }
 
             if ((new Date(startTime)) < (new Date(course.startTime)) || (new Date(endTime)) > (new Date(course.endTime)))
-                return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
+                return res.status(400).json({ message: "Thời gian của bài thi không hợp lệ" })
 
             const newExam = await new Exam({
 
@@ -155,7 +155,11 @@ const ExamController = {
             if (startTime === null || endTime === null
                 || new Date(startTime).toLocaleString() === "Invalid Date"
                 || new Date(endTime).toLocaleString() === "Invalid Date") {
-                return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
+                return res.status(400).json({ message: "Thời gian của bài thi không hợp lệ" })
+
+            }
+            if (CompareDate(startTime, course.startTime) === -1 || CompareDate(endTime, course.endTime) === 1) {
+                return res.status(400).json({ message: "Thời gian của bài thi phải nằm trong thời gian khoá học diễn ra" })
 
             }
 
@@ -401,7 +405,7 @@ const ExamController = {
         }
     },
 
-    
+
 
 };
 

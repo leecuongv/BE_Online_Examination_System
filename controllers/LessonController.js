@@ -27,6 +27,10 @@ const LessonController = {
                 return res.status(400).json({ message: "Thời gian của bài giảng không hợp lệ" })
 
             }
+            if (CompareDate(startTime, course.startTime) === -1 || CompareDate(endTime, course.endTime) === 1) {
+                return res.status(400).json({ message: "Thời gian của bài tập phải nằm trong thời gian khoá học diễn ra" })
+
+            }
             const newLesson = await new Lesson({
                 courseId,
                 name,
@@ -107,7 +111,10 @@ const LessonController = {
                 return res.status(400).json({ message: "Thời gian của bài giảng không hợp lệ" })
 
             }
+            if (CompareDate(startTime, course.startTime) === -1 || CompareDate(endTime, course.endTime) === 1) {
+                return res.status(400).json({ message: "Thời gian của bài tập phải nằm trong thời gian khoá học diễn ra" })
 
+            }
 
             let newData = {
                 courseId,
@@ -257,18 +264,18 @@ const LessonController = {
             const username = req.user?.sub
             const courseId = req.query.courseId
             const user = await User.findOne({ username })
-            
+
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
             const course = await Course.aggregate([
                 {
                     $match: {
-                        $and:[
-                            {courseId: Number(courseId)},
-                            {students: { $in: [user._id] }}
+                        $and: [
+                            { courseId: Number(courseId) },
+                            { students: { $in: [user._id] } }
                         ]
-                        
+
                     }
                 },
                 {
@@ -279,11 +286,11 @@ const LessonController = {
                             {
                                 $match: {
                                     $expr: {
-                                        $and:[
-                                            {$in: ['$_id', '$$lessonIds']},
-                                            {$eq:['$status',STATUS.PUBLIC]}
+                                        $and: [
+                                            { $in: ['$_id', '$$lessonIds'] },
+                                            { $eq: ['$status', STATUS.PUBLIC] }
                                         ]
-                                        
+
                                     }
                                 }
                             },
@@ -318,7 +325,7 @@ const LessonController = {
             ])
             console.log(course)
 
-            if (course.length===0) return res.status(400).json({ message: "Thông tin không hợp lệ" })
+            if (course.length === 0) return res.status(400).json({ message: "Thông tin không hợp lệ" })
 
             // const result = listExam.map(item => {            
             return res.status(200).json(course[0].lessons)
@@ -589,24 +596,24 @@ const LessonController = {
                         let dateMark = new Date(exam.startTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push({nameCourse:course.name,type:'exam',...exam._doc})
+                        calendar[dateMark].push({ nameCourse: course.name, type: 'exam', ...exam._doc })
 
                         dateMark = new Date(exam.endTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push({nameCourse:course.name,type:'exam',...exam._doc})
+                        calendar[dateMark].push({ nameCourse: course.name, type: 'exam', ...exam._doc })
                     })
 
                     course.assignments?.forEach(assignment => {
                         let dateMark = new Date(assignment.startTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push({nameCourse:course.name,type:'assignment',...assignment._doc})
+                        calendar[dateMark].push({ nameCourse: course.name, type: 'assignment', ...assignment._doc })
 
                         dateMark = new Date(assignment.endTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push({nameCourse:course.name,type:'assignment',...assignment._doc})
+                        calendar[dateMark].push({ nameCourse: course.name, type: 'assignment', ...assignment._doc })
                     })
                 })
                 calendar = Object.keys(calendar).sort().reduce(

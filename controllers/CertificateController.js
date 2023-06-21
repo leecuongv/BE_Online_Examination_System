@@ -389,15 +389,6 @@ function GenerateURL(str) {
 
     return firstLetters.join('').toLowerCase();
 }
-async function translateVietnameseToEnglish(text) {
-    try {
-        const translation = await getData(translate(text, { from: 'vi', to: 'en' }));
-        return translation;
-    } catch (error) {
-        console.error('Translation error:', error);
-        return null;
-    }
-}
 
 
 
