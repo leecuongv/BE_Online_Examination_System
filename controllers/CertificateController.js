@@ -274,10 +274,11 @@ const CertificateController = {
                 font: embedFontDay,
                 color: rgb(0.36, 0.54, 0.66),
             });
-            firstPage.drawText("Xác nhận tại: oes.vercel.app/certification/" + url, {
+
+            firstPage.drawText("Xác nhận tại: " + backendUrl + "api/upload/download-deta?filename=" + url + ".pdf", {
                 x: 30,
                 y: 30,
-                size: 10,
+                size: 6,
                 font: embedFontCourseItalic,
                 color: rgb(0.36, 0.54, 0.66),
             });
