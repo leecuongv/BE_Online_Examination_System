@@ -25,11 +25,11 @@ const LessonController = {
             if (startTime === null || endTime === null
                 || new Date(startTime).toLocaleString() === "Invalid Date"
                 || new Date(endTime).toLocaleString() === "Invalid Date") {
-                return res.status(400).json({ message: "Thời gian của bài giảng không hợp lệ" })
+                return res.status(400).json({ message: "Thời gian của bài giảng không hợp lệ!" })
 
             }
             if (CompareDate(startTime, course.startTime) === -1 || CompareDate(endTime, course.endTime) === 1) {
-                return res.status(400).json({ message: "Thời gian của bài tập phải nằm trong thời gian khoá học diễn ra" })
+                return res.status(400).json({ message: "Thời gian của bài giảng phải nằm trong thời gian khoá học diễn ra!" })
 
             }
             const newLesson = await new Lesson({
@@ -113,7 +113,7 @@ const LessonController = {
 
             }
             if (CompareDate(startTime, course.startTime) === -1 || CompareDate(endTime, course.endTime) === 1) {
-                return res.status(400).json({ message: "Thời gian của bài tập phải nằm trong thời gian khoá học diễn ra" })
+                return res.status(400).json({ message: "Thời gian của bài giảng phải nằm trong thời gian khoá học diễn ra" })
 
             }
 
