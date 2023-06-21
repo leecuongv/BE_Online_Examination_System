@@ -4,14 +4,14 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
-const { 
-  UserRoute, 
-  AuthRoute, 
-  SocialRoutes, 
-  CourseRoutes, 
-  BillRoute, 
-  ExamRoutes, 
-  QuestionRoutes, 
+const {
+  UserRoute,
+  AuthRoute,
+  SocialRoutes,
+  CourseRoutes,
+  BillRoute,
+  ExamRoutes,
+  QuestionRoutes,
   TakeExamRoutes,
   QuestionBankRoutes,
   StatisticRoutes,
@@ -20,12 +20,11 @@ const {
   SubmitAssignmentRoutes,
   AdminRoutes,
   LessonRoutes,
-  TickRouters,
   CertificateRoutes
- } = require('./routers');
+} = require('./routers');
 
- const { notFound, errorHandler } = require("./routers/errorMiddleware");
-const helmet= require("helmet");
+const { notFound, errorHandler } = require("./routers/errorMiddleware");
+const helmet = require("helmet");
 //const passport = require('passport');
 const rateLimit = require('express-rate-limit');
 //const session = require('express-session');
@@ -105,7 +104,7 @@ app.use(function (req, res, next) {
 });
 
 mongoose.connect(URI)
-  .then(async() => {
+  .then(async () => {
     console.log('Connected to Database')
   }).catch(err => {
     console.log('err', err)
@@ -138,7 +137,6 @@ app.use("/api/assignment", AssignmentRoutes)
 app.use("/api/submitassignment", SubmitAssignmentRoutes)
 app.use("/api/admin", AdminRoutes)
 app.use("/api/lesson", LessonRoutes)
-app.use("/api/tick", TickRouters)
 app.use("/api/certificate", CertificateRoutes)
 
 app.use(notFound);
