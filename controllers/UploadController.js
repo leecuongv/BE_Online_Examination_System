@@ -202,24 +202,24 @@ const UploadController = {
             FileDrive.get(filename)
                 .then((data) => {
                     console.log(data);
-                   
-                    data.arrayBuffer().then(buffer =>{
+
+                    data.arrayBuffer().then(buffer => {
                         res.writeHead(200, {
                             'Content-Disposition': `attachment; filename="${filename}"`,
                             //'Content-Type': fileType,
                         })
-    
+
                         const download = Buffer.from(buffer);
-                        
-                    res.end(download);
+
+                        res.end(download);
                     })
 
-                    
+
                 })
                 .catch(error => {
                     console.log(error);
                     return res.status(200).json({
-                        message: 'Tải veef không thành công'
+                        message: 'Tải về không thành công'
                     })
                 });
 

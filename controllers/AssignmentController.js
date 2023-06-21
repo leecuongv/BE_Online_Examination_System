@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course")
 const User = require("../models/User")
 const { STATUS } = require("../utils/enum");
+
 const SubmitAssignment = require("../models/SubmitAssignment")
 
 const AssignmentController = {
@@ -19,14 +20,18 @@ const AssignmentController = {
             const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ(không tìm thấy thông tin khóa học hoặc người tạo khóa học" })
 
-
-
             if (startTime === null || endTime === null
                 || new Date(startTime).toLocaleString() === "Invalid Date"
-                || new Date(endTime).toLocaleString() === "Invalid Date") {
+                || new Date(endTime).toLocaleString() === "Invalid Date" || CompareDate(startTime, endTime) >= 0) {
                 return res.status(400).json({ message: "Thời gian của bài tập không hợp lệ" })
 
             }
+
+            if (CompareDate(startTime, course.startTime) === -1 || CompareDate(endTime, course.endTime) === 1) {
+                return res.status(400).json({ message: "Thời gian của bài tập phải nằm trong thời gian khoá học diễn ra" })
+
+            }
+
             const newAssignment = await new Assignment({
                 courseId,
                 name,
@@ -73,6 +78,10 @@ const AssignmentController = {
             const { slug } = req.query
             console.log(slug)
             const assignment = await Assignment.findOne({ slug, creatorId: user.id })
+            if (!IsOpen(assignment.startTime))
+                return res.status(400).json({ message: "Bài tập chưa được mở!" })
+            if (!IsClose(assignment.endTime))
+                return res.status(400).json({ message: "Bài tập đã đóng!" })
             if (assignment) {
                 return res.status(200).json(assignment._doc)
             }
@@ -109,7 +118,10 @@ const AssignmentController = {
                 return res.status(400).json({ message: "Thời gian của bài tập không hợp lệ" })
 
             }
+            if (CompareDate(startTime, course.startTime) === -1 || CompareDate(endTime, course.endTime) === 1) {
+                return res.status(400).json({ message: "Thời gian của bài tập phải nằm trong thời gian khoá học diễn ra" })
 
+            }
 
             let newData = {
                 courseId,
@@ -215,8 +227,8 @@ const AssignmentController = {
             console.log(exitsAssignment)
 
             exitsAssignment = await Assignment.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
-            
-            await SubmitAssignment.deleteMany({assignmentId: id})
+
+            await SubmitAssignment.deleteMany({ assignmentId: id })
 
             return res.status(200).json({
                 message: "Xóa bài tập thành công",
