@@ -13,7 +13,6 @@ dotenv.config()
 const backendUrl = 'https://be-oes.vercel.app/'
 const project_key = 'c0jjeyx4mur_FRm55gZPeEASwLoBFeVmWVu2PWbiQmjy';
 const CertificateController = {
-
     Create: async (req, res) => {
         try {
             const loginUsername = req.user?.sub
@@ -201,7 +200,7 @@ const CertificateController = {
                 if ((new Date(course[0].endTime)) > (new Date()) || course[0].avg < 0.8)
                     return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
 
-            const certificate = await Certificate.findOne({ user: loginUser.id, course: course.id })
+            const certificate = await Certificate.findOne({ user: loginUser.id, course: course[0]._id })
             if (certificate) {
 
                 return res.status(200).json({ message: "Đã tồn tại chứng chỉ", link: certificate.file })
