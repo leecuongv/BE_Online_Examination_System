@@ -303,7 +303,7 @@ const CertificateController = {
 
                     const newCert = new Certificate({
                         user: loginUser.id,
-                        course: course.id,
+                        course: course[0]._id,
                         file: linkFile,
                         slug: filename
                     })
