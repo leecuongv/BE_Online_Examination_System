@@ -281,13 +281,7 @@ const AssignmentController = {
                 {
                     $match: {
                         courseId: course._id,
-                        status: STATUS.PUBLIC,
-                        startTime: {
-                            $lt: new Date()
-                        },
-                        endTime: {
-                            $gte: new Date()
-                        }
+                        status: STATUS.PUBLIC
 
                     }
                 },
