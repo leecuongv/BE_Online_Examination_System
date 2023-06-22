@@ -9,7 +9,6 @@ const fontkit = require("@pdf-lib/fontkit");
 const Course = require("../models/Course");
 const Certificate = require("../models/Certificate");
 const { Deta } = require("deta");
-const translate = require("translate-google")
 dotenv.config()
 const backendUrl = 'https://be-oes.vercel.app/'
 const project_key = 'c0jjeyx4mur_FRm55gZPeEASwLoBFeVmWVu2PWbiQmjy';

@@ -269,13 +269,12 @@ const LessonController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
+
             const course = await Course.aggregate([
                 {
                     $match: {
-                        $and: [
-                            { courseId: Number(courseId) },
-                            { students: { $in: [user._id] } }
-                        ]
+                        courseId: Number(courseId),
+                        students: { $in: [user._id] },
 
                     }
                 },
@@ -289,7 +288,10 @@ const LessonController = {
                                     $expr: {
                                         $and: [
                                             { $in: ['$_id', '$$lessonIds'] },
-                                            { $eq: ['$status', STATUS.PUBLIC] }
+                                            { $eq: ['$status', STATUS.PUBLIC] },
+                                            { $lt: ["$startTime", new Date()] },
+                                            { $gte: ["$endTime", new Date()] }
+
                                         ]
 
                                     }

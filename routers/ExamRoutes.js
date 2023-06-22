@@ -7,7 +7,7 @@ router.post('/create-exam', verifyToken, ExamController.CreateExam);
 
 router.put('/update-exam', verifyToken, ExamController.UpdateExam);
 
-router.get('/get-exambyslug', verifyToken, ExamController.getExamBySlug);
+router.get('/get-exambyslug', verifyToken, ExamController.getExamBySlugTeacher);
 
 router.get('/exam-by-student', verifyToken, ExamController.getExamBySlugByStudent);
 

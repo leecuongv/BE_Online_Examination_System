@@ -78,7 +78,7 @@ const ExamController = {
         }
     },
 
-    getExamBySlug: async (req, res) => {
+    getExamBySlugTeacher: async (req, res) => {
         try {
             const username = req.user.sub
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -405,8 +405,6 @@ const ExamController = {
             res.status(400).json({ message: "Lỗi xuất bản bài thi" })
         }
     },
-
-
 
 };
 
