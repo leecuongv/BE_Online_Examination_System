@@ -79,10 +79,6 @@ const AssignmentController = {
             const { slug } = req.query
             console.log(slug)
             const assignment = await Assignment.findOne({ slug, creatorId: user.id })
-            if (!IsOpen(assignment.startTime))
-                return res.status(400).json({ message: "Bài tập chưa được mở!" })
-            if (!IsClose(assignment.endTime))
-                return res.status(400).json({ message: "Bài tập đã đóng!" })
             if (assignment) {
                 return res.status(200).json(assignment._doc)
             }
@@ -285,7 +281,14 @@ const AssignmentController = {
                 {
                     $match: {
                         courseId: course._id,
-                        status: STATUS.PUBLIC
+                        status: STATUS.PUBLIC,
+                        startTime: {
+                            $lt: new Date()
+                        },
+                        endTime: {
+                            $gte: new Date()
+                        }
+
                     }
                 },
                 {

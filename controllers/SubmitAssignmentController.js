@@ -12,16 +12,18 @@ const SubmitAssignmentController = {
             const { assignmentId, content, file } = req.body;
             const toDay = new Date()
             if (!username)
-                return res.status(400).json({ message: "Không có người dùng" });
+                return res.status(400).json({ message: "Không có người dùng!" });
             const user = await User.findOne({ username });
             if (!user)
-                return res.status(400).json({ message: "Không có người dùng" });
+                return res.status(400).json({ message: "Không có người dùng!" });
             const assignment = await Assignment.findById(assignmentId)
             if (!assignment)
                 return res.status(400).json({ message: "Không tồn tại bài tập!" })
 
-            if ((toDay < (new Date(assignment.startTime)) || (toDay > (new Date(assignment.endTime)))))
-                return res.status(200).json({ message: "Không nằm trong thời gian nộp bài!" })
+            if (assignment.allowSubmitLate === false)
+                if ((toDay < (new Date(assignment.startTime)) || (toDay > (new Date(assignment.endTime))))) {
+                    return res.status(200).json({ message: "Không nằm trong thời gian nộp bài!" })
+                }
 
             const newSubmitAssignment = new SubmitAssignment({
                 assignmentId: assignmentId,
@@ -45,7 +47,7 @@ const SubmitAssignmentController = {
         }
         catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi nộp bài tập" })
+            res.status(400).json({ message: "Lỗi nộp bài tập!" })
         }
     },
     Update: async (req, res) => {
@@ -54,10 +56,10 @@ const SubmitAssignmentController = {
             const { submitAssignmentId, content, file } = req.body;
             const toDay = new Date()
             if (!username)
-                return res.status(400).json({ message: "Không có người dùng" });
+                return res.status(400).json({ message: "Không có người dùng!" });
             const user = await User.findOne({ username });
             if (!user)
-                return res.status(400).json({ message: "Không có người dùng" });
+                return res.status(400).json({ message: "Không có người dùng!" });
             const submitAssignment = await SubmitAssignment.findById(submitAssignmentId)
 
 
@@ -67,11 +69,13 @@ const SubmitAssignmentController = {
 
             const assignment = await Assignment.findById(submitAssignment.assignmentId)
 
-            if ((toDay < (new Date(assignment.startTime)) || (toDay > (new Date(assignment.endTime)))))
-                return res.status(200).json({ message: "Không nằm trong thời gian nộp bài!" })
+            if (assignment.allowSubmitLate === false)
+                if ((toDay < (new Date(assignment.startTime)) || (toDay > (new Date(assignment.endTime))))) {
+                    return res.status(200).json({ message: "Đã hết thời gian chỉnh sửa bài tập!" })
+                }
 
             if (assignment.status !== STATUS.PUBLIC)
-                return res.status(200).json({ message: "Bài tập đã đóng hoặc chưa mở" })
+                return res.status(200).json({ message: "Bài tập đã đóng hoặc chưa mở!" })
             const data = {
                 content,
                 submitTime: new Date(),
@@ -94,24 +98,29 @@ const SubmitAssignmentController = {
             const username = req.user.sub;
             const submitAssignmentId = req.query.id;
             if (!username)
-                return res.status(400).json({ message: "Không có người dùng" });
+                return res.status(400).json({ message: "Không có người dùng!" });
             const user = await User.findOne({ username });
             if (!user)
-                return res.status(400).json({ message: "Không có người dùng" });
+                return res.status(400).json({ message: "Không có người dùng!" });
             const submitAssignment = await SubmitAssignment.findById(submitAssignmentId)
 
             if (!submitAssignment)
                 return res.status(400).json({ message: "Không tồn tại thông tin nộp bài tập!" })
+            const assignment = await Assignment.findById(submitAssignment.assignmentId)
 
+            if (assignment.allowSubmitLate === false)
+                if ((toDay < (new Date(assignment.startTime)) || (toDay > (new Date(assignment.endTime))))) {
+                    return res.status(200).json({ message: "Đã hết thời gian chỉnh sửa bài tập!" })
+                }
             const updateSubmitAssignment = await SubmitAssignment.deleteOne({ "_id": mongoose.Types.ObjectId(submitAssignmentId) })
 
             return res.status(200).json({
-                message: "Xóa lịch sử nộp bài tập thành công"
+                message: "Xóa bài tập đã nộp thành công!"
             })
         }
         catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi nộp bài tập" })
+            res.status(400).json({ message: "Lỗi xoá bài tập!" })
         }
     },
     Mark: async (req, res) => {
@@ -119,10 +128,10 @@ const SubmitAssignmentController = {
             const username = req.user.sub;
             const { submitAssignmentId, points } = req.body;
             if (!username)
-                return res.status(400).json({ message: "Không có người dùng" });
+                return res.status(400).json({ message: "Không có người dùng!" });
             const user = await User.findOne({ username });
             if (!user)
-                return res.status(400).json({ message: "Không có người dùng" });
+                return res.status(400).json({ message: "Không có người dùng!" });
             const submitAssignment = await SubmitAssignment.findById(submitAssignmentId)
 
             if (!submitAssignment)
@@ -140,7 +149,7 @@ const SubmitAssignmentController = {
         }
         catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi chấm điểm bài tập" })
+            res.status(400).json({ message: "Lỗi chấm điểm bài tập!" })
         }
     },
     GetSubmitAssignmentById: async (req, res) => {
@@ -148,10 +157,10 @@ const SubmitAssignmentController = {
             const username = req.user.sub;
             const submitAssignmentId = req.query.id;
             if (!username)
-                return res.status(400).json({ message: "Không có người dùng" });
+                return res.status(400).json({ message: "Không có người dùng!" });
             const user = await User.findOne({ username });
             if (!user)
-                return res.status(400).json({ message: "Không có người dùng" });
+                return res.status(400).json({ message: "Không có người dùng!" });
             const submitAssignment = await SubmitAssignment.findById(submitAssignmentId)
 
             if (!submitAssignment)
@@ -163,7 +172,7 @@ const SubmitAssignmentController = {
         }
         catch (error) {
             console.log(error)
-            res.status(400).json({ message: "Lỗi chấm điểm bài tập" })
+            res.status(400).json({ message: "Lỗi chấm điểm bài tập!" })
         }
     },
 
@@ -174,7 +183,7 @@ const SubmitAssignmentController = {
             const slug = req.query.slug
             const user = await User.findOne({ username })
             if (!user) {
-                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+                return res.status(400).json({ message: "Tài khoản không tồn tại!" })
             }
 
             const assignment = await Assignment.findOne({ slug: slug })
@@ -205,12 +214,12 @@ const SubmitAssignmentController = {
                 return res.status(200).json(results)
             }
             return res.status(400).json({
-                message: "Không tìm thấy bài tập",
+                message: "Không tìm thấy bài tập!",
             })
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Lỗi tìm bài tập" })
+            res.status(500).json({ message: "Lỗi tìm bài tập!" })
         }
     },
 }
