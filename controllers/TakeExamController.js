@@ -27,7 +27,7 @@ const TakeExamController = {
 
   CheckExam: async (req, res) => {
     try {
-      const username = req.user.sub;
+      const username = req.user?.sub;
       const { slug } = req.body;
 
       const user = await User.findOne({ username });
@@ -121,7 +121,7 @@ const TakeExamController = {
 
   CreateTakeExam: async (req, res) => {
     try {
-      const username = req.user.sub;
+      const username = req.user?.sub;
 
 
       const { slug, pin } = req.body;
@@ -225,7 +225,7 @@ const TakeExamController = {
 
   submitAnswerSheet: async (req, res) => {
     try {
-      const username = req.user.sub
+      const username = req.user?.sub
       const { answerSheet, takeExamId } = req.body
 
       const user = await User.findOne({ username })
@@ -358,7 +358,7 @@ const TakeExamController = {
 
     try {
       const { takeExamId } = req.query;
-      const username = req.user.sub;
+      const username = req.user?.sub;
 
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
@@ -400,7 +400,7 @@ const TakeExamController = {
   getPreviewExam: async (req, res) => {
     try {
       const { takeExamId } = req.query;
-      const username = req.user.sub;
+      const username = req.user?.sub;
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
 
@@ -466,7 +466,7 @@ const TakeExamController = {
   createLogs: async (req, res) => {
     try {
       const { action, takeExamId } = req.body;
-      const username = req.user.sub;
+      const username = req.user?.sub;
 
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
@@ -498,7 +498,7 @@ const TakeExamController = {
   getLogs: async (req, res) => {
     try {
       const { takeExamId } = req.query;
-      const username = req.user.sub;
+      const username = req.user?.sub;
 
       const user = await User.findOne({ username });
       if (!user) return res.status(400).json({ message: "Không có người dùng" });
@@ -533,7 +533,7 @@ const TakeExamController = {
   },
   ViewAccuracyRateOfExamQuestions: async (req, res) => {
     try {
-      const username = req.user.sub
+      const username = req.user?.sub
       const { slug } = req.query
 
       if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -622,7 +622,7 @@ const TakeExamController = {
 
   ViewExamScoreDistribution: async (req, res) => {
     try {
-      const username = req.user.sub
+      const username = req.user?.sub
       const { slug } = req.query
 
       if (!username) return res.status(400).json({ message: "Không có người dùng" })

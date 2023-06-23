@@ -18,14 +18,14 @@ const QuestionBankController = {
     CreateQuestionBank: async (req, res) => {
         try {
             const { name, description } = req.body
-            const username = req.user.sub
+            const username = req.user?.sub
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
-            
-            const existQuestionBank = await QuestionBank.findOne({name: name, creatorId: user._id})
+
+            const existQuestionBank = await QuestionBank.findOne({ name: name, creatorId: user._id })
             console.log(existQuestionBank);
-            if(existQuestionBank) return res.status(400).json({ message: "Trùng tên với ngân hàng câu hỏi trước đó" })
+            if (existQuestionBank) return res.status(400).json({ message: "Trùng tên với ngân hàng câu hỏi trước đó" })
             const newQuestionBank = new QuestionBank({
                 name,
                 description,
@@ -71,7 +71,7 @@ const QuestionBankController = {
     },
     getListQuestionBankByTeacher: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
 
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có tài khoản" })
@@ -243,7 +243,7 @@ const QuestionBankController = {
             if (questionBank.questions.find(item => item.toString() === question.id.toString())) {
                 questionBank.questions = questionBank.questions.filter(item => item.toString() !== question.id.toString())
             }
-            
+
             else {
                 return res.status(400).json({ message: "Câu hỏi không nằm trong ngân hàng câu hỏi." })
             }
@@ -283,7 +283,7 @@ const QuestionBankController = {
     DeleteQuestionBank: async (req, res) => {
         try {
             const { questionBankId } = req.query
-            const username = req.user.sub
+            const username = req.user?.sub
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })

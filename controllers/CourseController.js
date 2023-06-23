@@ -108,15 +108,9 @@ const CourseController = {
 
     GetCourseInfoByCourseId: async (req, res) => {
         try {
-            const { course_id } = req.query
-            //console.log(slug)
-            const course = await Course.findOne({ courseId: course_id }).populate({
-                path: 'creatorId',
-                select: 'fullname'
-            })
-
-            const course2 = await Course.aggregate([
-                { $match: { courseId: 6 } },
+            const { courseId } = req.query
+            const course = await Course.aggregate([
+                { $match: { courseId: courseId } },
                 {
                     $project: {
                         name: 1,
@@ -134,10 +128,9 @@ const CourseController = {
                     }
                 }
             ])
-            console.log(course2)
+            console.log(course)
             if (course) {
-                const { name, description, image, status, creatorId, startTime, endTime, certification } = course._doc
-                return res.status(200).json(course2)
+                return res.status(200).json(course)
                 //return res.status(200).json(course._doc)
             }
 
@@ -154,7 +147,7 @@ const CourseController = {
     getCourseInfoToEnroll: async (req, res) => {
         try {
             const { courseId } = req.query
-            const username = req.user.sub
+            const username = req.user?.sub
 
             const course = await Course.findOne({ courseId })
             const user = await User.findOne({ username })
@@ -352,16 +345,12 @@ const CourseController = {
                         message: "Học viên Không thuộc khoá học!",
                     })
 
-
-
-
                 const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification } = course[0]
 
                 // TODO: điều kiện cấp chứng chỉ 
                 let isQualified = true
                 if (certification === CERTIFICATION.NOTALLOW)
                     isQualified = false
-
                 if (certification === CERTIFICATION.WHENDONE && avg < 0.8)
                     isQualified = false
                 if (certification === CERTIFICATION.WHENCOURSEDONE)
@@ -380,7 +369,6 @@ const CourseController = {
             res.status(500).json({ message: "Lỗi tìm khoá học" })
         }
     },
-
 
     getCourseByCourseIdOfTeacher: async (req, res) => {
         try {
@@ -456,7 +444,6 @@ const CourseController = {
 
     searchListStudentToAdd: async (req, res) => {
         try {
-            //Lấy cái parameter
             const username = req.user?.sub
             const search = req.query.search
             const courseId = req.query.courseId
@@ -492,7 +479,6 @@ const CourseController = {
 
     getListStudentOfCourse: async (req, res) => {
         try {
-            //Lấy cái parameter
             const username = req.user?.sub
             const courseId = req.query?.courseId
             const start = new Date().getTime()
@@ -621,10 +607,6 @@ const CourseController = {
             console.log(listExam)
 
             if (listExam) {
-                // const result = listExam.map(item => {
-                //     let { id, name } = item
-                //     return { id, name, count: item.count }
-                // })
                 return res.status(200).json(listExam)
             }
             return res.status(400).json({
@@ -638,7 +620,6 @@ const CourseController = {
     },
     addStudentIntoCourse: async (req, res) => {
         try {
-            //Lấy cái parameter
             const username = req.user?.sub
             const { studentId, courseId } = req.body
             console.log(new mongoose.Types.ObjectId(courseId));
@@ -674,10 +655,8 @@ const CourseController = {
 
     deleteStudentInCourse: async (req, res) => {
         try {
-            //Lấy cái parameter
             const username = req.user?.sub
             const { studentId, courseId } = req.query
-
             const teacher = await User.findOne({ username })
             const student = await User.findById(studentId)
             if (!teacher || !student) {
@@ -712,7 +691,7 @@ const CourseController = {
     },
 
 
-    UpdateCourse: async (req, res) => {//nhớ sửa
+    UpdateCourse: async (req, res) => {
         try {
             let isSell = false
             const username = req.user?.sub
@@ -733,7 +712,7 @@ const CourseController = {
                 return res.status(400).json({ message: "Giá tiền của khoá học phải lớn hơn hoặc bằng 0!" })
             if (price > 0)
                 isSell = true
-            let data = {//dữ liệu cần update
+            let data = {
                 slug,
                 name,
                 description,
@@ -749,7 +728,7 @@ const CourseController = {
                     return res.status(400).json({ message: "Ảnh có kích thước quá 2Mb" })
                 }
                 let dataImage = image.data.toString('base64')
-                dataImage = `data:${image.mimetype};base64,${dataImage}`//chuyển sang data uri
+                dataImage = `data:${image.mimetype};base64,${dataImage}`
                 try {
                     const upload = await cloudinary.uploader
                         .upload(dataImage,
@@ -786,9 +765,6 @@ const CourseController = {
             if (!student) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            // let studentCourse = await Course.find({
-            //     students: { $in: [mongoose.Types.ObjectId(student.id)] }
-            // });
             let studentCourse = await Course.aggregate([
                 {
                     $match: { students: { $in: [mongoose.Types.ObjectId(student.id)] } }
@@ -955,7 +931,6 @@ const CourseController = {
 
     getListExamInCourseOfStudent: async (req, res) => {
         try {
-            //Lấy cái parameter
             const username = req.user?.sub
             const courseId = req.query.courseId
             const user = await User.findOne({ username })
@@ -1080,12 +1055,10 @@ const CourseController = {
     },
     deleteExam: async (req, res) => {
         try {
-            //Lấy cái parameter
             const username = req.user?.sub
             const { examId, courseId } = req.body
 
             const teacher = await User.findOne({ username })
-            //const student = await User.findById(studentId)
             const exam = await Exam.findOne({ _id: new mongoose.Types.ObjectId(examId), creatorId: teacher.id })
 
             if (!teacher) {
@@ -1186,26 +1159,19 @@ const CourseController = {
                         return res.status(403).json({ message: "Token không hợp lệ" });
                     }
                     loginUsername = user?.sub;
-                    //next();
                 })
             }
 
-            // if (!loginUsername)
-            //     return res.status(400).json({ message: "Vui lòng đăng nhập!" })
             const loginUser = await User.findOne({ username: loginUsername })
-            // if (!loginUser)
-            //     return res.status(400).json({ message: "Không có người dùng!" })
-
             const keyword = req.query.search
                 ? {
                     $or: [
                         { name: { $regex: req.query.search, $options: "i" } },
                         { description: { $regex: req.query.search, $options: "i" } },
-                        //{ email: { $regex: req.query.search, $options: "i" } },
                     ],
                 }
                 : {};
-            const courses = await Course.find(keyword)//.find({ _id: { $ne: req.course._id } });
+            const courses = await Course.find(keyword)
             if (courses.length === 0)
 
                 return res.status(400).json({ message: "Không tìm thấy khóa học!" })

@@ -13,7 +13,7 @@ const tokenBot = 'bot5567501004:AAEFZl4XA8Fc1D92QrO0vpKGLytC5fN_wZs'
 const UploadController = {
     UploadImage: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const file = req.files.upload
 
             const user = await User.findOne({ username })
@@ -60,7 +60,7 @@ const UploadController = {
     },
     Upload: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const file = req.files.upload
 
             const user = await User.findOne({ username })
@@ -107,7 +107,7 @@ const UploadController = {
     },
     UploadFile: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const file = req.files.upload
 
             const user = await User.findOne({ username })

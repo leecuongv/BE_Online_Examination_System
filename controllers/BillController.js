@@ -21,7 +21,7 @@ const BillController = {
 
             //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
             //parameters
-            const username = req.user.sub
+            const username = req.user?.sub
             let amount = 50000;
             const user = await User.findOne({ username })
             if (!user) {
@@ -181,7 +181,7 @@ const BillController = {
 
             let createDate = moment().format('YYYYMMDDHHmmss');
             let orderId = date.getTime()
-            let username = req.user.sub
+            let username = req.user?.sub
             let amount = 50000;
             let bankCode = req.body.bankCode;
 
@@ -324,7 +324,7 @@ const BillController = {
 
     WithdrawMoney: async (req, res) => {
         try {
-            const loginUsername = req.user.sub
+            const loginUsername = req.user?.sub
             if (!loginUsername)
                 return res.status(400).json({ message: "Vui lòng đăng nhập!" })
             const loginUser = await User.findOne({ username: loginUsername })
@@ -438,7 +438,7 @@ const BillController = {
 
             let createDate = moment().format('YYYYMMDDHHmmss');
             let orderId = date.getTime()
-            let username = req.user.sub
+            let username = req.user?.sub
             let { amount } = req.body;
             let bankCode = req.body.bankCode;
 
@@ -501,7 +501,7 @@ const BillController = {
 
             //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
             //parameters
-            const username = req.user.sub
+            const username = req.user?.sub
             let { amount } = req.body;
             const user = await User.findOne({ username })
             if (!user) {
@@ -633,8 +633,6 @@ const BillController = {
             if (customerBalance < coursePrice) {
                 return res.status(400).json({ message: "Không đủ số dư tài khoản, vui lòng nạp thêm!" })
             }
-
-
             if (!course.students.find(item => item.toString() === user.id.toString())) {
                 course.students.push(user.id)
 

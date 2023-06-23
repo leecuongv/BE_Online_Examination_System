@@ -10,7 +10,7 @@ const { STATUS } = require("../utils/enum");
 const TickController = {
     Create: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { tickId, date, activity } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -52,14 +52,14 @@ const TickController = {
 
     Update: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { tickId, date, activity } = req.body
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
 
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
 
-            const existTick = await Tick.findOne({tickId: tickId})
+            const existTick = await Tick.findOne({ tickId: tickId })
             if (!existTick) return res.status(400).json({ message: "Không có đánh dấu" })
 
 
@@ -91,7 +91,7 @@ const TickController = {
 
     Delete: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const id = req.query.id
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -116,7 +116,7 @@ const TickController = {
     },
     getByID: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const id = req.query.id
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -138,7 +138,7 @@ const TickController = {
     },
     getByTickID: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const id = req.query.id
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -158,7 +158,7 @@ const TickController = {
             res.status(400).json({ message: "Lỗi lấy thông tin đánh dấu" })
         }
     },
-    GetTickInCourseByStudentId: async(req, res)=>{
+    GetTickInCourseByStudentId: async (req, res) => {
         try {
             //Lấy cái parameter
             const username = req.user?.sub

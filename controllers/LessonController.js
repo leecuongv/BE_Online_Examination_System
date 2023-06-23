@@ -9,7 +9,7 @@ const { CompareDate, IsClose, IsOpen } = require("./handler/DateTimeHandler")
 const LessonController = {
     Create: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { courseId, name, content, startTime, endTime, embeddedMedia, status, file } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -69,7 +69,7 @@ const LessonController = {
 
     getLessonBySlug: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
@@ -92,7 +92,7 @@ const LessonController = {
 
     Update: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { lessonId, courseId, name, content, startTime, endTime, embeddedMedia, status, file } = req.body
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
 
@@ -145,7 +145,7 @@ const LessonController = {
 
     Public: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { id } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -173,7 +173,7 @@ const LessonController = {
     },
     Close: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { id } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -202,7 +202,7 @@ const LessonController = {
 
     Delete: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const id = req.query.id
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -218,7 +218,7 @@ const LessonController = {
             await course.save()
             console.log(exitsLesson)
 
-            exitsLesson = await Lesson.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
+            await Lesson.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
 
 
             return res.status(200).json({
@@ -234,7 +234,6 @@ const LessonController = {
         try {
             const username = req.user?.sub
             const courseId = req.query.courseId
-            const start = new Date().getTime()
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
@@ -342,7 +341,7 @@ const LessonController = {
 
     SeenLesson: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { lessonId } = req.body
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
 
@@ -370,7 +369,7 @@ const LessonController = {
     },
     UnseenLesson: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { lessonId } = req.query
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
 
@@ -396,7 +395,7 @@ const LessonController = {
     },
     UnseenLesson2: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { lessonId } = req.body
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
 
