@@ -112,7 +112,7 @@ const SubmitAssignmentController = {
                 if ((toDay < (new Date(assignment.startTime)) || (toDay > (new Date(assignment.endTime))))) {
                     return res.status(200).json({ message: "Đã hết thời gian chỉnh sửa bài tập!" })
                 }
-            const updateSubmitAssignment = await SubmitAssignment.deleteOne({ "_id": mongoose.Types.ObjectId(submitAssignmentId) })
+            await SubmitAssignment.deleteOne({ "_id": mongoose.Types.ObjectId(submitAssignmentId) })
 
             return res.status(200).json({
                 message: "Xóa bài tập đã nộp thành công!"
