@@ -8,7 +8,7 @@ const moment = require("moment/moment");
 const SubmitAssignmentController = {
     Create: async (req, res) => {
         try {
-            const username = req.user.sub;
+            const username = req.user?.sub;
             const { assignmentId, content, file } = req.body;
             const toDay = new Date()
             if (!username)
@@ -52,7 +52,7 @@ const SubmitAssignmentController = {
     },
     Update: async (req, res) => {
         try {
-            const username = req.user.sub;
+            const username = req.user?.sub;
             const { submitAssignmentId, content, file } = req.body;
             const toDay = new Date()
             if (!username)
@@ -95,7 +95,7 @@ const SubmitAssignmentController = {
     },
     Delete: async (req, res) => {
         try {
-            const username = req.user.sub;
+            const username = req.user?.sub;
             const submitAssignmentId = req.query.id;
             if (!username)
                 return res.status(400).json({ message: "Không có người dùng!" });
@@ -125,7 +125,7 @@ const SubmitAssignmentController = {
     },
     Mark: async (req, res) => {
         try {
-            const username = req.user.sub;
+            const username = req.user?.sub;
             const { submitAssignmentId, points } = req.body;
             if (!username)
                 return res.status(400).json({ message: "Không có người dùng!" });
@@ -154,7 +154,7 @@ const SubmitAssignmentController = {
     },
     GetSubmitAssignmentById: async (req, res) => {
         try {
-            const username = req.user.sub;
+            const username = req.user?.sub;
             const submitAssignmentId = req.query.id;
             if (!username)
                 return res.status(400).json({ message: "Không có người dùng!" });

@@ -12,7 +12,7 @@ const { CompareDate, IsClose, IsOpen } = require("./handler/DateTimeHandler")
 const ExamController = {
     CreateExam: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { name, description, pin, courseId, numberofQuestions, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
@@ -80,7 +80,7 @@ const ExamController = {
 
     getExamBySlugTeacher: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
@@ -108,7 +108,7 @@ const ExamController = {
     },
     getExamBySlugByStudent: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
@@ -141,7 +141,7 @@ const ExamController = {
     },
     UpdateExam: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { id, name, description, pin, courseId, numberofQuestions, viewPoint, viewAnswer,
                 attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
 
@@ -201,7 +201,7 @@ const ExamController = {
     createQuestionWithQuestionBank: async (req, res) => {
         try {
             const { examId, questionBankId, numberofQuestions, random } = req.body;
-            const username = req.user.sub;
+            const username = req.user?.sub;
 
             if (!username)
                 return res.status(400).json({ message: "Không tồn tại người dùng!" });
@@ -324,7 +324,7 @@ const ExamController = {
 
     PublicExam: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { id } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -352,7 +352,7 @@ const ExamController = {
     },
     CloseExam: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { id } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
@@ -381,7 +381,7 @@ const ExamController = {
 
     DeleteExam: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { id } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })

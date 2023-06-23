@@ -16,7 +16,7 @@ const QuestionController = {
     CreateQuestion: async (req, res) => {
         try {
             let start = new Date()
-            const username = req.user.sub
+            const username = req.user?.sub
             const { examId, type, content, maxPoints, answers, image } = req.body
             if (!username) return res.status(400).json({ message: "Không có người dùng!" })
             const user = await User.findOne({ username })
@@ -71,7 +71,7 @@ const QuestionController = {
     DeleteQuestion: async (req, res) => {
         try {
             let start = new Date()
-            const username = req.user.sub
+            const username = req.user?.sub
             const { examId, questionId } = req.body
             //if (!username) return res.status(400).json({ message: "Không có người dùng!" })
             const user = await User.findOne({ username })
@@ -122,7 +122,7 @@ const QuestionController = {
     },
     DeleteQuestionInQuestionBank: async (req, res) => {
         try {
-            const username = req.user.sub
+            const username = req.user?.sub
             const { questionBankId, questionId } = req.body
             //if (!username) return res.status(400).json({ message: "Không có người dùng!" })
             const user = await User.findOne({ username })
@@ -157,7 +157,7 @@ const QuestionController = {
     CreateQuestionByFile: async (req, res) => {
         try {
             let start = new Date()
-            const username = req.user.sub
+            const username = req.user?.sub
             let { examId, questions } = req.body
             if (!username) return res.status(400).json({ message: "Không có người dùng!" })
             const user = await User.findOne({ username })
@@ -215,11 +215,11 @@ const QuestionController = {
             res.status(400).json({ message: "Lỗi tạo câu hỏi!" })
         }
     },
-    
+
     UpdateQuestionInExam: async (req, res) => {
         try {
             let start = new Date()
-            const username = req.user.sub
+            const username = req.user?.sub
             const { examId, questionId, type, content, maxPoints, answers } = req.body
             //if (!username) return res.status(400).json({ message: "Không có người dùng!" })
             const user = await User.findOne({ username })

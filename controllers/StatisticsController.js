@@ -15,7 +15,7 @@ const StatisticController = {
     GetTakeExamByStudent: async (req, res) => {
         try {
 
-            const username = req.user.sub
+            const username = req.user?.sub
             const { examSlug } = req.query
 
             const user = await User.findOne({ username })
@@ -63,7 +63,7 @@ const StatisticController = {
     GetTakeExamByTeacher: async (req, res) => {
         try {
 
-            const username = req.user.sub
+            const username = req.user?.sub
             const { examSlug } = req.query
 
             const user = await User.findOne({ username })
@@ -115,7 +115,7 @@ const StatisticController = {
     GetTakeExamDetailByTeacher: async (req, res) => {
         try {
 
-            const username = req.user.sub
+            const username = req.user?.sub
 
             const user = await User.findOne({ username })
             if (!user) return res.status(200).json({ message: "Không có tài khoản" })
@@ -157,7 +157,7 @@ const StatisticController = {
     GetTakeExamDetail: async (req, res) => {
         try {
 
-            const username = req.user.sub
+            const username = req.user?.sub
 
             const user = await User.findOne({ username })
             if (!user) return res.status(200).json({ message: "Không có tài khoản" })
@@ -199,7 +199,7 @@ const StatisticController = {
     GetSubmitAssignmentDetailByTeacher: async (req, res) => {
         try {
 
-            const username = req.user.sub
+            const username = req.user?.sub
 
             const user = await User.findOne({ username })
             if (!user) return res.status(200).json({ message: "Không có tài khoản" })
