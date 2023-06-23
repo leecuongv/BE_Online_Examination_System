@@ -590,7 +590,7 @@ const StatisticController = {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
 
-            const course = await Course.findOne({ courseId: courseId, creatorId: user.id })
+            const course = await Course.findOne({ courseId: courseId })
 
             if (!course)
                 return res.status(400).json({ message: "Không tồn tại khóa học!" })
@@ -598,6 +598,15 @@ const StatisticController = {
             const listExam = await Course.aggregate([
                 {
                     $match: { courseId: Number(courseId) }
+                },
+                {
+                    $lookup:
+                    {
+                        from: "lessons",
+                        localField: "lessons",
+                        foreignField: "_id",
+                        as: "lessons"
+                    }
                 },
                 {
                     $lookup:
@@ -715,9 +724,10 @@ const StatisticController = {
             let countExams = course.exams.length
             let countAssignments = course.assignments.length
             let countStudents = course.students.length
+            let countLessons = course.lessons.length
 
 
-            return res.status(200).json({ countStudents, countExams, countAssignments, countTakeExams, countSubmitAssignments })
+            return res.status(200).json({ countStudents, countLessons, countExams, countAssignments, countTakeExams, countSubmitAssignments })
         } catch (error) {
             console.log(error)
             return res.status(500).json({ message: "Không xác định" })
