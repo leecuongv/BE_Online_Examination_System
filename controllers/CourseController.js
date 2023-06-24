@@ -88,9 +88,9 @@ const CourseController = {
     getCourseBySlug: async (req, res) => {
         try {
             const { slug } = req.query
-            console.log(slug)
+
             const course = await Course.findOne({ slug: slug, status: STATUS.PUBLIC })
-            console.log(course)
+
             if (course) {
                 const { name, description, exams, image } = course._doc
                 return res.status(200).json({ name, description, exams, image })
@@ -128,7 +128,7 @@ const CourseController = {
                     }
                 }
             ])
-            console.log(course)
+
             if (course) {
                 return res.status(200).json(course)
                 //return res.status(200).json(course._doc)
@@ -204,7 +204,8 @@ const CourseController = {
                                                     $and:
                                                         [
                                                             { $eq: ["$userId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $in: ["$examId", "$$examIds"] }
+                                                            { $in: ["$examId", "$$examIds"] },
+                                                            { $eq: ["$isPass", true] }
                                                         ]
                                                 }
                                             }
@@ -227,7 +228,8 @@ const CourseController = {
                                                     $and:
                                                         [
                                                             { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $in: ["$assignmentId", "$$assignmentIds"] }
+                                                            { $in: ["$assignmentId", "$$assignmentIds"] },
+                                                            { $eq: ["$isPass", true] }
                                                         ]
                                                 }
                                             }
@@ -459,7 +461,7 @@ const CourseController = {
                 })
             let students = course.students
             students.push(user.id)
-            console.log(students)
+
             const users = await User.find({ $text: { $search: search }, _id: { $nin: students } })
                 .select({ id: 1, fullname: 1, gender: 1, avatar: 1, birthday: 1 })
                 .limit(20)
@@ -519,7 +521,7 @@ const CourseController = {
 
                 return { ...std._doc, count }
             })
-            console.log(new Date().getTime() - start)
+
 
             if (course) {
                 return res.status(200).json(result)
@@ -543,7 +545,7 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            console.log(courseId)
+
 
             const listExam = await Course.aggregate([
                 {
@@ -604,7 +606,7 @@ const CourseController = {
                 }
             ]
             )
-            console.log(listExam)
+
 
             if (listExam) {
                 return res.status(200).json(listExam)
@@ -622,7 +624,7 @@ const CourseController = {
         try {
             const username = req.user?.sub
             const { studentId, courseId } = req.body
-            console.log(new mongoose.Types.ObjectId(courseId));
+
 
             const teacher = await User.findOne({ username })
             const student = await User.findById(studentId)
@@ -785,7 +787,8 @@ const CourseController = {
                                                     $and:
                                                         [
                                                             { $eq: ["$userId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $in: ["$examId", "$$examIds"] }
+                                                            { $in: ["$examId", "$$examIds"] },
+                                                            { $eq: ["$isPass", true] }
                                                         ]
                                                 }
                                             }
@@ -808,7 +811,8 @@ const CourseController = {
                                                     $and:
                                                         [
                                                             { $eq: ["$creatorId", mongoose.Types.ObjectId(student.id)] },
-                                                            { $in: ["$assignmentId", { $ifNull: ["$$assignmentIds", []] }] }
+                                                            { $in: ["$assignmentId", { $ifNull: ["$$assignmentIds", []] }] },
+                                                            { $eq: ["$isPass", true] }
                                                         ]
                                                 }
                                             }
@@ -937,7 +941,7 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            console.log(courseId)
+
 
             let listCourse = await Course.aggregate([
                 {

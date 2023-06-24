@@ -76,7 +76,6 @@ const AssignmentController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng!" })
             const { slug } = req.query
-            console.log(slug)
             const assignment = await Assignment.findOne({ slug, creatorId: user.id })
             if (assignment) {
                 return res.status(200).json(assignment._doc)
@@ -160,7 +159,7 @@ const AssignmentController = {
             if (!exitsAssignment) return res.status(400).json({ message: "Không có bài tập!" })
 
 
-            console.log(exitsAssignment)
+
             exitsAssignment = await Assignment.findByIdAndUpdate(id, {
                 status: STATUS.PUBLIC
             }, { new: true })
@@ -187,7 +186,7 @@ const AssignmentController = {
             let exitsAssignment = await Assignment.findById(id)
             if (!exitsAssignment) return res.status(400).json({ message: "Không có bài tập!" })
 
-            console.log(exitsAssignment)
+
 
             exitsAssignment = await Assignment.findByIdAndUpdate(id, {
                 status: STATUS.CLOSE
@@ -220,7 +219,7 @@ const AssignmentController = {
             let course = await Course.findById(exitsAssignment.courseId)
             course.assignments = course.assignments.filter(item => item.toString() !== id)
             await course.save()
-            console.log(exitsAssignment)
+
 
             exitsAssignment = await Assignment.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
 
@@ -248,7 +247,7 @@ const AssignmentController = {
                     path: 'assignments'
                 })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ!" })
-            console.log(course)
+
 
 
             if (course) {
@@ -327,10 +326,10 @@ const AssignmentController = {
             }
 
             const assignment = await Assignment.findOne({ slug: slug })
-            console.log(assignment)
+
 
             const submitAssignment = await SubmitAssignment.findOne({ assignmentId: assignment.id, creatorId: user.id })
-            console.log(submitAssignment)
+
 
             if (assignment) {
                 return res.status(200).json({

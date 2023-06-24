@@ -32,6 +32,10 @@ const submitAssignmentSchema = mongoose.Schema({
     type: Number,
     default: null,
   },
+  isPass: {
+    type: Boolean,
+    default: false
+  }
 },
   { timestamps: true });
 

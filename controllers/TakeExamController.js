@@ -54,8 +54,6 @@ const TakeExamController = {
           shuffle: 1
         });
       if (exam.shuffle === true) {
-
-        console.log("Chưa random \n " + exam)
         let randomArray = [...exam.questions].sort(() => Math.random() - 0.5)
         exam.questions = await randomArray
       }
@@ -79,7 +77,6 @@ const TakeExamController = {
 
       if ((new Date(toDay)) < (new Date(exam.startTime)) ||
         (new Date(toDay)) > (new Date(exam.endTime))) {
-        console.log(toDay)
         return res.status(400).json({
           message: "Thời gian thực hiện bài thi không hợp lệ!"
         })
@@ -151,8 +148,6 @@ const TakeExamController = {
         });
 
       if (exam.shuffle === true) {
-
-        console.log("Chưa random \n " + exam)
         let randomArray = [...exam.questions].sort(() => Math.random() - 0.5)
         exam.questions = await randomArray
       }
@@ -181,7 +176,6 @@ const TakeExamController = {
 
       if ((new Date(toDay)) < (new Date(course.startTime)) ||
         (new Date(toDay)) > (new Date(course.endTime))) {
-        console.log(toDay)
         return res.status(400).json({
           message: "Thời gian thực hiện bài thi không hợp lệ"
         })
@@ -226,7 +220,7 @@ const TakeExamController = {
   submitAnswerSheet: async (req, res) => {
     try {
       const username = req.user?.sub
-      const { answerSheet, takeExamId } = req.body
+      const { answerSheet, takeExamId, countOutTab, countOutFace } = req.body
 
       const user = await User.findOne({ username })
       if (!user) return res.status(400).json({ message: "Không có người dùng" })
@@ -267,8 +261,6 @@ const TakeExamController = {
         else {
 
           let noAnswerCorrect = question.answers.filter(e => e.isCorrect).length //số đáp án đúng
-          //let questionClient = answerSheet.find(e => e.question === question.id.toString())
-          //thay bằng Question result, answer
           if (!questionClient) {
             if (noAnswerCorrect === 0)
               pointOfQuestion = question.maxPoints
@@ -288,7 +280,6 @@ const TakeExamController = {
                     pointOfQuestion += pointEachAnswer
                   else
                     pointOfQuestion -= pointEachAnswer
-
               })
             }
           }
@@ -302,6 +293,8 @@ const TakeExamController = {
       takeExam.points = points
       takeExam.status = STATUS.SUBMITTED
       takeExam.submitTime = new Date()
+      takeExam.countOutTab = countOutTab
+      takeExam.countOutFace = countOutFace
       // let result = answerSheet.map(item => {
       //   try {
       //     let answers = item.answers.map(e => {
@@ -342,6 +335,9 @@ const TakeExamController = {
       })
       result = result.filter(e => e !== null)
       takeExam.result = result
+      if (takeExam.point >= exam.toPass) {
+        takeExam.isPass = true
+      }
       await takeExam.save()
 
       return res.status(200).json({
@@ -367,7 +363,6 @@ const TakeExamController = {
       const takeExams = await TakeExam.find({ examId: takeExam.examId.id, userId: user.id })
 
       const course = await Course.findOne({ exams: { $in: [takeExam.examId.id] } })
-      console.log("Course finding: \n" + course.id)
 
       const index = takeExams.findIndex(item => item.id.toString() === takeExamId)
       if (!takeExam) return res.status(400).json({ message: "Không có lịch sử làm bài!" })
@@ -523,7 +518,6 @@ const TakeExamController = {
       }
 
       const listTakeExam = await TakeExam.find({ userId: user.id })
-      console.log(listTakeExam)
 
       return res.status(200).json({ listTakeExam })
     } catch (error) {
@@ -541,7 +535,6 @@ const TakeExamController = {
 
       if (!user) return res.status(400).json({ message: "Không có người dùng" })
       let creatorId = user.id
-      console.log(creatorId)
       const exam = await Exam.findOne({
         slug,
         creatorId
@@ -576,8 +569,6 @@ const TakeExamController = {
           listQuestion.push(question)
         })
       })
-
-      console.log(listQuestion)
       let jsonArray = listQuestion
       let test = new Array(jsonArray.length).fill(0);
       let result = new Array();
@@ -630,7 +621,6 @@ const TakeExamController = {
 
       if (!user) return res.status(400).json({ message: "Không có người dùng" })
       let creatorId = user.id
-      console.log(creatorId)
       const exam = await Exam.findOne({
         slug,
         creatorId
@@ -638,7 +628,6 @@ const TakeExamController = {
 
       if (!exam) {
         return res.status(400).json({ message: "Không tồn tại bài thi!" })
-        console.log(exam)
       }
 
       // let examResult = await TakeExam.aggregate([

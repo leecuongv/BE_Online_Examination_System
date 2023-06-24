@@ -51,7 +51,7 @@ const assignmentSchema = mongoose.Schema(
       type: Boolean,
       default: false
     },
-    file:{
+    file: {
       type: String,
       default: ""
     },
@@ -59,6 +59,10 @@ const assignmentSchema = mongoose.Schema(
       type: String,
       default: STATUS.PUBLIC,
     },
+    toPass: {
+      type: Number,
+      default: 50
+    }
   },
   {
     timestamps: true,
@@ -85,4 +89,4 @@ assignmentSchema.plugin(
   }
 );
 const Assignment = mongoose.model(COLLECTION.ASSIGNMENT, assignmentSchema);
-module.exports =  Assignment 
+module.exports = Assignment 

@@ -48,7 +48,6 @@ const UploadController = {
 
                 })
                 .catch(error => {
-                    //console.log(error.response);
                     return res.status(200).json({
                         message: 'Tải lên không thành công'
                     })
@@ -95,7 +94,6 @@ const UploadController = {
 
                 })
                 .catch(error => {
-                    //console.log(error.response);
                     return res.status(200).json({
                         message: 'Tải lên không thành công'
                     })
@@ -133,7 +131,6 @@ const UploadController = {
                     })
                 })
                 .catch(error => {
-                    //console.log(error.response);
                     return res.status(200).json({
                         message: 'Tải lên không thành công'
                     })
@@ -160,7 +157,6 @@ const UploadController = {
             )
                 .then(response => {
                     let file_path = response.data.result.file_path
-                    console.log(file_path)
                     let fileName = "tailieu.doc"
                     let fileType = 'text/plain'
                     axios.get(`https://api.telegram.org/file/bot5684898171:AAH2OsGKaWNllMyA7QmGcleN9V3Gd78aDxU/${file_path}`)
@@ -175,7 +171,6 @@ const UploadController = {
                         })
                 })
                 .catch(error => {
-                    console.log(error.response);
                     return res.status(200).json({
                         message: 'Tải lên không thành công'
                     })
@@ -201,7 +196,6 @@ const UploadController = {
 
             FileDrive.get(filename)
                 .then((data) => {
-                    console.log(data);
 
                     data.arrayBuffer().then(buffer => {
                         res.writeHead(200, {

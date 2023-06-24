@@ -50,13 +50,12 @@ const QuestionController = {
                 newQuestion.answers.push(answer.id)
             }))
 
-            console.log(await (await newQuestion.save()).populate('answers'))
+            await (await newQuestion.save()).populate('answers')
             exam.questions.push({ question: newQuestion.id })
             exam.questions = exam.questions.map((item, index) => ({ ...item._doc, index: index + 1 }))//cập nhật lại index câu hỏi
             exam.maxPoints = Number(exam.maxPoints) + Number(newQuestion.maxPoints)
             exam.numberofQuestions += 1
             await exam.save()
-            console.log(new Date().getTime() - start.getTime())
             return res.status(200).json({
                 message: "Tạo câu hỏi mới thành công!",
                 question: newQuestion
@@ -203,7 +202,7 @@ const QuestionController = {
             });
             questions = await Promise.all(questions)
             await exam.save()
-            console.log(new Date().getTime() - start.getTime())
+            new Date().getTime() - start.getTime()
             return res.status(200).json({
                 message: "Tạo câu hỏi mới thành công!",
                 questions

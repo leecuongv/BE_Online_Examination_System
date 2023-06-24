@@ -22,9 +22,8 @@ const SubmitAssignmentController = {
 
             if (assignment.allowSubmitLate === false)
                 if ((toDay < (new Date(assignment.startTime)) || (toDay > (new Date(assignment.endTime))))) {
-                    return res.status(200).json({ message: "Không nằm trong thời gian nộp bài!" })
+                    return res.status(400).json({ message: "Không nằm trong thời gian nộp bài!" })
                 }
-
             const newSubmitAssignment = new SubmitAssignment({
                 assignmentId: assignmentId,
                 creatorId: user.id,
@@ -74,6 +73,9 @@ const SubmitAssignmentController = {
                     return res.status(200).json({ message: "Đã hết thời gian chỉnh sửa bài tập!" })
                 }
 
+            if (submitAssignment.points > 0) {
+                return res.status(400).json({ message: "Bài tập đã được chấm điểm, không thể chỉnh sửa!" })
+            }
             if (assignment.status !== STATUS.PUBLIC)
                 return res.status(200).json({ message: "Bài tập đã đóng hoặc chưa mở!" })
             const data = {
@@ -107,7 +109,9 @@ const SubmitAssignmentController = {
             if (!submitAssignment)
                 return res.status(400).json({ message: "Không tồn tại thông tin nộp bài tập!" })
             const assignment = await Assignment.findById(submitAssignment.assignmentId)
-
+            if (submitAssignment.points > 0) {
+                return res.status(400).json({ message: "Bài tập đã được chấm điểm, không thể chỉnh sửa!" })
+            }
             if (assignment.allowSubmitLate === false)
                 if ((toDay < (new Date(assignment.startTime)) || (toDay > (new Date(assignment.endTime))))) {
                     return res.status(200).json({ message: "Đã hết thời gian chỉnh sửa bài tập!" })
@@ -138,9 +142,15 @@ const SubmitAssignmentController = {
                 return res.status(400).json({ message: "Không tồn tại thông tin nộp bài tập!" })
             if (points < 0)
                 return res.status(400).json({ message: "Điểm phải lớn hơn hoặc bằng 0!" })
+            const assignment = await Assignment.findById(submitAssignment.assignmentId)
+            let isPass = false
+
+            if (points >= assignment.toPass) {
+                isPass = true
+            }
             const updateSubmitAssignment = await SubmitAssignment.findByIdAndUpdate(
                 { "_id": new mongoose.Types.ObjectId(submitAssignmentId) },
-                { points: points },
+                { points: points, isPass: isPass },
                 { new: true })
 
             return res.status(200).json({
@@ -188,7 +198,6 @@ const SubmitAssignmentController = {
 
             const assignment = await Assignment.findOne({ slug: slug })
             const course = await Course.findById(assignment.courseId).populate('students')
-            //console.log(assignment)
 
             let submitAssignment = await SubmitAssignment.find({ assignmentId: assignment.id })
 

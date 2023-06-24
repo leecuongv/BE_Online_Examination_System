@@ -35,7 +35,7 @@ const CertificateController = {
                             {
                                 $lookup: {
                                     from: "take_exams",
-                                    let: { examIds: "$exams" },
+                                    let: { examIds: "$exams", },
                                     pipeline: [
                                         {
                                             $match:
@@ -45,7 +45,8 @@ const CertificateController = {
                                                     $and:
                                                         [
                                                             { $eq: ["$userId", mongoose.Types.ObjectId(loginUser.id)] },
-                                                            { $in: ["$examId", "$$examIds"] }
+                                                            { $in: ["$examId", "$$examIds"] },
+                                                            { $eq: ["$isPass", true] }
                                                         ]
                                                 }
                                             }
@@ -68,7 +69,8 @@ const CertificateController = {
                                                     $and:
                                                         [
                                                             { $eq: ["$creatorId", mongoose.Types.ObjectId(loginUser.id)] },
-                                                            { $in: ["$assignmentId", "$$assignmentIds"] }
+                                                            { $in: ["$assignmentId", "$$assignmentIds"] },
+                                                            { $eq: ["$isPass", true] }
                                                         ]
                                                 }
                                             }
@@ -91,7 +93,8 @@ const CertificateController = {
                                                     $and:
                                                         [
                                                             { $eq: ["$creatorId", mongoose.Types.ObjectId(loginUser.id)] },
-                                                            { $in: ["$lessonId", "$$lessonIds"] }
+                                                            { $in: ["$lessonId", "$$lessonIds"] },
+
                                                         ]
                                                 }
                                             }
@@ -183,21 +186,22 @@ const CertificateController = {
             ]);
             //const courseCert = course[0].certification
             // const url1 = GenerateURL(loginUser.fullname + " " + course[0].name)
-            // console.log(url1)
 
             if (course.length === 0) {
                 return res.status(400).json({ message: "Khoá học không tồn tại!" })
             }
+
             if (!course[0].students.find(item => item.toString() === loginUser.id.toString())) {//nếu chưa có sinh viên trên
                 return res.status(400).json({ message: "Học viên không thuộc khoá học" })
             }
             if (course[0].certification === CERTIFICATION.NOTALLOW)
                 return res.status(400).json({ message: "Khoá học không hỗ trợ cấp chứng chỉ!" })
             // TODO: điều kiện cấp chứng chỉ 
-            if (course[0].certification === CERTIFICATION.WHENDONE && course[0].avg < 0.8)
+            let toPass = course[0].toPass / 100
+            if (course[0].certification === CERTIFICATION.WHENDONE && course[0].avg < toPass)
                 return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
             if (course[0].certification === CERTIFICATION.WHENCOURSEDONE)
-                if ((new Date(course[0].endTime)) > (new Date()) || course[0].avg < 0.8)
+                if ((new Date(course[0].endTime)) > (new Date()) || course[0].avg < toPass)
                     return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
 
             const certificate = await Certificate.findOne({ user: loginUser.id, course: course[0]._id })
