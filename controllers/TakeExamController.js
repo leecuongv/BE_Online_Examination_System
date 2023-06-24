@@ -9,7 +9,6 @@ const moment = require("moment/moment");
 const ExamLog = require("../models/ExamLog");
 const TakeExamController = {
   getExam: async (takeExam) => {
-
     let exam = await Exam.findById(takeExam.examId)
       .populate({
         path: "questions.question",
@@ -25,7 +24,7 @@ const TakeExamController = {
     return { ...data, endTime, questions };
   },
 
-  CheckExam: async (req, res) => {
+  CheckExam: async (req, res) => {//
     try {
       const username = req.user?.sub;
       const { slug } = req.body;
@@ -109,6 +108,8 @@ const TakeExamController = {
           endTime,
         },
         takeExamId: lastTakeExam.id,
+        countOutTab: lastTakeExam.countOutTab,
+        countOutFace: lastTakeExam.countOutFace
       });
     } catch (error) {
       console.log(error);
@@ -119,7 +120,6 @@ const TakeExamController = {
   CreateTakeExam: async (req, res) => {
     try {
       const username = req.user?.sub;
-
 
       const { slug, pin } = req.body;
 
@@ -210,6 +210,8 @@ const TakeExamController = {
           questions,
           endTime,
         },
+        countOutTab: takeExam.countOutTab,
+        countOutFace: takeExam.countOutFace
       });
     } catch (error) {
       console.log(error);
