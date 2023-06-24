@@ -74,7 +74,7 @@ const SubmitAssignmentController = {
                 }
 
             if (submitAssignment.points > 0) {
-                return res.status(400).json({ message: "Bài tập đã được chấm điểm, không thể chỉnh sửa!" })
+                return res.status(200).json({ message: "Bài tập đã được chấm điểm, không thể chỉnh sửa!" })
             }
             if (assignment.status !== STATUS.PUBLIC)
                 return res.status(200).json({ message: "Bài tập đã đóng hoặc chưa mở!" })
