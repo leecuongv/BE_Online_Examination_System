@@ -222,7 +222,7 @@ const TakeExamController = {
   submitAnswerSheet: async (req, res) => {
     try {
       const username = req.user?.sub
-      const { answerSheet, takeExamId, countOutTab, countOutFace } = req.body
+      const { answerSheet, takeExamId } = req.body
 
       const user = await User.findOne({ username })
       if (!user) return res.status(400).json({ message: "Không có người dùng" })
@@ -295,8 +295,6 @@ const TakeExamController = {
       takeExam.points = points
       takeExam.status = STATUS.SUBMITTED
       takeExam.submitTime = new Date()
-      takeExam.countOutTab = countOutTab
-      takeExam.countOutFace = countOutFace
       // let result = answerSheet.map(item => {
       //   try {
       //     let answers = item.answers.map(e => {
@@ -462,7 +460,7 @@ const TakeExamController = {
 
   createLogs: async (req, res) => {
     try {
-      const { action, takeExamId } = req.body;
+      const { action, takeExamId, countOutFace, countOutTab } = req.body;
       const username = req.user?.sub;
 
       const user = await User.findOne({ username });
@@ -481,6 +479,7 @@ const TakeExamController = {
         time: new Date(),
         action
       })
+      await TakeExam.findByIdAndUpdate(mongoose.Types.ObjectId(takeExamId), { countOutFace, countOutTab }, { new: true })
       await examLog.save()
       return res.status(200).json({
         message: 'Tạo thành công'
