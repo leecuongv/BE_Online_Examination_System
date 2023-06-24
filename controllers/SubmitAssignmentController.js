@@ -145,7 +145,7 @@ const SubmitAssignmentController = {
             const assignment = await Assignment.findById(submitAssignment.assignmentId)
             let isPass = false
 
-            if (points >= assignment.toPass) {
+            if ((points / assignment.maxPoints) >= (assignment.toPass / 100)) {
                 isPass = true
             }
             const updateSubmitAssignment = await SubmitAssignment.findByIdAndUpdate(
