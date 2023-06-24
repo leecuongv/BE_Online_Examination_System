@@ -60,7 +60,7 @@ const TakeExamController = {
       questions = questions.map((item) => ({ ...item.question._doc, id: item.question._id, index: item.index }));
 
       if (!exam) res.status(200).json({ message: "invalid" });
-
+      const course = await Course.findOne({ exams: { $in: [exam._id] } })
       const takeExam = await TakeExam.find({ userId: user.id, examId: exam.id });
       ///kiểm tra hợp lệ
       if (takeExam.length === 0)
@@ -77,7 +77,8 @@ const TakeExamController = {
       if ((new Date(toDay)) < (new Date(exam.startTime)) ||
         (new Date(toDay)) > (new Date(exam.endTime))) {
         return res.status(400).json({
-          message: "Thời gian thực hiện bài thi không hợp lệ!"
+          message: "Thời gian thực hiện bài thi không hợp lệ!",
+          courseId: course.courseId
         })
       }
 
@@ -87,11 +88,11 @@ const TakeExamController = {
       } else {
         if (takeExam.length === exam.attemptsAllowed) {
           if (lastTakeExam.status === STATUS.SUBMITTED)
-            return res.status(400).json({ message: "Hết số lần làm bài thi" }); //take exam cuối cùng đã hết thời gian
+            return res.status(400).json({ message: "Bài thi đã được nộp, không thể làm lại", courseId: course.courseId }); //take exam cuối cùng đã hết thời gian
           if (remainTime < 0)
-            return res.status(400).json({ message: "Hết số lần làm bài thi" }); //take exam cuối cùng đã hết thời gian
+            return res.status(400).json({ message: "Hết thời gian làm bài thi làm bài thi", courseId: course.courseId }); //take exam cuối cùng đã hết thời gian
         } else if (takeExam.length > exam.attemptsAllowed)
-          return res.status(400).json({ message: "Hết số lần làm bài thi" }); //take exam cuối cùng đã hết thời gian
+          return res.status(400).json({ message: "Hết số lần làm bài thi", courseId: course.courseId }); //take exam cuối cùng đã hết thời gian
       }
       if (lastTakeExam.status === STATUS.SUBMITTED)
         return res.status(200).json({ message: "checkpin" }); //take exam cuối cùng đã hết thời gian
@@ -177,7 +178,8 @@ const TakeExamController = {
       if ((new Date(toDay)) < (new Date(course.startTime)) ||
         (new Date(toDay)) > (new Date(course.endTime))) {
         return res.status(400).json({
-          message: "Thời gian thực hiện bài thi không hợp lệ"
+          message: "Thời gian thực hiện bài thi không hợp lệ",
+          courseId: course.courseId
         })
       }
       // const takeExams = TakeExam.find({})  
@@ -197,6 +199,7 @@ const TakeExamController = {
         console.log(error);
         return res.status(400).json({
           message: "Làm bài thi thất bại!",
+          courseId: course.courseId
         });
       }
       const takeExam = await newTakeExam.save();
@@ -211,7 +214,8 @@ const TakeExamController = {
           endTime,
         },
         countOutTab: takeExam.countOutTab,
-        countOutFace: takeExam.countOutFace
+        countOutFace: takeExam.countOutFace,
+        courseId: course.courseId
       });
     } catch (error) {
       console.log(error);
