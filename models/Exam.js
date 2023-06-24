@@ -91,15 +91,22 @@ const examSchema = mongoose.Schema(
       type: String,
       default: STATUS.PUBLIC,
     },
+
+    toPass: {
+      type: Number,
+      default: 50
+    }
   },
-  { timestamps: true ,
+  {
+    timestamps: true,
     toObject: {
       transform: function (doc, ret) {
-        ret.id=ret._id
+        ret.id = ret._id
         delete ret._id;
       }
-    }},
-  
+    }
+  },
+
 );
 
 examSchema.method("toJSON", function () {

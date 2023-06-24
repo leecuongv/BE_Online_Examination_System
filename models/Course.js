@@ -87,6 +87,10 @@ const courseSchema = mongoose.Schema({
     type: String,
     default: CERTIFICATION.NOTALLOW
   },
+  toPass: {
+    type: Number,
+    default: 80
+  }
 
 },
   {

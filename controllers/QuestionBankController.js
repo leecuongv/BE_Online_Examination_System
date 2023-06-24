@@ -24,7 +24,6 @@ const QuestionBankController = {
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
 
             const existQuestionBank = await QuestionBank.findOne({ name: name, creatorId: user._id })
-            console.log(existQuestionBank);
             if (existQuestionBank) return res.status(400).json({ message: "Trùng tên với ngân hàng câu hỏi trước đó" })
             const newQuestionBank = new QuestionBank({
                 name,
@@ -52,9 +51,7 @@ const QuestionBankController = {
     getQuestionBankBySlug: async (req, res) => {
         try {
             const { slug } = req.query
-            console.log(slug)
             const questionBank = await QuestionBank.findOne({ slug: slug })
-            console.log(questionBank)
             if (questionBank) {
                 const { name, description, questions, image, status } = questionBank._doc
                 return res.status(200).json({ name, description, image, status })
@@ -77,7 +74,6 @@ const QuestionBankController = {
             if (!user) return res.status(400).json({ message: "Không có tài khoản" })
 
             const questionBanks = await QuestionBank.find({ creatorId: user.id })
-            console.log(user.id)
 
             if (questionBanks) {
                 return res.status(200).json(questionBanks)
@@ -203,7 +199,7 @@ const QuestionBankController = {
                 newQuestion.answers.push(answer.id)
             }))
 
-            console.log(await (await newQuestion.save()).populate('answers'))
+            await (await newQuestion.save()).populate('answers')
             questionBank.questions.push(newQuestion.id)
 
             await questionBank.save()

@@ -74,7 +74,6 @@ const LessonController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             const { slug } = req.query
-            console.log(slug)
             const lesson = await Lesson.findOne({ slug, creatorId: user.id })
             if (lesson) {
                 return res.status(200).json(lesson._doc)
@@ -155,8 +154,6 @@ const LessonController = {
             let exitsLesson = await Lesson.findById(id)
             if (!exitsLesson) return res.status(400).json({ message: "Không có bài giảng" })
 
-
-            console.log(exitsLesson)
             exitsLesson = await Lesson.findByIdAndUpdate(id, {
                 status: STATUS.PUBLIC
             }, { new: true })
@@ -183,7 +180,6 @@ const LessonController = {
             let exitsLesson = await Lesson.findById(id)
             if (!exitsLesson) return res.status(400).json({ message: "Không có bài giảng" })
 
-            console.log(exitsLesson)
 
             exitsLesson = await Lesson.findByIdAndUpdate(id, {
                 status: STATUS.CLOSE
@@ -216,7 +212,6 @@ const LessonController = {
             let course = await Course.findById(exitsLesson.courseId)
             course.lessons = course.lessons.filter(item => item.toString() !== id)
             await course.save()
-            console.log(exitsLesson)
 
             await Lesson.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
 
@@ -243,7 +238,6 @@ const LessonController = {
                     path: 'lessons'
                 })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ" })
-            console.log(course)
 
 
             if (course) {
@@ -325,7 +319,6 @@ const LessonController = {
                     }
                 }
             ])
-            console.log(course)
 
             if (course.length === 0) return res.status(400).json({ message: "Thông tin không hợp lệ" })
 
@@ -588,8 +581,6 @@ const LessonController = {
                     select: 'name startTime endTime _id slug'
                 })
             if (!courses) return res.status(400).json({ message: "Thông tin không hợp lệ" })
-            console.log(courses)
-
 
             if (courses) {
                 let calendar = {}
@@ -634,7 +625,6 @@ const LessonController = {
                             activities: calendar[key]
                         }
                     })
-                console.log(result)
                 // const result = listExam.map(item => {
                 return res.status(200).json(result)
             }

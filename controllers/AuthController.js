@@ -109,7 +109,7 @@ const AuthController = {
             }
             const auth = await bcrypt.compare(password, user.password)
             if (auth) {
-                
+
                 const data = {
                     sub: user.username,
                     role: user.role
@@ -171,7 +171,6 @@ const AuthController = {
     ReActive: async (req, res) => {
         try {
             const email = req.body.email;
-            console.log(email)
             if (email) {
                 const user = await User.findOne({ email: email })
                 if (user) {
@@ -182,10 +181,8 @@ const AuthController = {
                         process.env.JWT_ACCESS_KEY,
                         { expiresIn: "15m" }
                     )
-                    console.log("active:" + activeCode);
                     sendMail(email, "Kích hoạt tài khoản", process.env.CLIENT_URL + "active/" + activeCode, user.username)
                         .then(response => {
-                            console.log(response)
                             return res.status(200).json({ message: "Đã gửi mail kích hoạt. Vui lòng kiểm tra trong hộp thư của email" })
                         })
                         .catch(err => {
@@ -303,7 +300,6 @@ const AuthController = {
         const token = req.headers.authorization;
         if (token) {
             const accessToken = token.split(" ")[1];
-            console.log(accessToken)
             jwt.verify(accessToken, process.env.JWT_ACCESS_KEY, (err, user) => {
                 if (err) {
                     return res.status(403).json({ message: "Token không hợp lệ" });

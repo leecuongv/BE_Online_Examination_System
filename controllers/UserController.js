@@ -59,7 +59,7 @@ const UserController = {
                         })
 
                 const newUser = await User.findOneAndUpdate({ username }, { avatar: upload.secure_url }, { new: true })
-                console.log(newUser)
+
                 return res.status(200).json({ avatar: newUser.avatar })
             }
             else {
@@ -181,9 +181,9 @@ const UserController = {
     deleteAccount: async (req, res) => {
         try {
             const id = req.query.id;
-            console.log(id)
+
             const deleteUser = await User.deleteOne({ _id: id })
-            console.log(deleteUser)
+
             if (deleteUser)
                 return res.status(200).json({ message: "Xoá thành công" })
             return res.status(400).json({ message: "Xoá thất bại" })

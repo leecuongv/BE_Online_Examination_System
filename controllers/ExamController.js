@@ -85,7 +85,7 @@ const ExamController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             const { slug } = req.query
-            console.log(slug)
+
             const exam = await Exam.findOne({ slug, creatorId: user.id })
                 .populate({
                     path: 'questions.question',
@@ -113,7 +113,7 @@ const ExamController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             const { slug } = req.query
-            console.log(slug)
+
             const exam = await Exam.findOne({ slug })
                 .populate({
                     path: 'questions.question',
@@ -128,7 +128,7 @@ const ExamController = {
             }
             if (exam.shuffle === true) {
 
-                console.log("Chưa random \n " + exam)
+
                 let randomArray = [...exam.questions].sort(() => Math.random() - 0.5)
                 exam.questions = await randomArray
             }
@@ -267,7 +267,7 @@ const ExamController = {
                         noneExistQuestion.push(questionInQB.id)
                     }
                 });
-                console.log(noneExistQuestion)
+
                 if (noneExistQuestion.length === 0) {
                     return res.status(400).json({ message: "Tất cả các câu hỏi đã tồn tại trong hệ thống" })
                 }
@@ -333,8 +333,6 @@ const ExamController = {
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             let exitsExam = await Exam.findById(id)
 
-
-            console.log(exitsExam)
             const status = "public"
             exitsExam = await Exam.findByIdAndUpdate(id, {
                 status
@@ -360,9 +358,6 @@ const ExamController = {
 
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             let exitsExam = await Exam.findById(id)
-
-
-            console.log(exitsExam)
 
             exitsExam = await Exam.findByIdAndUpdate(id, {
                 status: STATUS.CLOSE
@@ -390,8 +385,6 @@ const ExamController = {
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             let exitsExam = await Exam.findById(id)
 
-
-            console.log(exitsExam)
             exitsExam = await Exam.deleteOne(id)
             await TakeExam.deleteMany({ examId: id })
             return res.status(200).json({
