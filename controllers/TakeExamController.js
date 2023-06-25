@@ -339,7 +339,7 @@ const TakeExamController = {
       })
       result = result.filter(e => e !== null)
       takeExam.result = result
-      if ((takeExam.point / exam.maxPoints) >= (exam.toPass / 100)) {
+      if ((points / exam.maxPoints) >= (exam.toPass / 100)) {
         takeExam.isPass = true
       }
       await takeExam.save()
