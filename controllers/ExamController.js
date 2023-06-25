@@ -257,10 +257,18 @@ const ExamController = {
                 return res.status(400).json({
                     message: "Không tìm thấy ngân hàng câu hỏi!",
                 })
+            if (questionBank.questions.length === 0) {
+                return res.status(400).json({
+                    message: "Ngân hàng câu hỏi trống!",
+                })
+            }
             let soCauHoiCanLay = 0
             let questionIdsTaken = []
             if (random === true) {
-
+                if (questionBank.questions.length <= numberofNeedQuestions)
+                    return res.status(400).json({
+                        message: "Số lượng câu hỏi vượt quá số lượng câu hỏi cần lấy phải nhỏ hơn số lượng câu hỏi trong ngân hàng câu hỏi!",
+                    })
                 let noneExistQuestion = []
                 questionBank.questions.forEach(questionInQB => {
                     if (!exam.questions.find(item => item.question.toString() === questionInQB.id.toString())) {
