@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const Course = require("../models/Course");
 const User = require("../models/User");
 const TakeExam = require("../models/TakeExam");
-const { STATUS, VIEWPOINT, QUESTIONTYPE, ANSWERTYPE } = require("../utils/enum");
+const { STATUS, VIEWPOINT, QUESTIONTYPE, ANSWERTYPE, VIEWANSWER } = require("../utils/enum");
 const moment = require("moment/moment");
 const ExamLog = require("../models/ExamLog");
 const TakeExamController = {
@@ -401,7 +401,7 @@ const TakeExamController = {
       const { takeExamId } = req.query;
       const username = req.user?.sub;
       const user = await User.findOne({ username });
-      if (!user) return res.status(400).json({ message: "Không có người dùng" });
+      if (!user) return res.status(400).json({ message: "Không có người dùng!" });
 
       const takeExam = await TakeExam.findById(takeExamId)
 
@@ -413,7 +413,6 @@ const TakeExamController = {
             select: "id content isCorrect type",
           },
         }).lean()
-
       let { questions, startTime, maxTimes, ...data } = exam;
       questions = questions.map((item) => item.question);
 

@@ -19,7 +19,7 @@ const StatisticController = {
             const { examSlug } = req.query
 
             const user = await User.findOne({ username })
-            if (!user) return res.status(200).json({ message: "Không có tài khoản" })
+            if (!user) return res.status(200).json({ message: "Không có tài khoản!" })
 
             const exam = await Exam.findOne({ slug: examSlug })
             if (!exam) return res.status(200).json({ message: "Không tìm thấy bài thi!" })
@@ -35,6 +35,12 @@ const StatisticController = {
                 },
                     0
                 )
+                if (exam.viewAnswer === 'no' || (exam.viewAnswer === 'alldone' && moment().diff(exam.endTime, 'minutes') > 0)) {
+
+                    points = "?"
+
+
+                }
                 return {
                     ...data,
 
@@ -43,7 +49,7 @@ const StatisticController = {
                     points
                 }
             })
-
+            console.log(takeExams)
 
             return res.status(200).json({
                 examName: exam.name,
