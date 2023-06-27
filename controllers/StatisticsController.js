@@ -37,7 +37,7 @@ const StatisticController = {
                 )
                 if (exam.viewAnswer === 'no' || (exam.viewAnswer === 'alldone' && moment().diff(exam.endTime, 'minutes') > 0)) {
 
-                    points = "?"
+                    points = 0
 
 
                 }
@@ -49,7 +49,7 @@ const StatisticController = {
                     points
                 }
             })
-            console.log(takeExams)
+
 
             return res.status(200).json({
                 examName: exam.name,
