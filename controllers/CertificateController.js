@@ -173,6 +173,8 @@ const CertificateController = {
                         image: '$doc.image',
                         courseId: "$doc.courseId",
                         exams: '$doc.exams',
+                        assignments: "$doc.assignments",
+                        lessons: "$doc.lessons",
                         students: '$doc.students',
                         description: '$doc.description',
                         certification: "$doc.certification",
