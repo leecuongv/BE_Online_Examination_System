@@ -263,10 +263,10 @@ const QuestionController = {
             let exams = await Exam.find({
                 "questions.question": { $in: mongoose.Types.ObjectId(questionId) }
             })
-            console.log(exams)
+
             let newExam = exams.map(exam => {
                 let maxPoints = Number(exam.maxPoints) - Number(question.maxPoints) + Number(newData.maxPoints)
-                console.log("MAXPOINT" + maxPoints)
+
                 return {
                     updateOne:
                     {
