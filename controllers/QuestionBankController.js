@@ -175,14 +175,14 @@ const QuestionBankController = {
                     message: "Không tìm thấy ngân hàng câu hỏi",
                 })
 
-            const newQuestion = new Question({
+            const question = new Question({
                 type,
                 content,
                 maxPoints,
                 answers: [],
                 image
             })
-            let error = newQuestion.validateSync()
+            let error = question.validateSync()
             if (error) {
                 console.log(error)
                 return res.status(400).json({
@@ -196,16 +196,16 @@ const QuestionBankController = {
                     isCorrect: element.isCorrect || false
                 })
                 await answer.save()
-                newQuestion.answers.push(answer.id)
+                question.answers.push(answer.id)
             }))
 
-            await (await newQuestion.save()).populate('answers')
-            questionBank.questions.push(newQuestion.id)
+            await (await question.save()).populate('answers')
+            questionBank.questions.push(question.id)
 
             await questionBank.save()
             return res.status(200).json({
                 message: "Thêm câu hỏi thành công",
-                newQuestion
+                question
             })
 
         } catch (error) {
@@ -213,8 +213,61 @@ const QuestionBankController = {
             res.status(500).json({ message: "Lỗi thêm câu hỏi" })
         }
     },
+    UpdateQuestionInQuestionBank: async (req, res) => {
+        try {
+            //Lấy cái parameter
+            const username = req.user?.sub
+            const { questionBankId, questionId, type, content, maxPoints, answers, image } = req.body
 
-    deleteQuestionInQuestionBank: async (req, res) => {
+            const user = await User.findOne({ username })
+            if (!user) return res.status(400).json({ message: "Không có người dùng!" })
+
+            let questionBank = await QuestionBank.findOne({ _id: new mongoose.Types.ObjectId(questionBankId), creatorId: user.id })
+            if (!questionBank)
+                return res.status(400).json({
+                    message: "Không tìm thấy ngân hàng câu hỏi",
+                })
+            const question = await Question.findOne({ _id: mongoose.Types.ObjectId(questionId) })
+            if (!question) return res.status(400).json({ message: 'Không tồn tại câu hỏi' })
+            let newAnswers = []
+
+            await Promise.all(answers.map(async (element) => {
+                if (mongoose.Types.ObjectId.isValid(element.id)) {
+                    newAnswers.push(element.id)
+                    return Answer.findByIdAndUpdate(element.id, {
+                        content: element.content || "",
+                        isCorrect: element.isCorrect || false,
+                        type: element.type
+                    }, { upsert: true })
+
+                }
+                else {
+                    let newAnswer = new Answer({ content: element.content, isCorrect: element.isCorrect })
+                    newAnswers.push(newAnswer.id)
+                    return newAnswer.save()
+                }
+            }))
+            let newData = {
+                type,
+                content,
+                maxPoints,
+                answers: newAnswers,
+                image
+            }
+
+            let updatedQuestion = await Question.findByIdAndUpdate({ '_id': new mongoose.Types.ObjectId(question.id) }, newData, { new: true }).populate('answers')
+            return res.status(200).json({
+                question: updatedQuestion
+                //question: exitsQuestion
+            })
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ message: "Lỗi sửa câu hỏi!" })
+        }
+
+    },
+
+    DeleteQuestionInQuestionBank: async (req, res) => {
         try {
             //Lấy cái parameter
             const username = req.user?.sub
@@ -250,7 +303,7 @@ const QuestionBankController = {
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Lỗi thêm câu hỏi!" })
+            res.status(500).json({ message: "Lỗi xoá câu hỏi!" })
         }
     },
 

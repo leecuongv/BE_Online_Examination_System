@@ -224,14 +224,14 @@ const QuestionController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng!" })
 
-            const exam = await Exam.findOne({ _id: mongoose.Types.ObjectId(examId), creatorId: user._id })
+            // const exam = await Exam.findOne({ _id: mongoose.Types.ObjectId(examId), creatorId: user._id })
 
-            if (!exam) return res.status(400).json({ message: "Không tồn tại bài thi!" })
+            // if (!exam) return res.status(400).json({ message: "Không tồn tại bài thi!" })
 
             const question = await Question.findOne({ _id: mongoose.Types.ObjectId(questionId) })
             if (!question) return res.status(400).json({ message: 'Không tồn tại câu hỏi' })
 
-            exam.maxPoints -= question.maxPoints
+            // exam.maxPoints -= question.maxPoints
 
 
             let newAnswers = []
@@ -260,7 +260,25 @@ const QuestionController = {
                 answers: newAnswers
             }
 
-            exam.maxPoints = Number(exam.maxPoints) + Number(newData.maxPoints)
+            let exams = await Exam.find({
+                "questions.question": { $in: mongoose.Types.ObjectId(questionId) }
+            })
+            console.log(exams)
+            let newExam = exams.map(exam => {
+                let maxPoints = Number(exam.maxPoints) - Number(question.maxPoints) + Number(newData.maxPoints)
+                console.log("MAXPOINT" + maxPoints)
+                return {
+                    updateOne:
+                    {
+                        "filter": { _id: exam.id },
+                        "update": {
+                            maxPoints: maxPoints
+                        },
+
+                    }
+                }
+            })
+            //
 
             let takeExams = await TakeExam.find({
                 "result.question": { $in: mongoose.Types.ObjectId(questionId) }
@@ -329,7 +347,7 @@ const QuestionController = {
                 }
             })
             await TakeExam.bulkWrite(newTakeExams)
-            await exam.save()
+            await Exam.bulkWrite(newExam)
 
             let updatedQuestion = await Question.findByIdAndUpdate({ '_id': new mongoose.Types.ObjectId(question.id) }, newData, { new: true }).populate('answers')
             return res.status(200).json({
