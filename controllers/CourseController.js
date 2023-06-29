@@ -92,12 +92,12 @@ const CourseController = {
             const course = await Course.findOne({ slug: slug, status: STATUS.PUBLIC })
 
             if (course) {
-                const { name, description, exams, image } = course._doc
-                return res.status(200).json({ name, description, exams, image })
+                const { name, description, exams, lessons, assignments, image } = course._doc
+                return res.status(200).json({ name, description, exams, lessons, assignments, image })
             }
 
             return res.status(400).json({
-                message: "Không tìm thấy khoá học",
+                message: "Không tìm thấy khoá học!",
             })
 
         } catch (error) {
@@ -331,6 +331,8 @@ const CourseController = {
                         image: '$doc.image',
                         courseId: "$doc.courseId",
                         exams: '$doc.exams',
+                        assignments: "$doc.assignments",
+                        lessons: "$doc.lessons",
                         students: '$doc.students',
                         description: '$doc.description',
                         count: 1,
@@ -347,7 +349,7 @@ const CourseController = {
                         message: "Học viên Không thuộc khoá học!",
                     })
 
-                const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification } = course[0]
+                const { _id, courseId, name, description, exams, assignments, lessons, image, status, startTime, endTime, avg, certification } = course[0]
 
                 // TODO: điều kiện cấp chứng chỉ 
                 let isQualified = true
@@ -359,7 +361,7 @@ const CourseController = {
                     if ((new Date(endTime)) > (new Date()) || avg < 0.8)
                         isQualified = false
 
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification, isQualified })
+                return res.status(200).json({ id: _id, courseId, name, description, exams, assignments, lessons, image, status, startTime, endTime, avg, certification, isQualified })
             }
 
             return res.status(400).json({

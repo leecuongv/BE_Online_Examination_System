@@ -36,10 +36,7 @@ const StatisticController = {
                     0
                 )
                 if (exam.viewAnswer === 'no' || (exam.viewAnswer === 'alldone' && moment().diff(exam.endTime, 'minutes') > 0)) {
-
                     points = 0
-
-
                 }
                 return {
                     ...data,
