@@ -413,9 +413,9 @@ const TakeExamController = {
             select: "id content isCorrect type",
           },
         }).lean()
-      let { questions, startTime, maxTimes, ...data } = exam;
+      let { questions, startTime, maxTimes, _id, ...data } = exam;
       questions = questions.map((item) => item.question);
-
+      const course = await Course.findOne({ exams: { $in: [_id] } })
       const result = takeExam.result
 
       questions = questions.map(item => {
@@ -449,8 +449,10 @@ const TakeExamController = {
           viewPoint: exam.viewPoint,
           viewAnswer: exam.viewAnswer,
           maxPoints: exam.maxPoints,
+          countId: course.courseId,
           points: (exam.viewPoint === 'no' ||
-            (exam.viewPoint === 'alldone' && moment().diff(exam.endTime, 'minutes') > 0)) ? undefined : takeExam.points
+            (exam.viewPoint === 'alldone' && moment().diff(exam.endTime, 'minutes') > 0)) ? undefined : takeExam.points,
+
         })
 
     }
