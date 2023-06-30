@@ -201,10 +201,10 @@ const CertificateController = {
             // TODO: điều kiện cấp chứng chỉ 
             let toPass = course[0].toPass / 100
             if (course[0].certification === CERTIFICATION.WHENDONE && course[0].avg < toPass)
-                return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
+                return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ!" })
             if (course[0].certification === CERTIFICATION.WHENCOURSEDONE)
                 if ((new Date(course[0].endTime)) > (new Date()) || course[0].avg < toPass)
-                    return res.status(400).json({ message: "Chưa đủ điều kiện cấp chứng chỉ" })
+                    return res.status(400).json({ message: "Chứng chỉ sẽ được cấp khi khoá học kết thúc và học viên hoàn thành khoá học!" })
 
             const certificate = await Certificate.findOne({ user: loginUser.id, course: course[0]._id })
             if (certificate) {
