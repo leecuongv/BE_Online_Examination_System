@@ -110,7 +110,7 @@ const CourseController = {
         try {
             const { courseId } = req.query
             const course = await Course.aggregate([
-                { $match: { courseId: courseId } },
+                { $match: { courseId: Number(courseId) } },
                 {
                     $project: {
                         name: 1,
@@ -149,7 +149,7 @@ const CourseController = {
             const { courseId } = req.query
             const username = req.user?.sub
 
-            const course = await Course.findOne({ courseId })
+            const course = await Course.findOne({ courseId: Number(courseId) })
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: 'Không tồn tại tài khoản' })
             if (course) {
@@ -379,40 +379,13 @@ const CourseController = {
             const { courseId } = req.query
             const username = req.user?.sub
             const student = await User.findOne({ username })
-            const course = await Course.findOne({ courseId: Number(courseId) });
-
-            if (course.length > 0) {
-                if (!course[0].students.find(e => e.toString() === student.id.toString()))
-                    return res.status(400).json({
-                        message: "Học viên Không thuộc khoá học!",
-                    })
-                const { _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification } = course[0]
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, avg, certification })
-            }
-
-            return res.status(400).json({
-                message: "Không tìm thấy khoá học",
-            })
-
-        } catch (error) {
-            console.log(error)
-            res.status(500).json({ message: "Lỗi tìm khoá học" })
-        }
-    },
-
-
-    getCourseByCourseIdOfTeacher: async (req, res) => {
-        try {
-            const { courseId } = req.query
-            const username = req.user?.sub
-            const student = await User.findOne({ username })
             if (!student) {
                 return res.status(400).json({ message: "Không tìm thấy người dùng!" })
             }
             const course = await Course.findOne({ courseId: Number(courseId), creatorId: student.id });
             if (course) {
-                const { _id, courseId, name, description, exams, image, status, startTime, endTime, price, avg, certification } = course._doc
-                return res.status(200).json({ id: _id, courseId, name, description, exams, image, status, startTime, endTime, price, avg, certification })
+                const { _id, courseId, name, description, exams, lessons, assignments, image, status, startTime, endTime, price, avg, certification } = course._doc
+                return res.status(200).json({ id: _id, courseId, name, description, exams, lessons, assignments, image, status, startTime, endTime, price, avg, certification })
             }
 
             return res.status(400).json({
@@ -490,7 +463,7 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const course = await Course.findOne({ courseId })
+            const course = await Course.findOne({ courseId: Number(courseId) })
                 .populate({ path: 'students', select: { id: 1, fullname: 1, avatar: 1, email: 1, gender: 1 } })
             if (!course)
                 return res.status(400).json({
@@ -699,7 +672,7 @@ const CourseController = {
         try {
             let isSell = false
             const username = req.user?.sub
-            const { slug, name, description, startTime, endTime, courseId, price, certification } = req.body
+            const { slug, name, description, startTime, endTime, courseId, price, certification, pin, status, toPass } = req.body
             const image = req.files?.file
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -710,7 +683,7 @@ const CourseController = {
                 || new Date(endTime).toLocaleString() === "Invalid Date") {
                 return res.status(400).json({ message: "Thời gian của khoá học không hợp lệ" })
             }
-            const course = await Course.findOne({ courseId })
+            const course = await Course.findOne({ courseId: Number(courseId) })
 
             if (price < 0)
                 return res.status(400).json({ message: "Giá tiền của khoá học phải lớn hơn hoặc bằng 0!" })
@@ -724,7 +697,10 @@ const CourseController = {
                 endTime,
                 price,
                 isSell,
-                certification
+                certification,
+                pin,
+                status,
+                toPass
             }
 
             if (image) {
@@ -749,7 +725,7 @@ const CourseController = {
 
             }
 
-            await Course.updateOne({ courseId }, data);
+            await Course.updateOne({ courseId: Number(courseId) }, data, { new: true });
             return res.status(200).json({
                 message: "Cập nhật khoá học thành công",
                 courseId: course._doc.courseId
@@ -1008,7 +984,7 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
             }
-            const course = await Course.findOne({ courseId })
+            const course = await Course.findOne({ courseId: Number(courseId) })
             if (!course)
                 return res.status(400).json({ message: "Không tồn tại khóa học!" })
 
@@ -1043,7 +1019,7 @@ const CourseController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
             }
-            const course = await Course.findOne({ courseId })
+            const course = await Course.findOne({ courseId: Number(courseId) })
             if (!course)
                 return res.status(400).json({ message: "Không tồn tại khóa học!" })
 
