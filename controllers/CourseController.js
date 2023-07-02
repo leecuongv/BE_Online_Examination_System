@@ -384,8 +384,8 @@ const CourseController = {
             }
             const course = await Course.findOne({ courseId: Number(courseId), creatorId: student.id });
             if (course) {
-                const { _id, courseId, name, description, exams, lessons, assignments, image, status, startTime, endTime, price, avg, certification } = course._doc
-                return res.status(200).json({ id: _id, courseId, name, description, exams, lessons, assignments, image, status, startTime, endTime, price, avg, certification })
+                const { _id, courseId, name, description, exams, lessons, assignments, image, status, startTime, endTime, price, avg, certification, pin } = course._doc
+                return res.status(200).json({ id: _id, courseId, name, description, exams, lessons, assignments, image, status, startTime, endTime, price, avg, certification, pin })
             }
 
             return res.status(400).json({
