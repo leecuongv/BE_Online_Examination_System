@@ -132,7 +132,7 @@ const AssignmentController = {
 
             }
 
-            let updatedAssignment = await Assignment.findByIdAndUpdate({ "_id": new mongoose.Types.ObjectId(assignmentId) }, newData, { new: true })
+            let updatedAssignment = await Assignment.findByIdAndUpdate(assignmentId, newData, { new: true })
 
             await course.save()
 
