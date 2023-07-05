@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const User = require("../models/User")
 const axios = require('axios');
 const FormData = require('form-data');
+const { XoaDau, ChuoiNgay, GenerateURL, GenerateFileName } = require("./handler/StringHandler")
 
 const { Deta } = require('deta'); // import Deta
 
@@ -26,7 +27,7 @@ const UploadController = {
 
             var bodyFormData = new FormData();
             bodyFormData.append('chat_id', 5813484449)
-            bodyFormData.append('document', file.data, { filename: file.name })
+            bodyFormData.append('document', file.data, { filename: GenerateFileName(file.name) })
 
             axios.post(`https://api.telegram.org/${tokenBot}/sendDocument`,
                 bodyFormData,
@@ -72,7 +73,7 @@ const UploadController = {
 
             var bodyFormData = new FormData();
             bodyFormData.append('chat_id', 5813484449)
-            bodyFormData.append('document', file.data, { filename: file.name })
+            bodyFormData.append('document', file.data, { filename: GenerateFileName(file.name) })
 
             axios.post(`https://api.telegram.org/${tokenBot}/sendDocument`,
                 bodyFormData,
@@ -117,7 +118,7 @@ const UploadController = {
             }
 
             let id = new mongoose.Types.ObjectId();
-            let filename = id.toString() + "__" + file.name;
+            let filename = id.toString() + "__" + GenerateFileName(file.name);
             // Initialize with a Project Key
             const deta = Deta(project_key);
 
