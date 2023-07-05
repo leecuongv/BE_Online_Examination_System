@@ -117,6 +117,7 @@ const UploadController = {
                 })
             }
 
+
             let id = new mongoose.Types.ObjectId();
             let filename = id.toString() + "__" + GenerateFileName(file.name);
             // Initialize with a Project Key
