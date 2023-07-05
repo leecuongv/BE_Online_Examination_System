@@ -563,7 +563,7 @@ const LessonController = {
         try {
             const timeZone = -420 * 60000
             const username = req.user?.sub
-            const courseId = req.query.courseId
+            //const courseId = req.query.courseId
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
@@ -589,24 +589,24 @@ const LessonController = {
                         let dateMark = new Date(exam.startTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push({ nameCourse: course.name, type: 'exam', ...exam._doc })
+                        calendar[dateMark].push({ nameCourse: course.name, courseId: course.courseId, type: 'exam', ...exam._doc })
 
                         dateMark = new Date(exam.endTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push({ nameCourse: course.name, type: 'exam', ...exam._doc })
+                        calendar[dateMark].push({ nameCourse: course.name, courseId: course.courseId, type: 'exam', ...exam._doc })
                     })
 
                     course.assignments?.forEach(assignment => {
                         let dateMark = new Date(assignment.startTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push({ nameCourse: course.name, type: 'assignment', ...assignment._doc })
+                        calendar[dateMark].push({ nameCourse: course.name, courseId: course.courseId, type: 'assignment', ...assignment._doc })
 
                         dateMark = new Date(assignment.endTime - timeZone).toISOString().substring(0, 10)
                         if (!calendar[dateMark])
                             calendar[dateMark] = []
-                        calendar[dateMark].push({ nameCourse: course.name, type: 'assignment', ...assignment._doc })
+                        calendar[dateMark].push({ nameCourse: course.name, courseId: course.courseId, type: 'assignment', ...assignment._doc })
                     })
                 })
                 calendar = Object.keys(calendar).sort().reduce(
