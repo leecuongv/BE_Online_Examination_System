@@ -37,6 +37,6 @@ function GenerateURL(str) {
 function GenerateFileName(str) {
     let temp = XoaDau(str)
     temp = temp.replaceAll(" ", "_")
-    return words.toLowerCase()
+    return temp.toLowerCase()
 }
 module.exports = { XoaDau, ChuoiNgay, GenerateURL, GenerateFileName }
