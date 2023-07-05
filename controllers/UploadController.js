@@ -116,10 +116,9 @@ const UploadController = {
                     message: 'Không có file'
                 })
             }
-
-
             let id = new mongoose.Types.ObjectId();
             let filename = id.toString() + "__" + GenerateFileName(file.name);
+
             // Initialize with a Project Key
             const deta = Deta(project_key);
 
