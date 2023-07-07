@@ -227,6 +227,7 @@ const TakeExamController = {
     try {
       const username = req.user?.sub
       const { answerSheet, takeExamId } = req.body
+      console.log(answerSheet)
 
       const user = await User.findOne({ username })
       if (!user) return res.status(400).json({ message: "Không có người dùng" })
