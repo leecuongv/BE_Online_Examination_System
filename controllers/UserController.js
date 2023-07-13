@@ -218,7 +218,7 @@ const UserController = {
                 let fullname = item.fullname + ": " + item.email
                 delete item.email
                 delete item.fullname
-                return { ...item._doc, fullname }
+                return { id: item.id, fullname, gender: item.gender, avatar: item.avatar, birthday: item.birthday }
             })
             return res.status(200).json(listUsers);
 
