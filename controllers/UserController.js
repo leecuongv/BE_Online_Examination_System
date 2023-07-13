@@ -211,7 +211,7 @@ const UserController = {
                     ],
                 }
                 : {};
-            const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
+            const users = await User.find(keyword).find({ _id: { $ne: req.user._id }, role: { $ne: ROLES.ADMIN } });
             if (users.length === 0)
                 return res.status(400).json({ message: "Không tìm thấy người dùng, vui lòng kiểm tra lại!" })
             return res.status(200).json(users);
