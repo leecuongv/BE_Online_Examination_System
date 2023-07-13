@@ -422,7 +422,7 @@ const CourseController = {
     searchListStudentToAdd: async (req, res) => {
         try {
             const username = req.user?.sub
-            const search = req.query.search
+            //const search = req.query.search
             const courseId = req.query.courseId
 
             const user = await User.findOne({ username })
@@ -437,16 +437,36 @@ const CourseController = {
             let students = course.students
             students.push(user.id)
 
-            const users = await User.find({ $text: { $search: search }, _id: { $nin: students } })
-                .select({ id: 1, fullname: 1, gender: 1, avatar: 1, birthday: 1 })
-                .limit(20)
-            if (users) {
-                return res.status(200).json(users)
-            }
+            // const users = await User.find({ $text: { $search: search }, _id: { $nin: students }, role: { $ne: ROLES.ADMIN } })
+            //     .select({ id: 1, fullname: 1, gender: 1, avatar: 1, birthday: 1 })
+            //     .limit(20)
 
-            return res.status(400).json({
-                message: "Không tìm thấy khoá học",
+            const search = req.query.search
+                ? {
+                    $or: [
+                        { username: { $regex: req.query.search, $options: "i" } },
+                        { fullname: { $regex: req.query.search, $options: "i" } },
+                        { email: { $regex: req.query.search, $options: "i" } },
+                    ],
+                }
+                : {};
+            const users = await User.find(search).find({ _id: { $nin: students }, role: { $ne: ROLES.ADMIN } })
+                .select({ id: 1, fullname: 1, email: 1, gender: 1, avatar: 1, birthday: 1 })
+                .limit(20);
+
+            if (!users) {
+                return res.status(400).json({
+                    message: "Không tìm thấy khoá học",
+                })
+
+            }
+            let listUsers = users.map(item => {
+                let fullname = item.fullname + ": " + item.email
+                delete item.email
+                delete item.fullname
+                return { ...item._doc, fullname }
             })
+            return res.status(200).json(listUsers)
 
         } catch (error) {
             console.log(error)

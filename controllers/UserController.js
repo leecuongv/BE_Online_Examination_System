@@ -214,7 +214,13 @@ const UserController = {
             const users = await User.find(keyword).find({ _id: { $ne: req.user._id }, role: { $ne: ROLES.ADMIN } });
             if (users.length === 0)
                 return res.status(400).json({ message: "Không tìm thấy người dùng, vui lòng kiểm tra lại!" })
-            return res.status(200).json(users);
+            let listUsers = users.map(item => {
+                let fullname = item.fullname + ": " + item.email
+                delete item.email
+                delete item.fullname
+                return { ...item._doc, fullname }
+            })
+            return res.status(200).json(listUsers);
 
         }
         catch (error) {
