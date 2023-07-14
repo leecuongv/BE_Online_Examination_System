@@ -42,6 +42,7 @@ const assignmentSchema = mongoose.Schema(
     slug: {
       type: Number,
       require: true,
+      isUnique: true
     },
     allowReSubmit: {
       type: Boolean,

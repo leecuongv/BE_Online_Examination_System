@@ -25,6 +25,10 @@ router.post('/enroll-in-course', verifyToken, CourseController.enrollInCourse)
 router.post('/exit-course', verifyToken, CourseController.exitCourse)
 router.delete('/delete-exam', verifyToken, CourseController.deleteExam);
 
+router.post("/duplicate", verifyToken, CourseController.duplicateCourse)
+//get course detail
+//router.get("/detail", CourseController.getCourseDetail)
+
 router.get("/info", CourseController.GetCourseInfoByCourseId)
 router.get("/s", CourseController.Search)
 

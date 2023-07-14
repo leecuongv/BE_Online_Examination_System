@@ -6,6 +6,12 @@ const cloudinary = require('cloudinary').v2
 const dotenv = require('dotenv')
 const TakeExam = require("../models/TakeExam")
 const Exam = require("../models/Exam")
+const Assignment = require("../models/Assignment")
+const Lesson = require("../models/Lesson")
+const Question = require("../models/Question")
+const Answer = require("../models/Answer")
+
+
 const jwt = require("jsonwebtoken");
 
 
@@ -1198,6 +1204,206 @@ const CourseController = {
             return res.status(500).json({ message: "Lỗi tìm khóa học!" })
         }
     },
+    duplicateCourse: async (req, res) => {
+        try {
+            const username = req.user?.sub
+            const { courseId } = req.body
+
+            const teacher = await User.findOne({ username })
+            const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId) })
+                .populate("lessons").populate("assignments").populate({
+                    path: "exams",
+                    populate: {
+                        path: "questions.question",
+                        populate: {
+                            path: "answers"
+                        }
+                    }
+
+                })
+            if (!teacher) {
+                return res.status(400).json({ message: "Tài khoản không tồn tại" })
+            }
+            if (!course) {
+                return res.status(400).json({ message: "Khóa học không tồn tại" })
+            }
+
+            const newCourse = new Course({
+                _id: new mongoose.Types.ObjectId(),
+                name: course.name + " - Copy",
+                startTime: course.startTime,
+                endTime: course.endTime,
+                description: course.description,
+                price: course.price,
+                creatorId: teacher.id,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                students: [],
+                lessons: [],
+                exams: [],
+                assignments: [],
+                pin: "",
+                slug: course.slug + "-copy" + Date.now(),
+                status: STATUS.PRIVATE
+
+            })
+            const lessons = course.lessons
+            for (let i = 0; i < lessons.length; i++) {
+                const lesson = lessons[i]
+                const newLesson = new Lesson({
+                    _id: new mongoose.Types.ObjectId(),
+                    name: lesson.name + " - Copy",
+                    content: lesson.content,
+                    creatorId: teacher.id,
+                    startTime: lesson.startTime,
+                    endTime: lesson.endTime,
+                    file: lesson.file,
+                    status: lesson.status,
+                    courseId: newCourse.id,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+
+                })
+                await newLesson.save()
+                newCourse.lessons.push(newLesson.id)
+            }
+            const exams = course.exams
+            for (let i = 0; i < exams.length; i++) {
+                const exam = exams[i]
+                const newExam = new Exam({
+                    _id: new mongoose.Types.ObjectId(),
+                    name: exam.name + " - Copy",
+                    creatorId: teacher.id,
+                    description: exam.description,
+                    pin: "",
+                    startTime: exam.startTime,
+                    endTime: exam.endTime,
+                    numberofQuestions: exam.numberofQuestions,
+                    viewPoint: exam.viewPoint,
+                    viewAnswer: exam.viewAnswer,
+                    attemptsAllowed: exam.attemptsAllowed,
+                    maxPoints: exam.maxPoints,
+                    typeofPoint: exam.typeofPoint,
+                    maxTimes: exam.maxTimes,
+                    tracking: exam.tracking,
+                    shuffle: exam.shuffle,
+                    status: exam.status,
+                    questions: [],
+
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                })
+                newCourse.exams.push(newExam.id)
+                const questions = exam.questions
+                for (let j = 0; j < questions.length; j++) {
+                    const question = questions[j]
+                    //console.log(JSON.stringify(question.question.answers))
+                    const newQuestion = new Question({
+                        //...question._doc,
+
+                        _id: new mongoose.Types.ObjectId(),
+
+                        //examId: newExam.id,
+                        type: question.question.type,
+                        content: question.question.content,
+                        maxPoints: question.question.point,
+                        image: question.question.image,
+                        answers: [],
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
+                    })
+                    newExam.questions.push({ question: newQuestion.id })
+
+                    const answers = question.question.answers
+                    console.log(JSON.stringify(answers))
+
+                    for (let k = 0; k < answers.length; k++) {
+                        const answer = answers[k]
+                        const newAnswer = new Answer({
+                            ...answer._doc,
+                            _id: new mongoose.Types.ObjectId(),
+                            //questionId: newQuestion.id,
+                            createdAt: Date.now(),
+                            updatedAt: Date.now(),
+                        })
+                        await newAnswer.save()
+                        newQuestion.answers.push(newAnswer.id)
+                    }
+                    await newQuestion.save()
+                }
+                await newExam.save()
+            }
+            const assignments = course.assignments
+            for (let i = 0; i < assignments.length; i++) {
+                const assignment = assignments[i]
+                const newAssignment = new Assignment({
+                    _id: new mongoose.Types.ObjectId(),
+                    name: assignment.name + " - Copy",
+                    content: assignment.content,
+                    creatorId: assignment.creatorId,
+                    startTime: assignment.startTime,
+                    endTime: assignment.endTime,
+                    viewPoint: assignment.viewPoint,
+                    maxPoints: assignment.maxPoints,
+                    courseId: newCourse.id,
+                    allowReSubmit: assignment.allowReSubmit,
+                    allowSubmitLate: assignment.allowSubmitLate,
+                    file: assignment.file,
+                    status: assignment.status,
+                    toPass: assignment.toPass,
+
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                })
+                await newAssignment.save()
+                newCourse.assignments.push(newAssignment.id)
+            }
+            await newCourse.save()
+
+            return res.status(200).json({
+                message: "Tạo khóa học thành công!",
+                course: newCourse
+            })
+        }
+
+        catch (error) {
+            console.log(error)
+            return res.status(500).json({ message: "Lỗi tạo khóa học!" })
+        }
+    },
+
+    //lấy danh sách khóa học bao gồm các bài giảng, bài tập và bài kiểm tra chi tiết các câu hỏi và câu trả lời
+    getCourseDetail: async (req, res) => {
+        try {
+            const { courseId } = req.query
+            const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId) })
+                .populate("lessons").populate("assignments").populate({
+                    path: "exams",
+                    populate: {
+                        path: "questions.question",
+                        populate: {
+                            path: "answers"
+                        }
+                    }
+
+                })
+            if (!course) {
+                return res.status(400).json({ message: "Khóa học không tồn tại" })
+            }
+            return res.status(200).json({
+                message: "Lấy dữ liệu thành công!",
+                course
+            })
+        }
+        catch (error) {
+            console.log(error)
+            return res.status(500).json({ message: "Lỗi lấy dữ liệu!" })
+        }
+    }
+
+
+
+
 }
 
 module.exports = { CourseController }
