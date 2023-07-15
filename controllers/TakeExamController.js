@@ -112,7 +112,9 @@ const TakeExamController = {
         },
         takeExamId: lastTakeExam.id,
         countOutTab: lastTakeExam.countOutTab,
-        countOutFace: lastTakeExam.countOutFace
+        countOutFace: lastTakeExam.countOutFace,
+        allowOutTab: lastTakeExam.allowOutTab,
+        allowOutFace: lastTakeExam.allowOutFace
       });
     } catch (error) {
       console.log(error);
@@ -219,6 +221,8 @@ const TakeExamController = {
         },
         countOutTab: takeExam.countOutTab,
         countOutFace: takeExam.countOutFace,
+        allowOutTab: takeExam.allowOutTab,
+        allowOutFace: takeExam.allowOutFace,
         courseId: course.courseId
       });
     } catch (error) {
