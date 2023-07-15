@@ -50,7 +50,9 @@ const TakeExamController = {
           maxTimes: 1,
           tracking: 1,
           attemptsAllowed: 1,
-          shuffle: 1
+          shuffle: 1,
+          allowOutTab: 1,
+          allowOutFace: 1,
         });
       if (exam.shuffle === true) {
         let randomArray = [...exam.questions].sort(() => Math.random() - 0.5)
@@ -146,6 +148,8 @@ const TakeExamController = {
           tracking: 1,
           pin: 1,
           shuffle: 1,
+          allowOutTab: 1,
+          allowOutFace: 1,
         });
 
       if (exam.shuffle === true) {
@@ -387,6 +391,8 @@ const TakeExamController = {
         maxPoints: takeExam.examId.maxPoints,
         courseId: course.courseId,
         viewAnswer: takeExam.examId.viewAnswer,
+        countOutTab: takeExam.countOutTab,
+        countOutFace: takeExam.countOutFace,
 
       })
     }

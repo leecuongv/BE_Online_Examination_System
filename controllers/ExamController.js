@@ -14,7 +14,7 @@ const ExamController = {
         try {
             const username = req.user?.sub
             const { name, description, pin, courseId, numberofQuestions, viewPoint, viewAnswer,
-                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
+                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime, allowOutTab, allowOutFace } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -53,7 +53,9 @@ const ExamController = {
                 shuffle,
                 status: STATUS.PRIVATE,
                 startTime: new Date(startTime),
-                endTime: new Date(endTime)
+                endTime: new Date(endTime),
+                allowOutTab,
+                allowOutFace
             })
             let error = newExam.validateSync()
             if (error) {
@@ -143,7 +145,7 @@ const ExamController = {
         try {
             const username = req.user?.sub
             const { id, name, description, pin, courseId, numberofQuestions, viewPoint, viewAnswer,
-                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime } = req.body
+                attemptsAllowed, maxPoints, typeofPoint, maxTimes, tracking, shuffle, status, startTime, endTime, allowOutTab, allowOutFace } = req.body
 
             if (!username) return res.status(400).json({ message: "Không có người dùng" })
             const user = await User.findOne({ username })
@@ -180,7 +182,9 @@ const ExamController = {
                 shuffle,
                 status,
                 startTime: new Date(startTime),
-                endTime: new Date(endTime)
+                endTime: new Date(endTime),
+                allowOutTab,
+                allowOutFace
             }
             //const exam = await newExam.save();
 

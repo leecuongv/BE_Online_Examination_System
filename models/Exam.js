@@ -95,7 +95,16 @@ const examSchema = mongoose.Schema(
     toPass: {
       type: Number,
       default: 50
-    }
+    },
+    allowOutTab: {
+      type: Number,
+      default: 5
+    },
+    allowOutFace: {
+      type: Number,
+      default: 5
+    },
+
   },
   {
     timestamps: true,
