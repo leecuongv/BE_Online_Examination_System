@@ -11,7 +11,8 @@ const { STATUS, BANK, FEE } = require('../utils/enum')
 dotenv.config()
 // const frontendUrl = 'http://localhost:3006/'
 // const backendUrl = 'http://localhost:5000/'
-const frontendUrl = 'https://oes.vercel.app/'
+//const frontendUrl = 'https://oes.vercel.app/'
+const frontendUrl = 'https://www.belloquiz.tech/'
 const backendUrl = 'https://be-oes.vercel.app/'
 const bcrypt = require("bcrypt");
 const BillController = {
