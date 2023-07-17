@@ -95,7 +95,7 @@ const ANSWERTYPE = {
   INCLUDE: "include"
 }
 const FEE = {
-  FEE: 10
+  FEE: 30
 }
 
 const BANK = {
