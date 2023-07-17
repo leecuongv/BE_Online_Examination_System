@@ -202,7 +202,7 @@ const UploadController = {
 
                     data.arrayBuffer().then(buffer => {
                         res.writeHead(200, {
-                            'Content-Disposition': `attachment; filename="${filename}"`,
+                            'Content-Disposition': `attachment; filename="certificate.pdf"`,
                             //'Content-Type': fileType,
                         })
 
