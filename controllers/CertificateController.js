@@ -292,7 +292,7 @@ const CertificateController = {
 
             const pdfBytes = await pdfDoc.save()
 
-            let id = new mongoose.Types.ObjectId();
+
             //let filename = id.toString() + "-certificate.pdf";
 
 

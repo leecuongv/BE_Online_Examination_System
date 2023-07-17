@@ -390,19 +390,19 @@ const BillController = {
                 balance: newBalance
             }, { new: true })
 
-            const newBill = new Bill({
-                creatorId: loginUser._id,
-                description: "Rút tiền về tài khoản: " + bank + " STK: " + creditNumber + " STR: " + soTienNhanDuoc + " PHI: " + phiRut,
-                amount: phiRut,
-                method: "User balance",
-                status: STATUS.SUCCESS
-            })
-            let error2 = newBill.validateSync()
-            if (error2)
-                return res.status(400).json({
-                    message: "Tạo hóa đơn mới thất bại!"
-                })
-            await newBill.save()
+            // const newBill = new Bill({
+            //     creatorId: loginUser._id,
+            //     description: "Rút tiền về tài khoản: " + bank + " STK: " + creditNumber + " STR: " + soTienNhanDuoc + " PHI: " + phiRut,
+            //     amount: phiRut,
+            //     method: "User balance",
+            //     status: STATUS.SUCCESS
+            // })
+            // let error2 = newBill.validateSync()
+            // if (error2)
+            //     return res.status(400).json({
+            //         message: "Tạo hóa đơn mới thất bại!"
+            //     })
+            // await newBill.save()
 
 
             return res.status(200).json({
