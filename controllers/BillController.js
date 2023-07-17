@@ -640,7 +640,7 @@ const BillController = {
                 await User.findOneAndUpdate({ username }, {
                     balance: newBalance
                 }, { new: true })
-                let description = "Mua khoá học: " + course._id
+                let description = "Mua khoá học: " + course.name
                 const newBill = new Bill({
                     creatorId: user.id,
                     description: description,
