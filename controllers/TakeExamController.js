@@ -24,7 +24,7 @@ const TakeExamController = {
     return { ...data, endTime, questions };
   },
 
-  CheckExam: async (req, res) => {//
+  CheckExam: async (req, res) => {
     try {
       const username = req.user?.sub;
       const { slug } = req.body;
@@ -93,7 +93,8 @@ const TakeExamController = {
             return res.status(400).json({ message: "Bài thi đã được nộp, không thể làm lại", courseId: course.courseId }); //take exam cuối cùng đã hết thời gian
           if (remainTime < 0)
             return res.status(400).json({ message: "Hết thời gian làm bài thi làm bài thi", courseId: course.courseId }); //take exam cuối cùng đã hết thời gian
-        } else if (takeExam.length > exam.attemptsAllowed)
+        }
+        else if (takeExam.length > exam.attemptsAllowed)
           return res.status(400).json({ message: "Hết số lần làm bài thi", courseId: course.courseId }); //take exam cuối cùng đã hết thời gian
       }
       if (lastTakeExam.status === STATUS.SUBMITTED)
@@ -188,12 +189,6 @@ const TakeExamController = {
           courseId: course.courseId
         })
       }
-      // const takeExams = TakeExam.find({})  
-      // const countTakeExam = takeExam.length - 1;
-      // if (countTakeExam > exam.attemptsAllowed)
-      //   return res.status(400).json({
-      //     message: "Đã quá số lần làm bài"
-      //   })
       const newTakeExam = new TakeExam({
         examId: exam.id,
         userId: user.id,
@@ -438,7 +433,6 @@ const TakeExamController = {
           choose = resultAnswer.answers
           point = resultAnswer.point
         }
-        let toDay = new Date()
         if (exam.viewAnswer === 'no' || (exam.viewAnswer === 'alldone' && moment().diff(exam.endTime, 'minutes') > 0)) {
           answers = answers.map(item => {
             delete item.isCorrect
@@ -559,7 +553,6 @@ const TakeExamController = {
 
       if (!exam) {
         return res.status(400).json({ message: "Không tồn tại bài thi!" })
-        console.log(exam)
       }
 
       // let examResult = await TakeExam.aggregate([
@@ -655,7 +648,7 @@ const TakeExamController = {
       // ])
 
       let examResult = await TakeExam.find({ examId: mongoose.Types.ObjectId(exam.id), status: STATUS.SUBMITTED }).select({ examId: 1, userId: 1, points: 1, id: 1 })
-      const dataset = [];
+
       const labels = [];
 
       const freq = examResult.reduce(function (prev, cur) {

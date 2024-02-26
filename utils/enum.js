@@ -120,7 +120,6 @@ const BANK = {
   VPBANK: "NHTMCP VN Thịnh Vượng (VP Bank)",
   PGBANK: "NHTMCP Xăng dầu Petrolimex (PGBank)",
   EXIMBANK: "NHTMCP Xuất Nhập Khẩu (Eximbank)",
-  PVCOMBANK: "NH Đại Chúng (PVcombank)",
   TIENPHONGBANK: "NH Tiên Phong (Tiên Phong Bank)",
   LIENVIETPOSTBANK: "NH TMCP BƯU ĐIỆN LIÊN VIỆT",
   ACB: "NHTMCP Á Châu (ACB)",
