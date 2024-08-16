@@ -88,7 +88,7 @@ const ExamController = {
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             const { slug } = req.query
 
-            const exam = await Exam.findOne({ slug, creatorId: user.id })
+            const exam = await Exam.findOne({ slug: slug.toString(), creatorId: user.id })
                 .populate({
                     path: 'questions.question',
                     populate: {
@@ -116,7 +116,7 @@ const ExamController = {
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             const { slug } = req.query
 
-            const exam = await Exam.findOne({ slug })
+            const exam = await Exam.findOne({ slug: slug.toString() })
                 .populate({
                     path: 'questions.question',
                     populate: {

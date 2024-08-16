@@ -33,7 +33,8 @@ const AdminController = {
             const { username, role } = req.body;
 
             if (username) {
-                const newUser = await User.updateOne({ username }, { role: role }, { new: true })
+
+                const newUser = await User.updateOne({ username: username.toString() }, { role: role.toString() }, { new: true })
                 if (newUser)
                     return res.status(200).json({ message: "Cập nhật quyền thành công" })
 
@@ -141,7 +142,7 @@ const AdminController = {
         try {
             const { transactionId, isTransferred } = req.body
 
-            const transactionHistory = await TransactionHistory.findOneAndUpdate({ transactionId: transactionId }, { isTransferred }, { new: true })
+            const transactionHistory = await TransactionHistory.findOneAndUpdate({ transactionId: transactionId.toString() }, { isTransferred }, { new: true })
 
             if (!transactionHistory)
                 return res.status(400).json({ message: "Không tồn tại giao dịch!" })

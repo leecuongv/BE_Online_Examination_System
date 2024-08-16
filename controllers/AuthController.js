@@ -102,7 +102,7 @@ const AuthController = {
     LoginAdmin: async (req, res) => {
         try {
             const { username, password } = req.body
-            const user = await User.findOne({ username: username, role: ROLES.ADMIN })
+            const user = await User.findOne({ username: username.toString(), role: ROLES.ADMIN })
 
             if (!user) {
                 return res.status(404).json({ message: "Sai tên đăng nhập hoặc mật khẩu" })
@@ -172,7 +172,7 @@ const AuthController = {
         try {
             const email = req.body.email;
             if (email) {
-                const user = await User.findOne({ email: email })
+                const user = await User.findOne({ email: email.toString() })
                 if (user) {
                     if (user.status === STATUS.ACTIVE)
                         return res.status(400).json({ message: "Tài khoản đã được kích hoạt" })
@@ -206,7 +206,7 @@ const AuthController = {
         try {
             const email = req.query.email;
             if (email) {
-                const user = await User.findOne({ email: email })
+                const user = await User.findOne({ email: email.toString() })
                 if (user) {
                     const resetCode = generateToken({
                         id: user.id.toString()
@@ -344,7 +344,7 @@ const AuthController = {
     checkUsername: async (req, res) => {
         try {
             const username = req.body.username;
-            const user = await User.findOne({ username: username })
+            const user = await User.findOne({ username: username.toString() })
             if (user)
                 return res.status(200).json({ message: "Tên đăng nhập đã tồn tại trong hệ thống", valid: false })
             return res.status(200).json({ message: "Tên đăng nhập hợp lý", valid: true })

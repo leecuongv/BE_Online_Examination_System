@@ -76,7 +76,7 @@ const AssignmentController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng!" })
             const { slug } = req.query
-            const assignment = await Assignment.findOne({ slug, creatorId: user.id })
+            const assignment = await Assignment.findOne({ slug: slug.toString(), creatorId: user.id })
             if (assignment) {
                 return res.status(200).json(assignment._doc)
             }
@@ -223,7 +223,7 @@ const AssignmentController = {
 
             exitsAssignment = await Assignment.deleteOne({ "_id": mongoose.Types.ObjectId(id) })
 
-            await SubmitAssignment.deleteMany({ assignmentId: id })
+            await SubmitAssignment.deleteMany({ assignmentId: id.toString() })
 
             return res.status(200).json({
                 message: "Xóa bài tập thành công!",
@@ -242,7 +242,7 @@ const AssignmentController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
             }
-            const course = await Course.findOne({ courseId, creatorId: user.id })
+            const course = await Course.findOne({ courseId: courseId.toString(), creatorId: user.id })
                 .populate({
                     path: 'assignments'
                 })
@@ -268,8 +268,7 @@ const AssignmentController = {
             //Lấy cái parameter
             const username = req.user?.sub
             const courseId = req.query.courseId
-            const course = await Course.findOne({ courseId })
-            const start = new Date().getTime()
+            const course = await Course.findOne({ courseId: courseId.toString() })
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
@@ -325,7 +324,7 @@ const AssignmentController = {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
             }
 
-            const assignment = await Assignment.findOne({ slug: slug })
+            const assignment = await Assignment.findOne({ slug: slug.toString() })
 
 
             const submitAssignment = await SubmitAssignment.findOne({ assignmentId: assignment.id, creatorId: user.id })

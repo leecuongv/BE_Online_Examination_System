@@ -69,7 +69,6 @@ const QuestionController = {
 
     DeleteQuestion: async (req, res) => {
         try {
-            let start = new Date()
             const username = req.user?.sub
             const { examId, questionId } = req.body
             //if (!username) return res.status(400).json({ message: "Không có người dùng!" })
@@ -202,7 +201,6 @@ const QuestionController = {
             });
             questions = await Promise.all(questions)
             await exam.save()
-            new Date().getTime() - start.getTime()
             return res.status(200).json({
                 message: "Tạo câu hỏi mới thành công!",
                 questions

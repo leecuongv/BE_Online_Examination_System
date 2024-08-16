@@ -95,7 +95,7 @@ const CourseController = {
         try {
             const { slug } = req.query
 
-            const course = await Course.findOne({ slug: slug, status: STATUS.PUBLIC })
+            const course = await Course.findOne({ slug: slug.toString(), status: STATUS.PUBLIC })
 
             if (course) {
                 const { name, description, exams, lessons, assignments, image } = course._doc
@@ -1084,7 +1084,7 @@ const CourseController = {
 
             if (course.exams.find(item => item.toString() === exam.id.toString())) {//nếu chưa có sinh viên trên
                 course.exams = course.exams.filter(item => item.toString() !== exam.id.toString())
-                await TakeExam.deleteMany({ examId })
+                await TakeExam.deleteMany({ examId: examId.toString() })
             }
             else {
                 return res.status(400).json({ message: "Bài kiểm tra không thuộc khóa học." })

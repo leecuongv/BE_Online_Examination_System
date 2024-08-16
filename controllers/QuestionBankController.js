@@ -23,7 +23,7 @@ const QuestionBankController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
 
-            const existQuestionBank = await QuestionBank.findOne({ name: name, creatorId: user._id })
+            const existQuestionBank = await QuestionBank.findOne({ name: name.toString(), creatorId: user._id })
             if (existQuestionBank) return res.status(400).json({ message: "Trùng tên với ngân hàng câu hỏi trước đó" })
             const newQuestionBank = new QuestionBank({
                 name,
@@ -51,9 +51,9 @@ const QuestionBankController = {
     getQuestionBankBySlug: async (req, res) => {
         try {
             const { slug } = req.query
-            const questionBank = await QuestionBank.findOne({ slug: slug })
+            const questionBank = await QuestionBank.findOne({ slug: slug.toString() })
             if (questionBank) {
-                const { name, description, questions, image, status } = questionBank._doc
+                const { name, description, image, status } = questionBank._doc
                 return res.status(200).json({ name, description, image, status })
             }
 
@@ -99,7 +99,7 @@ const QuestionBankController = {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
 
-            const listQuestion = await QuestionBank.findOne({ slug })
+            const listQuestion = await QuestionBank.findOne({ slug: slug.toString() })
                 .populate({
                     path: 'questions',
                     populate: {
@@ -128,7 +128,6 @@ const QuestionBankController = {
             //Lấy cái parameter
             const username = req.user?.sub
             const arrSlug = eval(req.body.arrSlug)
-            const start = new Date().getTime()
             const user = await User.findOne({ username })
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })

@@ -3,12 +3,6 @@
 
 const { PDFDocument, rgb, degrees } = PDFLib;
 
-
-const capitalize = (str, lower = false) =>
-  (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) =>
-    match.toUpperCase()
-  );
-
 const generatePDF = async (name, course, location, date, url) => {
   //const { PDFDocument, rgb, degrees } = PDFLib;
   const existingPdfBytes = await fetch("cert.pdf").then((res) =>
@@ -68,21 +62,21 @@ const generatePDF = async (name, course, location, date, url) => {
     font: embedFontCourseItalic,
     color: rgb(0.36, 0.54, 0.66),
   });
-  firstPage.drawText(location+`, `+ChuoiNgay(formattedDate), {
+  firstPage.drawText(location + `, ` + ChuoiNgay(formattedDate), {
     x: 75,
     y: 85,
     size: 12,
     font: embedFontDay,
     color: rgb(0, 0, 0),
   });
-  firstPage.drawText(XoaDau(location)+", "+formattedDate, {
+  firstPage.drawText(XoaDau(location) + ", " + formattedDate, {
     x: 90,
     y: 65,
     size: 10,
     font: embedFontDay,
     color: rgb(0.36, 0.54, 0.66),
   });
-  firstPage.drawText("Xác nhận tại: oes.vercel.app/certification/"+url, {
+  firstPage.drawText("Xác nhận tại: oes.vercel.app/certification/" + url, {
     x: 30,
     y: 30,
     size: 10,

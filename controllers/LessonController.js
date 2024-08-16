@@ -20,8 +20,6 @@ const LessonController = {
             const course = await Course.findOne({ _id: mongoose.Types.ObjectId(courseId), creatorId: user.id })
             if (!course) return res.status(400).json({ message: "Thông tin không hợp lệ(không tìm thấy thông tin khóa học hoặc người tạo khóa học" })
 
-
-
             if (startTime === null || endTime === null
                 || new Date(startTime).toLocaleString() === "Invalid Date"
                 || new Date(endTime).toLocaleString() === "Invalid Date") {
@@ -74,7 +72,7 @@ const LessonController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(400).json({ message: "Không có người dùng" })
             const { slug } = req.query
-            const lesson = await Lesson.findOne({ slug, creatorId: user.id })
+            const lesson = await Lesson.findOne({ slug: slug.toString(), creatorId: user.id })
             if (lesson) {
                 return res.status(200).json(lesson._doc)
             }
@@ -233,7 +231,7 @@ const LessonController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
-            const course = await Course.findOne({ courseId, creatorId: user.id })
+            const course = await Course.findOne({ courseId: courseId.toString(), creatorId: user.id })
                 .populate({
                     path: 'lessons'
                 })

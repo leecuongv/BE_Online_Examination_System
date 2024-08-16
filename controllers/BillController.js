@@ -620,7 +620,7 @@ const BillController = {
             if (!user) {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
             }
-            const course = await Course.findOne({ courseId })
+            const course = await Course.findOne({ courseId: courseId.toString() })
             if (!course)
                 return res.status(400).json({ message: "Không tồn tại khóa học!" })
 

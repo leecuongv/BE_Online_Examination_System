@@ -344,9 +344,7 @@ const CertificateController = {
 
             const { slug } = req.query
 
-            //TODO: điều kiện cấp chứng chỉ 
-
-            const certificate = await Certificate.findOne({ slug })
+            const certificate = await Certificate.findOne({ slug: slug.toString() })
             if (certificate) {
                 return res.status(200).json({ link: certificate.file })
             }

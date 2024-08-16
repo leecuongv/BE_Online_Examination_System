@@ -21,7 +21,7 @@ const StatisticController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(200).json({ message: "Không có tài khoản!" })
 
-            const exam = await Exam.findOne({ slug: examSlug })
+            const exam = await Exam.findOne({ slug: examSlug.toString() })
             if (!exam) return res.status(200).json({ message: "Không tìm thấy bài thi!" })
             let takeExams = await TakeExam.find({ examId: exam.id, userId: user.id }).populate('userId')
             takeExams = takeExams.map(item => {
@@ -72,7 +72,7 @@ const StatisticController = {
             const user = await User.findOne({ username })
             if (!user) return res.status(200).json({ message: "Không có tài khoản" })
 
-            const exam = await Exam.findOne({ slug: examSlug })
+            const exam = await Exam.findOne({ slug: examSlug.toString() })
             if (!exam) return res.status(200).json({ message: "Không tìm thấy bài thi!" })
 
             if (exam.creatorId.toString() !== user.id.toString()) {//nếu không phải người tạo khoá học thì không trả về kết quả
@@ -590,7 +590,7 @@ const StatisticController = {
                 return res.status(400).json({ message: "Tài khoản không tồn tại" })
             }
 
-            const course = await Course.findOne({ courseId: courseId })
+            const course = await Course.findOne({ courseId: courseId.toString() })
 
             if (!course)
                 return res.status(400).json({ message: "Không tồn tại khóa học!" })
