@@ -72,7 +72,7 @@ const AuthController = {
             if (!user) {
                 return res.status(404).json({ message: "Sai tên đăng nhập hoặc mật khẩu" })
             }
-            const auth = await bcrypt.compare(password, user.password)
+            const auth = bcrypt.compare(password, user.password)
             if (auth) {
                 if (user.status !== STATUS.ACTIVE) {
                     return res.status(403).json({ message: "Tài khoản của bạn chưa được kích hoạt. Vui lòng kiểm tra lại email kích hoạt" })

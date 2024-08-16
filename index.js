@@ -22,7 +22,8 @@ const {
   LessonRoutes,
   CertificateRoutes
 } = require('./routers');
-
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 const { notFound, errorHandler } = require("./routers/errorMiddleware");
 const helmet = require("helmet");
 //const passport = require('passport');
@@ -30,8 +31,22 @@ const rateLimit = require('express-rate-limit');
 //const session = require('express-session');
 const morgan = require('morgan');
 const fileupload = require("express-fileupload");
-
-
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Backend API for Online Education System', //you can change you title
+      version: '1.1.0',
+      description: 'This is a backend API for Online Education System', //you can change you description
+    },
+    servers: [
+      { url: 'http://localhost:5000/api' }, //you can change you server url
+    ],
+  },
+  apis: ['./routers/*.js'], //you can change you swagger path
+  //apis: ['./routers/*.js'], //you can change you swagger path
+};
+const specs = swaggerJsdoc(options);
 dotenv.config()
 
 const app = express();
@@ -102,6 +117,7 @@ app.use(function (req, res, next) {
   res.header('Pragma', 'no-cache');
   next()
 });
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 mongoose.connect(URI)
   .then(async () => {
