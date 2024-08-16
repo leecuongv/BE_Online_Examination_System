@@ -33,7 +33,7 @@ const TakeExamController = {
       if (!user)
         return res.status(400).json({ message: "Không có người dùng" });
 
-      let exam = await Exam.findOne({ slug })
+      let exam = await Exam.findOne({ slug: slug.toString() })
         .populate({
           path: "questions.question",
           populate: {
@@ -135,7 +135,7 @@ const TakeExamController = {
       const user = await User.findOne({ username });
       if (!user)
         return res.status(400).json({ message: "Không có người dùng" });
-      const exam = await Exam.findOne({ slug })
+      const exam = await Exam.findOne({ slug: slug.toString() })
         .populate({
           path: "questions.question",
           populate: {
@@ -547,8 +547,8 @@ const TakeExamController = {
       if (!user) return res.status(400).json({ message: "Không có người dùng" })
       let creatorId = user.id
       const exam = await Exam.findOne({
-        slug,
-        creatorId
+        slug: slug.toString,
+        creatorId: creatorId.toString()
       })
 
       if (!exam) {
@@ -632,8 +632,8 @@ const TakeExamController = {
       if (!user) return res.status(400).json({ message: "Không có người dùng" })
       let creatorId = user.id
       const exam = await Exam.findOne({
-        slug,
-        creatorId
+        slug: slug.toString(),
+        creatorId: creatorId.toString()
       })
 
       if (!exam) {

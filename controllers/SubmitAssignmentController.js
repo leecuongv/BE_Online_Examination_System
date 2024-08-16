@@ -196,7 +196,7 @@ const SubmitAssignmentController = {
                 return res.status(400).json({ message: "Tài khoản không tồn tại!" })
             }
 
-            const assignment = await Assignment.findOne({ slug: slug })
+            const assignment = await Assignment.findOne({ slug: slug.toString() })
             const course = await Course.findById(assignment.courseId).populate('students')
 
             let submitAssignment = await SubmitAssignment.find({ assignmentId: assignment.id })

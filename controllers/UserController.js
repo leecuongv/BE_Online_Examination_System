@@ -182,7 +182,7 @@ const UserController = {
         try {
             const id = req.query.id;
 
-            const deleteUser = await User.deleteOne({ _id: id })
+            const deleteUser = await User.deleteOne({ _id: id.toString() })
 
             if (deleteUser)
                 return res.status(200).json({ message: "Xoá thành công" })
