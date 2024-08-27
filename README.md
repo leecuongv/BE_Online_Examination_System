@@ -19,7 +19,7 @@ Dự án tập trung vào việc xử lý các thao tác cơ bản cho một tra
 | stt | Họ Tên  | MSSV |
 |---| ----- | -------- |
 | 1 | Lê Văn Cường | 19110332 |
-| 2 | Trần Bảo Duy | 1911039 |
+| 2 | Trần Bảo Duy | 19110339 |
 ## Công Nghệ Sử Dụng
 Kiến trúc chung của hệ thống
 ### MongoDB
