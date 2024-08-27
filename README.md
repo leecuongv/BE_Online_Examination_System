@@ -1,13 +1,3 @@
-
-<div align="center">
-
-# Back End Online Examination System
-
-![Completion](https://img.shields.io/badge/style-100%25-00e600?label=Completion&logo=java&logoColor=red&style=for-the-badge)
-
-</div>
-
----
 <div align="center">
 
 # Back End Online Examination System
