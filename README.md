@@ -3,12 +3,6 @@
 # Back End Online Examination System
 
 ![Completion](https://img.shields.io/badge/style-100%25-00e600?label=Completion&logo=java&logoColor=red&style=for-the-badge)
-
-</div>
-![Completion](https://img.shields.io/badge/style-100%25-00e600?label=Completion&logo=java&logoColor=red&style=for-the-badge)
-
-</div>
-
 ---
 
 Dự án tập trung vào việc xử lý các thao tác cơ bản cho một trang web tổ chức và quản lý các khóa học, thi trực tuyến, và nộp bài tập. Nó bao gồm các chức năng cơ bản như đăng ký, đăng nhập, quản lý hồ sơ người dùng, tổ chức khóa học, quản lý thi, quản lý bài tập, tham gia kiểm tra, nộp bài tập, chia sẻ câu hỏi thi, quản lý người tham gia, thống kê kết quả, và thanh toán trực tuyến.
