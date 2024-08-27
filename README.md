@@ -42,7 +42,6 @@ Kiến trúc chung của hệ thống
 - CK Editor: Thư viện cung cấp bộ công cụ nhập văn bản có định dạng trên trang web.
 - FaceAPI.JS: Sử dụng để giám sát tự động, phòng chống người dùng gian lận khi thi trực tuyến.
 - Dialogflow: Xây dựng Chat bot tự động hỗ trợ giải đáp thắc mắc của người dùng.
-<br>
 ## Mô tả hệ thống
 ### Giáo viên
 - Đăng ký, đăng nhập.
