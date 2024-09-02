@@ -132,7 +132,7 @@ const ExamController = {
 
 
                 let randomArray = [...exam.questions].sort(() => Math.random() - 0.5)
-                exam.questions = await randomArray
+                exam.questions = randomArray
             }
             return res.status(200).json(exam)
 
